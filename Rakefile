@@ -9,10 +9,16 @@ require './src/tyrell-util.rb'
 ################################
 # Global tasks #################
 ################################
-task :default => [:build, :dwn_data, :cln_data]
+task :default => :build
 
 desc "Run analyses"
-task :build => [:install]
+task :build => [:before_build, :install, :dwn_data, :cln_data, :after_build]
+task :before_build do
+  puts "Starting ..."
+end
+task :after_build do
+  puts "Finished!"
+end
 
 CLOBBER.include("raw-data/*")
 CLEAN.include("clean-data/*")
@@ -24,7 +30,8 @@ CLEAN.include("forecasts/*")
 # Install software and tyrell ##
 ################################
 desc "Install all software and setup tyrell folders"
-task :install => ["metadata.yml", :folders, :r_packages] do
+task :install => [:before_install, "metadata.yml", :folders, :r_packages]
+task :before_install do
   puts "\t ... Installing software and setting up tyrell folders"
 end
 
@@ -46,7 +53,8 @@ file "metadata.yml" do File.open("metadata.yml", "w") end
 # Download raw data ############
 ################################
 desc "Download all raw data"
-task :dwn_data => [:raw_jhu, "raw-data/ecdc-cases.csv", :raw_gadm] do
+task :dwn_data => [:before_dwn_data, :raw_jhu, "raw-data/ecdc-cases.csv", :raw_gadm]
+task :before_dwn_data do
   puts "\t ... Downloading all raw data (can take a long time)"
 end
 
@@ -82,12 +90,13 @@ file "raw-data/ecdc-cases.csv" do dwn_file("raw-data", "https://opendata.ecdc.eu
 # Clean data ###################
 ################################
 desc "Process all raw data"
-task :cln_data => ["clean-data/climate_array.RDS"] do
+task :cln_data => [:before_cln_data, "clean-data/climate_array.RDS"]
+task :before_cln_data do
   puts "\t ... Processing raw data"
 end
 
 desc "Clean climate data"
-file "clean-data/climate_array.RDS" => :r_packages do
+file "clean-data/climate_array.RDS" do
   `Rscript "src/climate-data.R"`
   # Remove extra .rds files (Michael, fix this in the script?)
   FileUtils.rm ["gadm36_AUT_0_sp.rds","gadm36_DEU_0_sp.rds","gadm36_FRA_0_sp.rds","gadm36_NOR_0_sp.rds","gadm36_BEL_0_sp.rds","gadm36_DNK_0_sp.rds","gadm36_GBR_0_sp.rds","gadm36_SWE_0_sp.rds","gadm36_CHE_0_sp.rds","gadm36_ESP_0_sp.rds","gadm36_ITA_0_sp.rds"]
