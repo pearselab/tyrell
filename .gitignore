@@ -1,0 +1,8 @@
+metadata.yml
+raw-data/*
+clean-data/*
+figures/*
+models/*
+nohup.out
+*~
+#*
