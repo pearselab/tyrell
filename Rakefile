@@ -30,7 +30,7 @@ CLEAN.include("forecasts/*")
 # Install software and tyrell ##
 ################################
 desc "Install all software and setup tyrell folders"
-task :install => [:before_install, "metadata.yml", :folders, :r_packages]
+task :install => [:before_install, "timestamp.yml", :folders, :r_packages]
 task :before_install do
   puts "\t ... Installing software and setting up tyrell folders"
 end
@@ -46,8 +46,8 @@ directory 'figures'
 directory 'models'
 directory 'forecasts'
 
-desc "Setup meta-data recording"
-file "metadata.yml" do File.open("metadata.yml", "w") end
+desc "Setup timestamping"
+file "timestamp.yml" do File.open("timestamp.yml", "w") end
 
 ################################
 # Download raw data ############
