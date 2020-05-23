@@ -8,7 +8,7 @@ A tool to allow us to build, and then track, a common set of data, models, and f
 
 ## Installation
 
-Ensure you have Ruby (>= 2.5.1) and R (>= 3.6.3) installed on your computer. Then ensure the Ruby gems `rake`, `open-uri`, `rubyzip`, and `yaml` are installed (something like `sudo gem install rake` etc. should do the trick). All other dependencies are installed by the script; check error logs if something seems not to be working. A rough guide of what you should be typing is in `install-tyrell.sh`.
+Ensure you have Ruby (>= 2.5.1) and R (>= 3.6.3) installed on your computer. Then ensure the Ruby gems `rake`, `open-uri`, `rubyzip`, `selenium-webdriver`, and `yaml` are installed (something like `sudo gem install rake` etc. should do the trick). All other dependencies are installed by the script; check error logs if something seems not to be working. A rough guide of what you should be typing is in `install-tyrell.sh`. If you want to download the NextStrain data, please hold fire for now. If you must try, but again, please don't, you'll need to install Selenium (instructions above) and then the Chrome WebDriver for it (which you can Google, but shouldn't bother doing so right now because it's not required).
 
 ## Usage
 

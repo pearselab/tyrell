@@ -13,7 +13,7 @@ ready <- sapply(packages, silent.require)
 # Install missing packages
 for(i in seq_along(ready))
     if(!ready[i])
-        install.packages(ready[i], quietly=TRUE)
+        install.packages(packages[i], quietly=TRUE, dependencies=TRUE)
 
 # Error out if not all packages installed
 ready <- sapply(packages, silent.require)
