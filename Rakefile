@@ -154,6 +154,48 @@ end
 imptf_folders.each {|x| file x do raw_imptfmods(imptf_folders) end}
 
 ################################
+# Running external models ######
+################################
+desc "Run externally-generated models"
+task :ext_models => [:before_ext_models, :ext_imptf]
+task :before_ext_models do
+  puts "\t ... Running externally-generated models (takes a long time and is stochastic)"
+end
+
+task :ext_imptf => ["imptf-modes/cover19model-1.0/results/base-12345.Rdata", "imptf-modes/cover19model-2.0/results/base-12345.Rdata", "imptf-modes/cover19model-3.0/results/base-12345.Rdata", "imptf-modes/cover19model-4.0/results/Italy/results/base-12345-stanfit.Rdata", "imptf-modes/cover19model-5.0/results/Brazil/results/base-12345-stanfit.Rdata"]
+file "imptf-modes/cover19model-1.0/results/base-12345.Rdata" do
+  Dir.chdir("imptf-models/covid19model-1.0") do
+    IO.popen "PBS_JOBID=12345
+Rscript base.r"
+  end
+end
+file "imptf-modes/cover19model-2.0/results/base-12345.Rdata" do
+  Dir.chdir("imptf-models/covid19model-2.0") do
+    IO.popen "PBS_JOBID=12345
+Rscript base.r"
+  end
+end
+file "imptf-modes/cover19model-3.0/results/base-12345.Rdata" do
+  Dir.chdir("imptf-models/covid19model-3.0") do
+    IO.popen "PBS_JOBID=12345
+Rscript base_general.r -F"
+  end
+end
+file "imptf-modes/cover19model-4.0/results/Italy/results/base-12345-stanfit.Rdata" do
+  Dir.chdir("imptf-models/covid19model-4.0") do
+    IO.popen "PBS_JOBID=12345
+Rscript base-Italy.r -F"
+  end
+end
+file "imptf-modes/cover19model-5.0/results/Brazil/results/base-12345-stanfit.Rdata" do
+  Dir.chdir("imptf-models/covid19model-5.0") do
+    IO.popen "PBS_JOBID=12345
+Rscript base-Brazil.r"
+  end
+end
+
+
+################################
 # Clean data ###################
 ################################
 desc "Process all raw data"
