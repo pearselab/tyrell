@@ -8,7 +8,7 @@ A tool to allow us to build, and then track, a common set of data, models, and f
 
 ## Installation
 
-Ensure you have Ruby (>= 2.5.1) and R (>= 3.6.3) installed on your computer. Then ensure the Ruby gems `rake`, `open-uri`, `zip`, and `yaml` are installed (something like `sudo gem install rake` etc. should do the trick). All other dependencies are installed by the script; check error logs if something seems not to be working.
+Ensure you have Ruby (>= 2.5.1) and R (>= 3.6.3) installed on your computer. Then ensure the Ruby gems `rake`, `open-uri`, `rubyzip`, and `yaml` are installed (something like `sudo gem install rake` etc. should do the trick). All other dependencies are installed by the script; check error logs if something seems not to be working. A rough guide of what you should be typing is in `install-tyrell.sh`.
 
 ## Usage
 

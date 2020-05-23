@@ -6,6 +6,7 @@ require 'open-uri'
 def stream_file(url, save_name)
   download = open(url)
   IO.copy_stream(download, save_name)
+  return save_name
 end
 
 def unzip(file)
@@ -27,4 +28,3 @@ def dwn_file(folder, url, save_name, opts_yaml="timestamp.yml")
   end
   date_metadata("#{folder}/#{save_name}", opts_yaml)
 end
-

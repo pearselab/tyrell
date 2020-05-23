@@ -53,7 +53,7 @@ file "timestamp.yml" do File.open("timestamp.yml", "w") end
 # Download raw data ############
 ################################
 desc "Download all raw data"
-task :dwn_data => [:before_dwn_data, :raw_jhu, "raw-data/ecdc-cases.csv", :raw_gadm]
+task :dwn_data => [:before_dwn_data, :raw_jhu, "raw-data/ecdc-cases.csv", "raw-data/imperial-europe-pred.csv", :raw_ihme, :raw_gadm]
 task :before_dwn_data do
   puts "\t ... Downloading all raw data (can take a long time)"
 end
@@ -63,9 +63,8 @@ desc "Download GADM global shapefiles"
 task :raw_gadm => gadm_shapefiles
 def raw_gadm_func(shapefiles)
   Dir.chdir("raw-data") do 
-    #unzip(stream_file("https://biogeo.ucdavis.edu/data/gadm3.6/gadm36_levels_shp.zip", "gadm.zip"))
-    unzip("gadm.zip")
-    #FileUtils.rm "gadm.zip"
+    unzip(stream_file("https://biogeo.ucdavis.edu/data/gadm3.6/gadm36_levels_shp.zip", "gadm.zip"))
+    FileUtils.rm "gadm.zip"
     FileUtils.rm "license.txt"
   end
   shapefiles.map {|x| date_metadata(x)}
@@ -83,8 +82,30 @@ file "raw-data/jh-us-deaths.csv" do dwn_file("raw-data", "https://raw.githubuser
 file "raw-data/jh-global-deaths.csv" do dwn_file("raw-data", "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv", "jh-global-deaths.csv") end
 file "raw-data/jh-global-recovered.csv" do dwn_file("raw-data", "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv", "jh-global-recovered.csv") end
 
+desc "Download Institute for Health Metrics and Evaluation (IHME)"
+ihme_files = ["raw-data/ihme-summary.csv", "raw-data/ihme-hospitalisation.csv"]
+task :raw_ihme => ihme_files
+def raw_ihme(ihme_files)
+  Dir.chdir("raw-data") do
+    unzip(stream_file("https://ihmecovid19storage.blob.core.windows.net/latest/ihme-covid19.zip", "ihme.zip"))
+    FileUtils.rm "ihme.zip"
+    FileUtils.mv Dir["*/Hospitalization_all_locs.csv"][0], "ihme-hospitalisation.csv"
+    FileUtils.mv Dir["*/Summary_stats_all_locs.csv"][0], "ihme-summary.csv"
+    FileUtils.rm_r Dir["*/"]
+  end
+  ihme_files.map {|x| date_metadata(x)}
+end
+ihme_files.each {|x| file x do raw_ihme(ihme_files) end}
+
+file "raw-data/jh-global-confirmed.csv" do dwn_file("raw-data", "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv", "jh-global-confirmed.csv") end
+
+
+
 desc "Download ECDC cases"
 file "raw-data/ecdc-cases.csv" do dwn_file("raw-data", "https://opendata.ecdc.europa.eu/covid19/casedistribution/csv", "ecdc-cases.csv") end
+
+desc "Download Imperial COVID-19 Europe predictions"
+file "raw-data/imperial-europe-pred.csv" do dwn_file("raw-data", "https://mrc-ide.github.io/covid19estimates/data/results.csv", "imperial-europe-pred.csv") end
 
 ################################
 # Clean data ###################
