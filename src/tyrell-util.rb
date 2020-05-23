@@ -2,6 +2,7 @@ require 'fileutils'
 require 'yaml'
 require 'zip'
 require 'open-uri'
+require 'selenium-webdriver'
 
 def stream_file(url, save_name)
   download = open(url)
@@ -28,3 +29,4 @@ def dwn_file(folder, url, save_name, opts_yaml="timestamp.yml")
   end
   date_metadata("#{folder}/#{save_name}", opts_yaml)
 end
+

@@ -53,7 +53,7 @@ file "timestamp.yml" do File.open("timestamp.yml", "w") end
 # Download raw data ############
 ################################
 desc "Download all raw data"
-task :dwn_data => [:before_dwn_data, :raw_jhu, "raw-data/ecdc-cases.csv", "raw-data/imperial-europe-pred.csv", :raw_ihme, :raw_gadm]
+task :dwn_data => [:before_dwn_data, :raw_jhu, "raw-data/ecdc-cases.csv", "raw-data/imperial-europe-pred.csv", :raw_ihme, :raw_nxtstr, :raw_gadm]
 task :before_dwn_data do
   puts "\t ... Downloading all raw data (can take a long time)"
 end
@@ -72,7 +72,6 @@ end
 gadm_shapefiles.each do |sub_file|
   file sub_file do raw_gadm_func(gadm_shapefiles) end
 end
-
 
 desc "Download Johns Hopkins data"
 task :raw_jhu => ["raw-data/jh-global-confirmed.csv", "raw-data/jh-us-confirmed.csv", "raw-data/jh-us-deaths.csv", "raw-data/jh-global-deaths.csv", "raw-data/jh-global-recovered.csv"]
@@ -100,12 +99,41 @@ ihme_files.each {|x| file x do raw_ihme(ihme_files) end}
 file "raw-data/jh-global-confirmed.csv" do dwn_file("raw-data", "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv", "jh-global-confirmed.csv") end
 
 
-
 desc "Download ECDC cases"
 file "raw-data/ecdc-cases.csv" do dwn_file("raw-data", "https://opendata.ecdc.europa.eu/covid19/casedistribution/csv", "ecdc-cases.csv") end
 
 desc "Download Imperial COVID-19 Europe predictions"
 file "raw-data/imperial-europe-pred.csv" do dwn_file("raw-data", "https://mrc-ide.github.io/covid19estimates/data/results.csv", "imperial-europe-pred.csv") end
+
+desc "Download NextStrain data"
+nxtstr_files = ["raw-data/nxtstr-sel-meta.tsv", "raw-data/nxtstr-meta.tsv", "raw-data/nxtstr-authors.tsv", "raw-data/nxtstr-tree-mut.tre", "raw-data/nxtstr-tree-date.tre"]
+task :raw_nxtstr => nxtstr_files
+def raw_nxtstr(nxtstr_files)
+  begin
+    options = Selenium::WebDriver::Chrome::Options.new#(args: ['headless'])
+  rescue
+    puts "\t ... ... Selenium missing; skipping NextStrain; don't try to fix please"
+    return false
+  end
+  #options.add_preference(:download, "directory_upgrade": true, "prompt_for_download": false, "default_directory": Dir.pwd)
+  driver = Selenium::WebDriver.for(:chrome, options: options)
+  driver.navigate.to "https://nextstrain.org/ncov/global"
+  sleep 15
+  first = driver.find_elements(css: "button")[-1]
+  first.click
+  sleep 2
+  downloads = driver.find_elements(css: "button")[0..4]
+  downloads.map {|x| x.click; sleep 5}
+  Dir.chdir("raw-data") do
+    FileUtils.mv "#{File.expand_path("~")}/Downloads/nextstrain_ncov_global_selected_metadata.tsv", "nxtstr-sel-meta.tsv"
+    FileUtils.mv "#{File.expand_path("~")}/Downloads/nextstrain_ncov_global_metadata.tsv", "nxtstr-meta.tsv"
+    FileUtils.mv "#{File.expand_path("~")}/Downloads/nextstrain_ncov_global_authors.tsv", "nxtstr-authors.tsv"
+    FileUtils.mv "#{File.expand_path("~")}/Downloads/nextstrain_ncov_global_tree.nwk", "nxtstr-tree-mut.tre"
+    FileUtils.mv "#{File.expand_path("~")}/Downloads/nextstrain_ncov_global_timetree.nwk", "nxtstr-tree-date.tre"
+  end
+  nxtstr_files.map {|x| date_metadata(x)}
+end
+nxtstr_files.each {|x| file x do raw_nxtstr(nxtstr_files) end}
 
 ################################
 # Clean data ###################
