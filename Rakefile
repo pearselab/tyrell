@@ -57,7 +57,7 @@ file "timestamp.yml" do File.open("timestamp.yml", "w") end
 desc "Download all raw data"
 task :dwn_data => [:before_dwn_data, :raw_jhu, "raw-data/ecdc-cases.csv", "raw-data/imperial-europe-pred.csv", :raw_ihme, :raw_nxtstr, :raw_imptfmods, :raw_gadm]
 task :before_dwn_data do
-  puts "\t ... Downloading all raw data (can take a long time)"
+  puts "\t ... Downloading raw data (can take a long time)"
 end
 
 gadm_shapefiles = ["raw-data/gadm36_0.cpg", "raw-data/gadm36_0.dbf","raw-data/gadm36_0.prj","raw-data/gadm36_0.shp","raw-data/gadm36_0.shx","raw-data/gadm36_1.cpg","raw-data/gadm36_1.dbf","raw-data/gadm36_1.prj","raw-data/gadm36_1.shp","raw-data/gadm36_1.shx","raw-data/gadm36_2.cpg","raw-data/gadm36_2.dbf","raw-data/gadm36_2.prj","raw-data/gadm36_2.shp","raw-data/gadm36_2.shx","raw-data/gadm36_3.cpg","raw-data/gadm36_3.dbf","raw-data/gadm36_3.prj","raw-data/gadm36_3.shp","raw-data/gadm36_3.shx","raw-data/gadm36_4.cpg","raw-data/gadm36_4.dbf","raw-data/gadm36_4.prj","raw-data/gadm36_4.shp","raw-data/gadm36_4.shx","raw-data/gadm36_5.cpg","raw-data/gadm36_5.dbf","raw-data/gadm36_5.prj","raw-data/gadm36_5.shp","raw-data/gadm36_5.shx"]
@@ -213,3 +213,29 @@ file "clean-data/climate_array.RDS" do
   date_metadata "clean-data/climate_array.RDS"
 end
 
+################################
+# Update data ##################
+################################
+desc "Update raw-data and purge calculated clean-data"
+task :update_data => [:before_update_data, :update_raw_data, :purge_clean_data]
+task :before_update_data do
+  puts "\t ... Updating changable raw data; purging relevant clean data"
+end
+
+desc "Update raw data"
+task :update_raw_data do
+  FileUtils.chdir("raw-data") do
+    FileUtils.rm Dir["ihme-*"]
+    FileUtils.rm Dir["jh-*"]
+    FileUtils.rm Dir["imperial-*"]
+    FileUtils.rm Dir["nxtstr-*"]
+  end
+  Rake.application[:dwn_data].invoke
+end
+
+desc "Purge clean data"
+task :purge_clean_data do
+  FileUtils.chdir("clean-data") do
+    # ... right now, nothing ...
+  end
+end
