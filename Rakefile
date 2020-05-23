@@ -21,6 +21,7 @@ task :after_build do
 end
 
 CLOBBER.include("raw-data/*")
+CLOBBER.include("imptf-models/*")
 CLEAN.include("clean-data/*")
 CLEAN.include("figures/*")
 CLEAN.include("models/*")
@@ -39,12 +40,13 @@ desc "Install R packages"
 task :r_packages do `Rscript "src/packages.R"` end
 
 desc "Setup tyrell folders"
-task :folders => ["raw-data", "clean-data", "figures", "models", "forecasts"]
+task :folders => ["raw-data", "clean-data", "figures", "models", "forecasts", "imptf-models"]
 directory 'raw-data'
 directory 'clean-data'
 directory 'figures'
 directory 'models'
 directory 'forecasts'
+directory 'imptf-models'
 
 desc "Setup timestamping"
 file "timestamp.yml" do File.open("timestamp.yml", "w") end
@@ -53,7 +55,7 @@ file "timestamp.yml" do File.open("timestamp.yml", "w") end
 # Download raw data ############
 ################################
 desc "Download all raw data"
-task :dwn_data => [:before_dwn_data, :raw_jhu, "raw-data/ecdc-cases.csv", "raw-data/imperial-europe-pred.csv", :raw_ihme, :raw_nxtstr, :raw_gadm]
+task :dwn_data => [:before_dwn_data, :raw_jhu, "raw-data/ecdc-cases.csv", "raw-data/imperial-europe-pred.csv", :raw_ihme, :raw_nxtstr, :raw_imptfmods, :raw_gadm]
 task :before_dwn_data do
   puts "\t ... Downloading all raw data (can take a long time)"
 end
@@ -134,6 +136,22 @@ def raw_nxtstr(nxtstr_files)
   nxtstr_files.map {|x| date_metadata(x)}
 end
 nxtstr_files.each {|x| file x do raw_nxtstr(nxtstr_files) end}
+
+desc "Download Imperial Task Force releases"
+imptf_folders = ["imptf-models/covid19model-1.0", "imptf-models/covid19model-2.0", "imptf-models/covid19model-3.0", "imptf-models/covid19model-4.0", "imptf-models/covid19model-5.0"]
+task :raw_imptfmods => imptf_folders
+def raw_imptfmods(imptf_folders)
+  Dir.chdir("imptf-models") do
+    unzip(stream_file("https://github.com/ImperialCollegeLondon/covid19model/archive/v1.0.zip", "tf1.zip"))
+    unzip(stream_file("https://github.com/ImperialCollegeLondon/covid19model/archive/v2.0.zip", "tf2.zip"))
+    unzip(stream_file("https://github.com/ImperialCollegeLondon/covid19model/archive/v3.0.zip", "tf3.zip"))
+    unzip(stream_file("https://github.com/ImperialCollegeLondon/covid19model/archive/v4.0.zip", "tf4.zip"))
+    unzip(stream_file("https://github.com/ImperialCollegeLondon/covid19model/archive/v5.0.zip", "tf5.zip"))
+    FileUtils.rm ["tf1.zip", "tf2.zip", "tf3.zip", "tf4.zip", "tf5.zip"]
+  end
+  imptf_folders.map {|x| date_metadata(x)}
+end
+imptf_folders.each {|x| file x do raw_imptfmods(imptf_folders) end}
 
 ################################
 # Clean data ###################

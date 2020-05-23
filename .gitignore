@@ -3,6 +3,7 @@ raw-data/*
 clean-data/*
 figures/*
 models/*
+imptf-models/*
 nohup.out
 *~
 #*
