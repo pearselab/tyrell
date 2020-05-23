@@ -162,35 +162,35 @@ task :before_ext_models do
   puts "\t ... Running externally-generated models (takes a long time and is stochastic)"
 end
 
-task :ext_imptf => ["imptf-modes/cover19model-1.0/results/base-12345.Rdata", "imptf-modes/cover19model-2.0/results/base-12345.Rdata", "imptf-modes/cover19model-3.0/results/base-12345.Rdata", "imptf-modes/cover19model-4.0/results/Italy/results/base-12345-stanfit.Rdata", "imptf-modes/cover19model-5.0/results/Brazil/results/base-12345-stanfit.Rdata"]
-file "imptf-modes/cover19model-1.0/results/base-12345.Rdata" do
+task :ext_imptf => ["imptf-models/covid19model-1.0/results/base-12345.Rdata", "imptf-models/covid19model-2.0/results/base-12345.Rdata", "imptf-models/covid19model-3.0/results/base-12345.Rdata", "imptf-models/covid19model-4.0/results/Italy/results/base-12345-stanfit.Rdata", "imptf-models/covid19model-5.0/results/Brazil/results/base-12345-stanfit.Rdata"]
+file "imptf-models/covid19model-1.0/results/base-12345.Rdata" do
   Dir.chdir("imptf-models/covid19model-1.0") do
-    IO.popen "PBS_JOBID=12345
-Rscript base.r"
+    `PBS_JOBID=12345
+    Rscript base.r > STDOUT-rake-base-12345`
   end
 end
-file "imptf-modes/cover19model-2.0/results/base-12345.Rdata" do
+file "imptf-models/covid19model-2.0/results/base-12345.Rdata" do
   Dir.chdir("imptf-models/covid19model-2.0") do
-    IO.popen "PBS_JOBID=12345
-Rscript base.r"
+    `PBS_JOBID=12345
+    Rscript base.r > STDOUT-rake-base-12345`
   end
 end
-file "imptf-modes/cover19model-3.0/results/base-12345.Rdata" do
+file "imptf-models/covid19model-3.0/results/base-12345.Rdata" do
   Dir.chdir("imptf-models/covid19model-3.0") do
-    IO.popen "PBS_JOBID=12345
-Rscript base_general.r -F"
+    `PBS_JOBID=12345
+    Rscript base_general.r -F > STDOUT-rake-base-12345`
   end
 end
-file "imptf-modes/cover19model-4.0/results/Italy/results/base-12345-stanfit.Rdata" do
+file "imptf-models/covid19model-4.0/results/Italy/results/base-12345-stanfit.Rdata" do
   Dir.chdir("imptf-models/covid19model-4.0") do
-    IO.popen "PBS_JOBID=12345
-Rscript base-Italy.r -F"
+    `PBS_JOBID=12345
+    Rscript base-Italy.r -F > STDOUT-rake-base-12345`
   end
 end
-file "imptf-modes/cover19model-5.0/results/Brazil/results/base-12345-stanfit.Rdata" do
+file "imptf-models/covid19model-5.0/results/Brazil/results/base-12345-stanfit.Rdata" do
   Dir.chdir("imptf-models/covid19model-5.0") do
-    IO.popen "PBS_JOBID=12345
-Rscript base-Brazil.r"
+    `PBS_JOBID=12345
+    Rscript base-Brazil.r > STDOUT-rake-base-12345`
   end
 end
 
