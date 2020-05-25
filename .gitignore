@@ -4,6 +4,7 @@ clean-data/*
 figures/*
 models/*
 imptf-models/*
+rambaut-nomenclature/*
 nohup.out
 *~
 #*

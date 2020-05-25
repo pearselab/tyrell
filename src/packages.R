@@ -22,7 +22,7 @@ if(any(!ready))
 
 # GitHub packages
 if(!silent.require("DENVfoiMap")){
-    install_github("lorecatta/DENVfoiMap")
+    install_github("lorecatta/DENVfoiMap", upgrade=FALSE)
     if(!silent.require("DENVfoiMap"))
         stop("Cannot install DENVfoiMap")
 }

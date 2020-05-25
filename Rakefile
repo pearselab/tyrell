@@ -22,6 +22,7 @@ end
 
 CLOBBER.include("raw-data/*")
 CLOBBER.include("imptf-models/*")
+CLOBBER.include("rambaut-nomenclature/*")
 CLEAN.include("clean-data/*")
 CLEAN.include("figures/*")
 CLEAN.include("models/*")
@@ -55,7 +56,7 @@ file "timestamp.yml" do File.open("timestamp.yml", "w") end
 # Download raw data ############
 ################################
 desc "Download all raw data"
-task :dwn_data => [:before_dwn_data, :raw_jhu, "raw-data/ecdc-cases.csv", "raw-data/imperial-europe-pred.csv", :raw_ihme, :raw_nxtstr, :raw_imptfmods, :raw_gadm]
+task :dwn_data => [:before_dwn_data, :raw_jhu, "raw-data/ecdc-cases.csv", "raw-data/imperial-europe-pred.csv", :raw_ihme, :raw_nxtstr, :raw_imptfmods, "rambaut-nomenclature", :raw_gadm]
 task :before_dwn_data do
   puts "\t ... Downloading raw data (can take a long time)"
 end
@@ -100,7 +101,6 @@ ihme_files.each {|x| file x do raw_ihme(ihme_files) end}
 
 file "raw-data/jh-global-confirmed.csv" do dwn_file("raw-data", "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv", "jh-global-confirmed.csv") end
 
-
 desc "Download ECDC cases"
 file "raw-data/ecdc-cases.csv" do dwn_file("raw-data", "https://opendata.ecdc.europa.eu/covid19/casedistribution/csv", "ecdc-cases.csv") end
 
@@ -111,12 +111,7 @@ desc "Download NextStrain data"
 nxtstr_files = ["raw-data/nxtstr-sel-meta.tsv", "raw-data/nxtstr-meta.tsv", "raw-data/nxtstr-authors.tsv", "raw-data/nxtstr-tree-mut.tre", "raw-data/nxtstr-tree-date.tre"]
 task :raw_nxtstr => nxtstr_files
 def raw_nxtstr(nxtstr_files)
-  begin
-    options = Selenium::WebDriver::Chrome::Options.new#(args: ['headless'])
-  rescue
-    puts "\t ... ... Selenium missing; skipping NextStrain; don't try to fix please"
-    return false
-  end
+  options = Selenium::WebDriver::Chrome::Options.new#(args: ['headless'])
   #options.add_preference(:download, "directory_upgrade": true, "prompt_for_download": false, "default_directory": Dir.pwd)
   driver = Selenium::WebDriver.for(:chrome, options: options)
   driver.navigate.to "https://nextstrain.org/ncov/global"
@@ -135,7 +130,13 @@ def raw_nxtstr(nxtstr_files)
   end
   nxtstr_files.map {|x| date_metadata(x)}
 end
-nxtstr_files.each {|x| file x do raw_nxtstr(nxtstr_files) end}
+nxtstr_files.each {|x| file x do
+                     begin
+                       raw_nxtstr(nxtstr_files)
+                     rescue Exception => e
+                       puts "\t ... ... Selenium missing; skipping NextStrain; don't try to fix please"
+                     end
+                   end}
 
 desc "Download Imperial Task Force releases"
 imptf_folders = ["imptf-models/covid19model-1.0", "imptf-models/covid19model-2.0", "imptf-models/covid19model-3.0", "imptf-models/covid19model-4.0", "imptf-models/covid19model-5.0"]
@@ -152,6 +153,13 @@ def raw_imptfmods(imptf_folders)
   imptf_folders.map {|x| date_metadata(x)}
 end
 imptf_folders.each {|x| file x do raw_imptfmods(imptf_folders) end}
+
+desc "Download Rambaut et al. phylo-nomenclature"
+directory "rambaut-nomenclature" do
+  unzip(stream_file("https://github.com/hCoV-2019/lineages/archive/master.zip", "rambaut-nomenclature.zip"))
+  FileUtils.mv "lineages-master", "rambaut-nomenclature"
+  FileUtils.rm "rambaut-nomenclature.zip"
+end
 
 ################################
 # Running external models ######
@@ -230,6 +238,7 @@ task :update_raw_data do
     FileUtils.rm Dir["imperial-*"]
     FileUtils.rm Dir["nxtstr-*"]
   end
+  FileUtils.rm_r "rambaut-nomenclature/"
   Rake.application[:dwn_data].invoke
 end
 
@@ -238,4 +247,18 @@ task :purge_clean_data do
   FileUtils.chdir("clean-data") do
     # ... right now, nothing ...
   end
+end
+
+################################
+# Fit models ###################
+################################
+desc "Fitting our models"
+task :fit_models => [:before_fit_models, :fit_proposal]
+task :before_fit_models do
+  puts "\t ... Fitting our models"
+end
+
+desc "Fitting proposal models"
+task :fit_proposal do
+  puts "Yeah, I'm working on it, OK?..."
 end
