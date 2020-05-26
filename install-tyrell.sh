@@ -2,7 +2,7 @@
 
 # Install Ruby and R
 # NOTE: Only for Linux; Mac/Windows Google please
-apt install ruby r-base-dev
+apt install ruby r-base-dev chromium-chromedriver
 
 
 # Install Ruby gems
