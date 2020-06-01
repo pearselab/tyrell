@@ -56,7 +56,7 @@ file "timestamp.yml" do File.open("timestamp.yml", "w") end
 # Download raw data ############
 ################################
 desc "Download all raw data"
-task :dwn_data => [:before_dwn_data, :raw_jhu, "raw-data/ecdc-cases.csv", "raw-data/imperial-europe-pred.csv", :raw_ihme, :raw_nxtstr, "raw-data/who-interventions.xlsx", "raw-data/imperial-interventions.csv", :raw_imptfmods, "rambaut-nomenclature", :raw_gadm]
+task :dwn_data => [:before_dwn_data, :raw_jhu, "raw-data/ecdc-cases.csv", "raw-data/imperial-europe-pred.csv", :raw_ihme, :raw_nxtstr, "raw-data/who-interventions.xlsx", "raw-data/imperial-interventions.csv", :raw_imptfmods, "rambaut-nomenclature", "raw-data/denvfoimap-raster.RDS", :raw_gadm]
 task :before_dwn_data do
   puts "\t ... Downloading raw data (can take a long time)"
 end
@@ -178,6 +178,11 @@ directory "rambaut-nomenclature" do
   FileUtils.rm "rambaut-nomenclature.zip"
 end
 
+desc "Download DENVfoiMap raster data"
+file "raw-data/denvfoimap-raster.RDS" do
+  stream_file("https://mrcdata.dide.ic.ac.uk/resources/DENVfoiMap/all_squares_env_var_0_1667_deg.rds", "raw-data/denvfoimap-raster.RDS")
+end
+
 ################################
 # Running external models ######
 ################################
@@ -229,19 +234,19 @@ end
 # Clean data ###################
 ################################
 desc "Process all raw data"
-task :cln_data => [:before_cln_data, "clean-data/climate_array.RDS"]
+task :cln_data => [:before_cln_data, :]
 task :before_cln_data do
   puts "\t ... Processing raw data"
 end
 
-desc "Clean climate data"
-file "clean-data/climate_array.RDS" do
-  `Rscript "src/climate-data.R"`
-  # Remove extra .rds files (Michael, fix this in the script?)
-  FileUtils.rm ["gadm36_AUT_0_sp.rds","gadm36_DEU_0_sp.rds","gadm36_FRA_0_sp.rds","gadm36_NOR_0_sp.rds","gadm36_BEL_0_sp.rds","gadm36_DNK_0_sp.rds","gadm36_GBR_0_sp.rds","gadm36_SWE_0_sp.rds","gadm36_CHE_0_sp.rds","gadm36_ESP_0_sp.rds","gadm36_ITA_0_sp.rds"]
-  FileUtils.rm_r "wc10"
-  date_metadata "clean-data/climate_array.RDS"
+desc "Clean DENVfoiMap raster data"
+def denvfoimap_rasters()
+  `Rscript "src/denvfoimap-rasters.R"`
+  date_metadata "clean-data/denvfoimap-rasters-countries.csv"
+  date_metadata "clean-data/denvfoimap-rasters-states.csv"
 end
+file "clean-data/denvfoimap-rasters-countries.csv" do denvfoimap_rasters() end
+file "clean-data/denvfoimap-rasters-rasters.csv" do denvfoimap_rasters() end
 
 ################################
 # Update data ##################
@@ -295,6 +300,6 @@ task :fit_env_imp do
   `Rscript stan-europe.R > STDOUT-europe`
   end
   Dir.chdir "bayes-env" do
-    `Rscript downstream.R`
+    `Rscript downstream.R > raw-results.txt`
   end
 end
