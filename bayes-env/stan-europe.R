@@ -6,6 +6,7 @@ library(dplyr)
 library(tidyr)
 library(EnvStats)
 library(optparse)
+library(bayesplot)
 
 countries <- c(
   "Denmark",
@@ -23,44 +24,6 @@ countries <- c(
   "Portugal",
   "Netherlands"
 )
-
-# Commandline options and parsing
-parser <- OptionParser()
-parser <- add_option(parser, c("-D", "--debug"), action="store_true",
-                     help="Perform a debug run of the model")
-parser <- add_option(parser, c("-F", "--full"), action="store_true",
-                     help="Perform a full run of the model")
-cmdoptions <- parse_args(parser, args = commandArgs(trailingOnly = TRUE), positional_arguments = TRUE)
-
-# Default run parameters for the model
-if(is.null(cmdoptions$options$debug)) {
-  DEBUG = Sys.getenv("DEBUG") == "TRUE"
-} else {
-  DEBUG = cmdoptions$options$debug
-}
-
-if(is.null(cmdoptions$options$full)) {
-  FULL = Sys.getenv("FULL") == "TRUE"
-} else {
-  FULL = cmdoptions$options$full
-}
-
-if(DEBUG && FULL) {
-  stop("Setting both debug and full run modes at once is invalid")
-}
-
-if(length(cmdoptions$args) == 0) {
-  StanModel = 'base'
-} else {
-  StanModel = cmdoptions$args[1]
-}
- 
-print(sprintf("Running %s",StanModel))
-if(DEBUG) {
-  print("Running in DEBUG mode")
-} else if (FULL) {
-  print("Running in FULL mode")
-}
 
 ## Reading all data
 d=readRDS('data/COVID-19-up-to-date.rds')
@@ -211,21 +174,6 @@ stan_data$covariate4 = 1*as.data.frame((stan_data$covariate1+
                                           stan_data$covariate5+
                                           stan_data$covariate6) >= 1)
 
-if(DEBUG) {
-  for(i in 1:length(countries)) {
-    write.csv(
-      data.frame(date=dates[[i]],
-                 `school closure`=stan_data$covariate1[1:stan_data$N[i],i],
-                 `self isolating if ill`=stan_data$covariate2[1:stan_data$N[i],i],
-                 `public events`=stan_data$covariate3[1:stan_data$N[i],i],
-                 `government makes any intervention`=stan_data$covariate4[1:stan_data$N[i],i],
-                 `lockdown`=stan_data$covariate5[1:stan_data$N[i],i],
-                 `social distancing encouraged`=stan_data$covariate6[1:stan_data$N[i],i]),
-      file=sprintf("results/%s-check-dates.csv",countries[i]),row.names=F)
-  }
-}
-
-
 # Combine covariates to an array of design matrices X
 stan_data$P <- 6
 stopifnot(dim(stan_data$covariate1) == c(stan_data$N2, stan_data$M))
@@ -245,59 +193,24 @@ stan_data$covariate1 <-
   stan_data$covariate5 <-
   stan_data$covariate6 <- NULL
 
-# Add RANDOM envirionmental data
-if(FALSE){
-    r.dim <- dim(stan_data$X)[1:2]
-    stan_data$env_dat <- matrix(rnorm(prod(r.dim)), nrow=r.dim[2], ncol=r.dim[1])
-}
+# Add envirionmental data
 env_dat <- t(readRDS("climate_array.RDS")[,"t_mean",1:3])
-made.up <- matrix(0, nrow=3, ncol=2); colnames(made.up) <- c("Portugal","Netherlands","Greece")
+made.up <- matrix(0, nrow=3, ncol=3); colnames(made.up) <- c("Portugal","Netherlands","Greece")
 env_dat <- cbind(env_dat, made.up)
 env_dat <- env_dat[rep(1:3, c(31,29,31)),countries][1:90,]
+stan_data$env_dat <- env_dat
 
 options(mc.cores = parallel::detectCores())
 rstan_options(auto_write = TRUE)
-m = stan_model(paste0('stan-models/env-model.stan'))
+m = stan_model(paste0('stan-models/stan-europe.stan'))
 
-
-if(DEBUG) {
-  fit = sampling(m,data=stan_data,iter=40, warmup=20, chains=2, seed = 4711)
-} else if (FULL) {
-  fit = sampling(m,data=stan_data,iter=4000,warmup=2000,chains=4,thin=4,control = list(adapt_delta = 0.95, max_treedepth = 10))
-} else { 
-  fit = sampling(m,data=stan_data,iter=200,warmup=100,chains=4,thin=4,control = list(adapt_delta = 0.95, max_treedepth = 10))
-}  
+fit = sampling(m,data=stan_data,iter=4000,warmup=2000,chains=4,thin=4,control = list(adapt_delta = 0.95, max_treedepth = 10))
 
 out = rstan::extract(fit)
 prediction = out$prediction
 estimated.deaths = out$E_deaths
 estimated.deaths.cf = out$E_deaths0
 
-JOBID = Sys.getenv("PBS_JOBID")
-if(JOBID == "")
-  JOBID = as.character(abs(round(rnorm(1) * 1000000)))
-print(sprintf("Jobid = %s",JOBID))
+save.image(paste0('results/env-europe.Rdata'))
 
-save.image(paste0('results/env-model-',JOBID,'.Rdata'))
-
-save(fit,prediction,dates,reported_cases,deaths_by_country,countries,estimated.deaths,estimated.deaths.cf,out,covariates,file=paste0('results/env-model-',JOBID,'-stanfit.Rdata'))
-
-library(bayesplot)
-filename <- paste0('env-model-',JOBID)
-system(paste0("Rscript covariate-size-effects.r ", filename,'-stanfit.Rdata'))
-mu = (as.matrix(out$mu))
-colnames(mu) = countries
-g = (mcmc_intervals(mu,prob = .9))
-ggsave(sprintf("results/%s-mu.png",filename),g,width=4,height=6)
-tmp = lapply(1:length(countries), function(i) (out$Rt_adj[,stan_data$N[i],i]))
-Rt_adj = do.call(cbind,tmp)
-colnames(Rt_adj) = countries
-g = (mcmc_intervals(Rt_adj,prob = .9))
-ggsave(sprintf("results/%s-final-rt.png",filename),g,width=4,height=6)
-system(paste0("Rscript plot-3-panel.r ", filename,'-stanfit.Rdata'))
-system(paste0("Rscript plot-forecast.r ",filename,'-stanfit.Rdata'))
-system(paste0("Rscript make-table.r results/",filename,'-stanfit.Rdata'))
-verify_result <- system(paste0("Rscript web-verify-output.r ", filename,'.Rdata'),intern=FALSE)
-if(verify_result != 0){
-  stop("Verification of web output failed!")
-}
+save(fit,prediction,dates,reported_cases,deaths_by_country,countries,estimated.deaths,estimated.deaths.cf,out,covariates,file=paste0('results/env-europe-stanfit.Rdata'))
