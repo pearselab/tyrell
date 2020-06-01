@@ -164,7 +164,8 @@ def raw_imptfmods(imptf_folders)
     unzip(stream_file("https://github.com/ImperialCollegeLondon/covid19model/archive/v3.0.zip", "tf3.zip"))
     unzip(stream_file("https://github.com/ImperialCollegeLondon/covid19model/archive/v4.0.zip", "tf4.zip"))
     unzip(stream_file("https://github.com/ImperialCollegeLondon/covid19model/archive/v5.0.zip", "tf5.zip"))
-    FileUtils.rm ["tf1.zip", "tf2.zip", "tf3.zip", "tf4.zip", "tf5.zip"]
+    unzip(stream_file("https://github.com/ImperialCollegeLondon/covid19model/archive/v6.0.zip", "tf6.zip"))
+    FileUtils.rm ["tf1.zip", "tf2.zip", "tf3.zip", "tf4.zip", "tf5.zip", "tf6.zip"]
   end
   imptf_folders.map {|x| date_metadata(x)}
 end
@@ -217,7 +218,12 @@ file "imptf-models/covid19model-5.0/results/Brazil/results/base-12345-stanfit.Rd
     Rscript base-Brazil.r > STDOUT-rake-base-12345`
   end
 end
-
+file "imptf-models/covid19model-6.0/results/usa/results/base-12345-stanfit.Rdata" do
+  Dir.chdir("imptf-models/covid19model-6.0") do
+    `PBS_JOBID=12345
+    Rscript base-usa.r > STDOUT-rake-base-12345`
+  end
+end
 
 ################################
 # Clean data ###################
