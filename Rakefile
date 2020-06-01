@@ -234,9 +234,18 @@ end
 # Clean data ###################
 ################################
 desc "Process all raw data"
-task :cln_data => [:before_cln_data, :cln_denvfoi_rasters]
+task :cln_data => [:before_cln_data, :cln_denvfoi_rasters, "clean-data/worldclim-countries.RDS"]
 task :before_cln_data do
   puts "\t ... Processing raw data"
+end
+
+desc "Clean WORLDCLIM data"
+file "clean-data/worldclim-countries.RDS" do
+  `Rscript "src/worldclim-countries.R"`
+  # Remove extra .rds files (Michael, fix this in the script?)
+  FileUtils.rm ["gadm36_AUT_0_sp.rds","gadm36_DEU_0_sp.rds","gadm36_FRA_0_sp.rds","gadm36_NOR_0_sp.rds","gadm36_BEL_0_sp.rds","gadm36_DNK_0_sp.rds","gadm36_GBR_0_sp.rds","gadm36_SWE_0_sp.rds","gadm36_CHE_0_sp.rds","gadm36_ESP_0_sp.rds","gadm36_ITA_0_sp.rds"]
+  FileUtils.rm_r "wc10"
+  date_metadata "clean-data/worldclim-countries.RDS"
 end
 
 desc "Clean DENVfoiMap raster data"

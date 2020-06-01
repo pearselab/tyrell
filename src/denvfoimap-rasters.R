@@ -46,4 +46,4 @@ s.summary <- sapply(c("latitude", "altitude", "DayTemp_const_term", "EVI_const_t
                     )
 
 write.csv(c.summary, "clean-data/denvfoimap-rasters-countries.csv")
-write.csv(s.summary, "clean-data/denvfoimap-rasters-states.csv")
+#write.csv(s.summary, "clean-data/denvfoimap-rasters-states.csv")
