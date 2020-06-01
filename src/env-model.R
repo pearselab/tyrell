@@ -246,8 +246,14 @@ stan_data$covariate1 <-
   stan_data$covariate6 <- NULL
 
 # Add RANDOM envirionmental data
-r.dim <- dim(stan_data$X)[1:2]
-stan_data$env_dat <- matrix(rnorm(prod(r.dim)), nrow=r.dim[2], ncol=r.dim[1])
+if(FALSE){
+    r.dim <- dim(stan_data$X)[1:2]
+    stan_data$env_dat <- matrix(rnorm(prod(r.dim)), nrow=r.dim[2], ncol=r.dim[1])
+}
+env_dat <- t(readRDS("climate_array.RDS")[,"t_mean",1:3])
+made.up <- matrix(0, nrow=3, ncol=2); colnames(made.up) <- c("Portugal","Netherlands","Greece")
+env_dat <- cbind(env_dat, made.up)
+env_dat <- env_dat[rep(1:3, c(31,29,31)),countries][1:90,]
 
 options(mc.cores = parallel::detectCores())
 rstan_options(auto_write = TRUE)
