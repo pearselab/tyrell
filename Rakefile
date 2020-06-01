@@ -288,10 +288,13 @@ end
 desc "Fitting modified Imperial models"
 task :fit_env_imp do
   puts "Hey, if you're expecting this to work... Don't do that"
-  FileUtils.cp "src/env-model.R", "imptf-models/covid19model-6.0/"
-  FileUtils.cp "src/env-model.stan", "imptf-models/covid19model-6.0/stan-models/"
+  FileUtils.cp "bayes-env/stan-europe.R", "imptf-models/covid19model-6.0/"
+  FileUtils.cp "bayes-env/stan-europe.stan", "imptf-models/covid19model-6.0/stan-models/"
   FileUtils.cp "clean-data/climate_array.RDS", "imptf-models/covid19model-6.0/"
-  Dir.chdir "imptf-models/covid19model-6.0/"
-  `PBS_JOBID=12345
-   Rscript env-model.R > STDOUT-rake-env-model-12345`
+  Dir.chdir "imptf-models/covid19model-6.0/" do
+  `Rscript stan-europe.R > STDOUT-europe`
+  end
+  Dir.chdir "bayes-env" do
+    `Rscript downstream.R`
+  end
 end
