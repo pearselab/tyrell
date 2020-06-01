@@ -234,19 +234,20 @@ end
 # Clean data ###################
 ################################
 desc "Process all raw data"
-task :cln_data => [:before_cln_data, :]
+task :cln_data => [:before_cln_data, :cln_denvfoi_rasters]
 task :before_cln_data do
   puts "\t ... Processing raw data"
 end
 
 desc "Clean DENVfoiMap raster data"
+task :cln_denvfoi_rasters => ["clean-data/denvfoimap-rasters-countries.csv", "clean-data/denvfoimap-rasters-states.csv"]
 def denvfoimap_rasters()
   `Rscript "src/denvfoimap-rasters.R"`
   date_metadata "clean-data/denvfoimap-rasters-countries.csv"
   date_metadata "clean-data/denvfoimap-rasters-states.csv"
 end
 file "clean-data/denvfoimap-rasters-countries.csv" do denvfoimap_rasters() end
-file "clean-data/denvfoimap-rasters-rasters.csv" do denvfoimap_rasters() end
+file "clean-data/denvfoimap-rasters-states.csv" do denvfoimap_rasters() end
 
 ################################
 # Update data ##################

@@ -2,7 +2,7 @@ silent.require <- function(x) suppressMessages(require(package=x, character.only
 
 # Load packages that are already installed
 packages <- c("rstan",
-              "raster", "sp", "lubridate", "rgeos", "RColorBrewer" # src/climate-data.R
+              "raster", "sp", "lubridate", "rgeos", "RColorBrewer", # src/climate-data.R
               "devtools", # to install GitHub packages (like Lorenzo's)
               "matrixStats","data.table","gdata","dplyr","tidyr","EnvStats","scales","tidyverse","dplyr","abind","ggplot2","gridExtra","ggpubr","bayesplot","cowplot","optparse", "lubridate", "zoo", "ggstance", "geofacet", "denstrip", "svglite" # Imperial models
               )
