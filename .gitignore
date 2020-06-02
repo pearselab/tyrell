@@ -7,4 +7,5 @@ imptf-models/*
 rambaut-nomenclature/*
 nohup.out
 *~
-#*
+*#
+.#*
