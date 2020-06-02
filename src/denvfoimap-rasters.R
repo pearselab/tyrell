@@ -41,9 +41,9 @@ clim_vars <- readRDS("raw-data/denvfoimap-raster.RDS")
 c.summary <- sapply(c("latitude", "altitude", "DayTemp_const_term", "EVI_const_term", "MIR_const_term", "NightTemp_const_term", "RFE_const_term", "log_pop_den", "birth_rate", "mean_age", "sd_age"),
                     function(x) avg.poly.clim(countries, clim_vars, x, countries_data)
                     )
-s.summary <- sapply(c("latitude", "altitude", "DayTemp_const_term", "EVI_const_term", "MIR_const_term", "NightTemp_const_term", "RFE_const_term", "log_pop_den", "birth_rate", "mean_age", "sd_age"),
-                    function(x) avg.poly.clim(states, clim_vars, x, states_data)
-                    )
+#s.summary <- sapply(c("latitude", "altitude", "DayTemp_const_term", "EVI_const_term", "MIR_const_term", "NightTemp_const_term", "RFE_const_term", "log_pop_den", "birth_rate", "mean_age", "sd_age"),
+#                    function(x) avg.poly.clim(states, clim_vars, x, states_data)
+#                    )
 
 write.csv(c.summary, "clean-data/denvfoimap-rasters-countries.csv")
 #write.csv(s.summary, "clean-data/denvfoimap-rasters-states.csv")
