@@ -27,6 +27,7 @@ CLEAN.include("clean-data/*")
 CLEAN.include("figures/*")
 CLEAN.include("models/*")
 CLEAN.include("forecasts/*")
+CLEAN.include("bayes-env/*.txt")
 
 ################################
 # Install software and tyrell ##
@@ -234,7 +235,7 @@ end
 # Clean data ###################
 ################################
 desc "Process all raw data"
-task :cln_data => [:before_cln_data, :cln_gadm, :cln_denvfoi_rasters, "clean-data/worldclim-countries.RDS"]
+task :cln_data => [:before_cln_data, :cln_gadm, :cln_denvfoi_rasters, :cln_worldclim]
 task :before_cln_data do
   puts "\t ... Processing raw data"
 end
@@ -250,17 +251,18 @@ file "clean-data/gadm-countries.RDS" do gadm_cleaning() end
 file "clean-data/gadm-states.RDS" do gadm_cleaning() end
 
 
-desc "Clean WORLDCLIM data"
-file "clean-data/worldclim-countries.RDS" => ["clean-data/gadm-countries.RDS","clean-data/gadm-states.RDS"] do
-  `Rscript src/worldclim-countries.R`
-  # Remove extra .rds files (Michael, fix this in the script?)
-  FileUtils.rm ["gadm36_AUT_0_sp.rds","gadm36_DEU_0_sp.rds","gadm36_FRA_0_sp.rds","gadm36_NOR_0_sp.rds","gadm36_BEL_0_sp.rds","gadm36_DNK_0_sp.rds","gadm36_GBR_0_sp.rds","gadm36_SWE_0_sp.rds","gadm36_CHE_0_sp.rds","gadm36_ESP_0_sp.rds","gadm36_ITA_0_sp.rds"]
-  FileUtils.rm_r "wc10"
+desc "Clean and process WORLDCLIM data"
+task :cln_worldclim => ["clean-data/worldclim-countries.RDS","clean-data/worldclim-states.RDS"]
+def cln_worldclim()
+  `Rscript src/worldclim.R`
   date_metadata "clean-data/worldclim-countries.RDS"
+  date_metadata "clean-data/worldclim-states.RDS"
 end
+file "clean-data/worldclim-countries.RDS" => "clean-data/gadm-countries.RDS" do cln_worldclim() end
+file "clean-data/worldclim-states.RDS" => "clean-data/gadm-states.RDS" do cln_worldclim() end
 
 desc "Clean DENVfoiMap raster data"
-task :cln_denvfoi_rasters => ["clean-data/denvfoimap-rasters-countries.csv", "clean-data/denvfoimap-rasters-states.csv", "clean-data/gadm-countries.csv","clean-data/gadm-states.csv"]
+task :cln_denvfoi_rasters => ["clean-data/denvfoimap-rasters-countries.csv", "clean-data/denvfoimap-rasters-states.csv", "clean-data/gadm-countries.RDS","clean-data/gadm-states.RDS"]
 def denvfoimap_rasters()
   `Rscript "src/denvfoimap-rasters.R"`
   date_metadata "clean-data/denvfoimap-rasters-countries.csv"
@@ -320,7 +322,5 @@ task :fit_env_imp do
   Dir.chdir "imptf-models/covid19model-6.0/" do
   `Rscript stan-europe.R > STDOUT-europe`
   end
-  Dir.chdir "bayes-env" do
-    `Rscript downstream.R > raw-results.txt`
-  end
+  `Rscript downstream.R > bayes-env/raw-results.txt`
 end
