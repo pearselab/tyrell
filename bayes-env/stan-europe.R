@@ -1,13 +1,4 @@
-library(rstan)
-library(data.table)
-library(lubridate)
-library(gdata)
-library(dplyr)
-library(tidyr)
-library(EnvStats)
-library(optparse)
-library(bayesplot)
-
+source("../../src/packages.R")
 countries <- c(
   "Denmark",
   "Italy",

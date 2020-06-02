@@ -2,6 +2,7 @@ silent.require <- function(x) suppressMessages(require(package=x, character.only
 
 # Load packages that are already installed
 packages <- c("rstan",
+              "zeallot", #src/clean-gadm.R (and because Will likes it)
               "raster", "sp", "lubridate", "rgeos", "RColorBrewer", # src/climate-data.R
               "devtools", # to install GitHub packages (like Lorenzo's)
               "matrixStats","data.table","gdata","dplyr","tidyr","EnvStats","scales","tidyverse","dplyr","abind","ggplot2","gridExtra","ggpubr","bayesplot","cowplot","optparse", "lubridate", "zoo", "ggstance", "geofacet", "denstrip", "svglite" # Imperial models
@@ -25,4 +26,9 @@ if(!silent.require("DENVfoiMap")){
     install_github("lorecatta/DENVfoiMap", upgrade=FALSE)
     if(!silent.require("DENVfoiMap"))
         stop("Cannot install DENVfoiMap")
+}
+if(!silent.require("velox")){ # src/clean-gadm.R and other GIS
+    install_github("hunzikp/velox", upgrade=FALSE)
+    if(!silent.require("velox"))
+        stop("Cannot install velox")
 }

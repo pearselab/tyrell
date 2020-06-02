@@ -234,14 +234,25 @@ end
 # Clean data ###################
 ################################
 desc "Process all raw data"
-task :cln_data => [:before_cln_data, :cln_denvfoi_rasters, "clean-data/worldclim-countries.RDS"]
+task :cln_data => [:before_cln_data, :cln_gadm, :cln_denvfoi_rasters, "clean-data/worldclim-countries.RDS"]
 task :before_cln_data do
   puts "\t ... Processing raw data"
 end
 
+desc "Clean and process GADM data"
+task :cln_gadm => ["clean-data/gadm-countries.RDS", "clean-data/gadm-states.RDS"]
+def gadm_cleaning()
+  `Rscript src/clean-gadm.R`
+  date_metadata "clean-data/gadm-countries.RDS"
+  date_metadata "clean-data/gadm-states.RDS"
+end
+file "clean-data/gadm-countries.RDS" do gadm_cleaning() end
+file "clean-data/gadm-states.RDS" do gadm_cleaning() end
+
+
 desc "Clean WORLDCLIM data"
-file "clean-data/worldclim-countries.RDS" do
-  `Rscript "src/worldclim-countries.R"`
+file "clean-data/worldclim-countries.RDS" => ["clean-data/gadm-countries.RDS","clean-data/gadm-states.RDS"] do
+  `Rscript src/worldclim-countries.R`
   # Remove extra .rds files (Michael, fix this in the script?)
   FileUtils.rm ["gadm36_AUT_0_sp.rds","gadm36_DEU_0_sp.rds","gadm36_FRA_0_sp.rds","gadm36_NOR_0_sp.rds","gadm36_BEL_0_sp.rds","gadm36_DNK_0_sp.rds","gadm36_GBR_0_sp.rds","gadm36_SWE_0_sp.rds","gadm36_CHE_0_sp.rds","gadm36_ESP_0_sp.rds","gadm36_ITA_0_sp.rds"]
   FileUtils.rm_r "wc10"
@@ -249,7 +260,7 @@ file "clean-data/worldclim-countries.RDS" do
 end
 
 desc "Clean DENVfoiMap raster data"
-task :cln_denvfoi_rasters => ["clean-data/denvfoimap-rasters-countries.csv", "clean-data/denvfoimap-rasters-states.csv"]
+task :cln_denvfoi_rasters => ["clean-data/denvfoimap-rasters-countries.csv", "clean-data/denvfoimap-rasters-states.csv", "clean-data/gadm-countries.csv","clean-data/gadm-states.csv"]
 def denvfoimap_rasters()
   `Rscript "src/denvfoimap-rasters.R"`
   date_metadata "clean-data/denvfoimap-rasters-countries.csv"
