@@ -32,11 +32,12 @@ states <- states[match(countries, m.states$code),]
 m.states <- m.states[match(countries, m.states$code),]
 
 env_dat <- readRDS("../../clean-data/worldclim-states.RDS")[m.states$GID_1,,"tmean"]
-stan_data$env_dat <- env_dat
+env_dat <- env_dat[,c(12, rep(1:5, c(31,29,31,30,12)))]
+stan_data$env_dat <- scale(t(env_dat))
 
 options(mc.cores = parallel::detectCores())
 rstan_options(auto_write = TRUE)
-m = stan_model('stan-models/env-brazil.stan')
+m = stan_model('stan-models/stan-brazil.stan')
 
 fit = sampling(m,data=stan_data,iter=1500,warmup=500,chains=8,thin=1, 
                control = list(adapt_delta = 0.95, max_treedepth = 15))
@@ -48,5 +49,5 @@ prediction = out$prediction
 estimated.deaths = out$E_deaths
 
 save(fit, dates, reported_cases,deaths_by_country, countries,
-     prediction, estimated.deaths,stan_data,JOBID,df_pop,filename,df_region_codes,
+     prediction, estimated.deaths,stan_data,df_pop,filename,df_region_codes,
      file=paste0('results/env-brazil-stanfit.Rdata'))

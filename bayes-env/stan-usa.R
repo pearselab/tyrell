@@ -88,14 +88,15 @@ m.states$code <- sapply(strsplit(m.states$HASC_1, ".", fixed=TRUE), function(x) 
 states <- states[match(names(processed_data$reported_deaths), m.states$code),]
 m.states <- m.states[match(names(processed_data$reported_deaths), m.states$code),]
 env_dat <- readRDS("../../clean-data/worldclim-states.RDS")[m.states$GID_1,,"tmean"]
-stan_data$env_dat <- env_dat
+env_dat <- env_dat[,rep(2:5, c(27,31,30,27))]
+stan_data$env_dat <- scale(t(env_dat))
 
 dates <- processed_data$dates
 reported_deaths <- processed_data$reported_deaths
 reported_cases <- processed_data$reported_cases
 options(mc.cores = parallel::detectCores())
 rstan_options(auto_write = TRUE)
-m <- stan_model('stan-models/env-usa.stan')
+m <- stan_model('stan-models/stan-usa.stan')
 fit = sampling(m,data=stan_data,iter=1800,warmup=1000,chains=5,thin=1,control = list(adapt_delta = 0.95, max_treedepth = 15))
 
 covariate_data = list(interventions, mobility)

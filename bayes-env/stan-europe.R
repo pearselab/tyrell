@@ -185,10 +185,10 @@ stan_data$covariate1 <-
   stan_data$covariate6 <- NULL
 
 # Add envirionmental data
-env_dat <- readRDS("../../clean-data/worldclim-countries.RDS")[,1:3,"tmean"]
+env_dat <- readRDS("../../clean-data/worldclim-countries.RDS")[,,"tmean"]
 rownames(env_dat) <- gsub(" ", "_", rownames(env_dat))
-env_dat <- env_dat[countries,]
-stan_data$env_dat <- env_dat
+env_dat <- env_dat[countries,c(12,rep(1:3,c(31,29,29)))]
+stan_data$env_dat <- scale(t(env_dat))
 
 options(mc.cores = parallel::detectCores())
 rstan_options(auto_write = TRUE)

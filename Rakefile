@@ -318,7 +318,6 @@ task :fit_env_imp do
   puts "Hey, if you're expecting this to work... Don't do that"
   FileUtils.cp ["bayes-env/stan-europe.R","bayes-env/stan-usa.R","bayes-env/stan-brazil.R"], "imptf-models/covid19model-6.0/"
   FileUtils.cp ["bayes-env/stan-europe.stan","bayes-env/stan-usa.stan","bayes-env/stan-brazil.stan"], "imptf-models/covid19model-6.0/stan-models/"
-  FileUtils.cp ["clean-data/worldclim-countries.RDS","clean-data/worldclim-states.RDS"], "imptf-models/covid19model-6.0/"
   Dir.chdir "imptf-models/covid19model-6.0/" do
     `Rscript stan-europe.R > STDOUT-europe`
     `Rscript stan-usa.R > STDOUT-usa`
