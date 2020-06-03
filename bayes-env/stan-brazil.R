@@ -28,7 +28,9 @@ m.states$code[m.states$NAME_1=="Espírito Santo"] <- "ES"
 m.states$code[m.states$NAME_1=="Rio Grande do Sul"] <- "RS"
 m.states$code[m.states$NAME_1=="Rio Grande do Norte"] <- "RN"
 m.states$code[m.states$NAME_1=="Santa Catarina"] <- "SC"
+states <- states[match(countries, m.states$code),]
 m.states <- m.states[match(countries, m.states$code),]
+
 env_dat <- readRDS("../../clean-data/worldclim-states.RDS")[m.states$GID_1,,"tmean"]
 stan_data$env_dat <- env_dat
 
