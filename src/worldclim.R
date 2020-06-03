@@ -7,9 +7,9 @@ c(states, states_data) %<-% readRDS("clean-data/gadm-states.RDS")
 
 # Get WORLDCLIM data
 clim_variables <- c("t_min", "t_mean", "t_max")
-tmean <- velox(getData("worldclim",var="tmean",res=10))
-tmin <- velox(getData("worldclim",var="tmin",res=10))
-tmax <- velox(getData("worldclim",var="tmax",res=10))
+tmean <- velox(getData("worldclim",var="tmean",res=10)) / 10
+tmin <- velox(getData("worldclim",var="tmin",res=10))   / 10
+tmax <- velox(getData("worldclim",var="tmax",res=10))   / 10
 
 # Average across countries and states
 c.clim <- abind(

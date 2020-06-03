@@ -80,6 +80,12 @@ processed_data <- process_covariates(states = states,
                                      formula_partial_state = formula_partial_state)
 stan_data <- processed_data$stan_data
 
+# Add envirionmental data
+env_dat <- readRDS("../../clean-data/worldclim-states.RDS")[,1:3,"tmean"]
+rownames(env_dat) <- gsub(" ", "_", rownames(env_dat))
+env_dat <- env_dat[countries,]
+stan_data$env_dat <- env_dat
+
 dates <- processed_data$dates
 reported_deaths <- processed_data$reported_deaths
 reported_cases <- processed_data$reported_cases
