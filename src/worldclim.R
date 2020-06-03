@@ -26,14 +26,17 @@ s.clim <- abind(
 )
 dimnames(c.clim) <- list(
     names(countries),
-    c("January","Februrary","March","April","May","June","July","August","September","October","November","December"),
+    c("January","February","March","April","May","June","July","August","September","October","November","December"),
     c("tmean", "tmin", "tmax")
 )
 dimnames(s.clim) <- list(
     names(states),
-    c("January","Februrary","March","April","May","June","July","August","September","October","November","December"),
+    c("January","February","March","April","May","June","July","August","September","October","November","December"),
     c("tmean", "tmin", "tmax")
 )
+
+# remove spaces from the country names
+rownames(c.clim) <- gsub(" ", "_", rownames(c.clim))
 
 saveRDS(c.clim, "clean-data/worldclim-countries.RDS")
 saveRDS(s.clim, "clean-data/worldclim-states.RDS")
