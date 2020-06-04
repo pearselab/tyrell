@@ -6,6 +6,10 @@ require 'rake/clean'
 
 require './src/tyrell-util.rb'
 
+def shp_fls(stem)
+  return [".cpg",".dbf",".prj",".shp",".shx"].map {|x| "#{stem}#{x}"}
+end
+
 ################################
 # Global tasks #################
 ################################
@@ -62,7 +66,7 @@ task :before_dwn_data do
   puts "\t ... Downloading raw data (can take a long time)"
 end
 
-gadm_shapefiles = ["raw-data/gadm36_0.cpg", "raw-data/gadm36_0.dbf","raw-data/gadm36_0.prj","raw-data/gadm36_0.shp","raw-data/gadm36_0.shx","raw-data/gadm36_1.cpg","raw-data/gadm36_1.dbf","raw-data/gadm36_1.prj","raw-data/gadm36_1.shp","raw-data/gadm36_1.shx","raw-data/gadm36_2.cpg","raw-data/gadm36_2.dbf","raw-data/gadm36_2.prj","raw-data/gadm36_2.shp","raw-data/gadm36_2.shx","raw-data/gadm36_3.cpg","raw-data/gadm36_3.dbf","raw-data/gadm36_3.prj","raw-data/gadm36_3.shp","raw-data/gadm36_3.shx","raw-data/gadm36_4.cpg","raw-data/gadm36_4.dbf","raw-data/gadm36_4.prj","raw-data/gadm36_4.shp","raw-data/gadm36_4.shx","raw-data/gadm36_5.cpg","raw-data/gadm36_5.dbf","raw-data/gadm36_5.prj","raw-data/gadm36_5.shp","raw-data/gadm36_5.shx"]
+gadm_shapefiles = shp_fls("gadm36_0") + shp_fls("gadm36_1") +shp_fls("gadm36_2") +shp_fls("gadm36_3") + shp_fls("gadm36_4") + shp_fls("gadm36_5")
 desc "Download GADM global shapefiles"
 task :raw_gadm => gadm_shapefiles
 def raw_gadm_func(shapefiles)
@@ -238,13 +242,13 @@ end
 # Clean data ###################
 ################################
 desc "Process all raw data"
-task :cln_data => [:before_cln_data, :cln_denvfoi_rasters, :cln_worldclim]
+task :cln_data => [:before_cln_data, :cln_gadm, :cln_denvfoi_rasters, :cln_worldclim]
 task :before_cln_data do
   puts "\t ... Processing raw data"
 end
 
 desc "Clean and process GADM data"
-task :cln_gadm => ["clean-data/gadm-countries.shp", "clean-data/gadm-states.shp"]
+task :cln_gadm => shp_fls("clean-data/gadm-countries") + shp_fls("clean-data/gadm-states")
 def gadm_cleaning()
   `ogr2ogr -simplify 0.005 -f "ESRI Shapefile" clean-data/gadm-countries.shp raw-data/gadm36_0.shp`
   `ogr2ogr -simplify 0.005 -f "ESRI Shapefile" clean-data/gadm-states.shp raw-data/gadm36_1.shp`
@@ -255,7 +259,6 @@ end
 file "clean-data/gadm-countries.shp" do gadm_cleaning() end
 file "clean-data/gadm-states.shp" do gadm_cleaning() end
 
-
 desc "Clean and process WORLDCLIM data"
 task :cln_worldclim => ["clean-data/worldclim-countries.RDS","clean-data/worldclim-states.RDS"]
 def cln_worldclim()
@@ -263,11 +266,11 @@ def cln_worldclim()
   date_metadata "clean-data/worldclim-countries.RDS"
   date_metadata "clean-data/worldclim-states.RDS"
 end
-file "clean-data/worldclim-countries.RDS" => "clean-data/gadm-countries.RDS" do cln_worldclim() end
-file "clean-data/worldclim-states.RDS" => "clean-data/gadm-states.RDS" do cln_worldclim() end
+file "clean-data/worldclim-countries.RDS" => "clean-data/gadm-countries.shp" do cln_worldclim() end
+file "clean-data/worldclim-states.RDS" => "clean-data/gadm-states.shp" do cln_worldclim() end
 
 desc "Clean DENVfoiMap raster data"
-task :cln_denvfoi_rasters => ["clean-data/denvfoimap-rasters-countries.csv", "clean-data/denvfoimap-rasters-states.csv", "clean-data/gadm-countries.RDS","clean-data/gadm-states.RDS"]
+task :cln_denvfoi_rasters => ["clean-data/denvfoimap-rasters-countries.csv", "clean-data/denvfoimap-rasters-states.csv", "clean-data/gadm-countries.shp","clean-data/gadm-states.shp"]
 def denvfoimap_rasters()
   `Rscript "src/denvfoimap-rasters.R"`
   date_metadata "clean-data/denvfoimap-rasters-countries.csv"
