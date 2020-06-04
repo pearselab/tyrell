@@ -326,5 +326,6 @@ task :fit_env_imp do
     `Rscript stan-usa.R > STDOUT-usa`
     `Rscript stan-brazil.R > STDOUT-brazil`
   end
-  `Rscript downstream.R > bayes-env/raw-results.txt`
+  FileUtils.rm ["bayes-env/stan-europe.R","bayes-env/stan-usa.R","bayes-env/stan-brazil.R", "bayes-env/stan-europe.stan","bayes-env/stan-usa.stan","bayes-env/stan-brazil.stan"]
+  `Rscript bayes-env/downstream.R > bayes-env/raw-results.txt`
 end
