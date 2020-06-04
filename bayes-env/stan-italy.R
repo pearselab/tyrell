@@ -54,20 +54,20 @@ reported_deaths <- processed_data$deaths_by_country
 reported_cases <- processed_data$reported_cases
 
 # Add envirionmental data
-c(states, m.states) %<-% readRDS("../../clean-data/gadm-states.RDS")
-m.states <- m.states[m.states$NAME_0=="Italy",]
-m.states$NAME_1 <- gsub(" ", "_", m.states$NAME_1)
-m.states$NAME_1[m.states$NAME_1=="Lombardia"] <- "Lombardy"
-m.states$NAME_1[m.states$NAME_1=="Trentino-Alto_Adige"] <- "Trento"
-m.states$NAME_1[m.states$NAME_1=="Piemonte"] <- "Piedmont"
-m.states$NAME_1[m.states$NAME_1=="Sardegna"] <- "Sardinia"
-m.states$NAME_1[m.states$NAME_1=="Toscana"] <- "Tuscany"
-m.states$NAME_1[m.states$NAME_1=="Valle_d'Aosta"] <- "Aosta"
-match <- match(regions, m.states$NAME_1)
+states <- readRDS("../../clean-data/gadm-states.RDS")
+states <- states[states$NAME_0=="Italy",]
+states$NAME_1 <- gsub(" ", "_", states$NAME_1)
+states$NAME_1[states$NAME_1=="Lombardia"] <- "Lombardy"
+states$NAME_1[states$NAME_1=="Trentino-Alto_Adige"] <- "Trento"
+states$NAME_1[states$NAME_1=="Piemonte"] <- "Piedmont"
+states$NAME_1[states$NAME_1=="Sardegna"] <- "Sardinia"
+states$NAME_1[states$NAME_1=="Toscana"] <- "Tuscany"
+states$NAME_1[states$NAME_1=="Valle_d'Aosta"] <- "Aosta"
+match <- match(regions, states$NAME_1)
 # Manually add in Bolzano, which is a city
-match[is.na(match)] <- which(m.states$NAME_1=="Trento")
-m.states <- m.states[match,]
-env_dat <- readRDS("../../clean-data/worldclim-states.RDS")[m.states$GID_1,,"tmean"]
+match[is.na(match)] <- which(states$NAME_1=="Trento")
+states <- states[match,]
+env_dat <- readRDS("../../clean-data/worldclim-states.RDS")[states$GID_1,,"tmean"]
 env_dat <- env_dat[,rep(1:6, c(4,29,31,30,30,6))]
 stan_data$env_dat <- scale(t(env_dat))
 

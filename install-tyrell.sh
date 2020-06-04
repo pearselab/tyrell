@@ -2,7 +2,10 @@
 
 # Install Ruby and R
 # NOTE: Only for Linux; Mac/Windows Google please
-apt install ruby r-base-dev chromium-chromedriver
+apt install ruby r-base-dev chromium-chromedriver gdal-bin
+
+#libv8-dev libprotobuf-dev protobuf-compiler
+# - last three for rmapshaper (and its dependencies)
 
 
 # Install Ruby gems

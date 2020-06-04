@@ -7,20 +7,20 @@ wSimplify <- function (spgeom, tol, name.var, topologyPreserve = FALSE){
         stop("Invalid value for topologyPreserve, must be logical")
     if (inherits(spgeom, "SpatialPolygons") && get_do_poly_check() && 
         rgeos:::notAllComments(spgeom)) 
-        spgeom <- createSPComment(spgeom)
-    id = eval(substitute(spgeom$XXX, list(XXX=name.var)))
+        spgeom <- createSPComment(spgeom, overwrite=FALSE)
+    id = row.names(spgeom)
     return(.Call("rgeos_simplify", rgeos:::.RGEOS_HANDLE, spgeom, tol, 
-        id, FALSE, topologyPreserve, PACKAGE = "rgeos"))
+                    id, FALSE, topologyPreserve, PACKAGE = "rgeos"))
 }
 
 countries <- shapefile("raw-data/gadm36_0.shp")
 countries_data <- SpatialPolygonsDataFrame(countries, data=countries@data)
-countries <- wSimplify(countries, tol=.005, "NAME_0", topologyPreserve=FALSE)
-countries_data <- countries_data[countries_data$NAME_0 %in% names(countries),]
+countries <- gSimplify(countries, tol=0.005, topologyPreserve=FALSE)
+countries_data <- countries_data[countries_data$GID_1 %in% row.names(countries),]
 saveRDS(list(polygons=countries, metadata=countries_data), "clean-data/gadm-countries.RDS")
 
 states <- shapefile("raw-data/gadm36_1.shp")
 states_data <- SpatialPolygonsDataFrame(states, data=states@data)
-states <- wSimplify(states, tol=0.005, "GID_1", topologyPreserve=FALSE)
-states_data <- states_data[states_data$GID_1 %in% names(states),]    
+states <- gSimplify(states, tol=0.005, topologyPreserve=FALSE)
+states_data <- states_data[states_data$GID_1 %in% row.names(states),]
 saveRDS(list(polygons=states, metadata=states_data), "clean-data/gadm-states.RDS")

@@ -238,20 +238,22 @@ end
 # Clean data ###################
 ################################
 desc "Process all raw data"
-task :cln_data => [:before_cln_data, :cln_gadm, :cln_denvfoi_rasters, :cln_worldclim]
+task :cln_data => [:before_cln_data, :cln_denvfoi_rasters, :cln_worldclim]
 task :before_cln_data do
   puts "\t ... Processing raw data"
 end
 
 desc "Clean and process GADM data"
-task :cln_gadm => ["clean-data/gadm-countries.RDS", "clean-data/gadm-states.RDS"]
+task :cln_gadm => ["clean-data/gadm-countries.shp", "clean-data/gadm-states.shp"]
 def gadm_cleaning()
-  `Rscript src/clean-gadm.R`
-  date_metadata "clean-data/gadm-countries.RDS"
-  date_metadata "clean-data/gadm-states.RDS"
+  `ogr2ogr -simplify 0.005 -f "ESRI Shapefile" clean-data/gadm-countries.shp raw-data/gadm36_0.shp`
+  `ogr2ogr -simplify 0.005 -f "ESRI Shapefile" clean-data/gadm-states.shp raw-data/gadm36_1.shp`
+  #`Rscript src/clean-gadm.R`
+  date_metadata "clean-data/gadm-countries.shp"
+  date_metadata "clean-data/gadm-states.shp"
 end
-file "clean-data/gadm-countries.RDS" do gadm_cleaning() end
-file "clean-data/gadm-states.RDS" do gadm_cleaning() end
+file "clean-data/gadm-countries.shp" do gadm_cleaning() end
+file "clean-data/gadm-states.shp" do gadm_cleaning() end
 
 
 desc "Clean and process WORLDCLIM data"
@@ -329,4 +331,10 @@ task :fit_env_imp do
   end
   FileUtils.rm ["bayes-env/stan-europe.R","bayes-env/stan-usa.R","bayes-env/stan-brazil.R","bayes-env/stan-italy.R", "bayes-env/stan-europe.stan","bayes-env/stan-usa.stan","bayes-env/stan-brazil.stan","bayes-env/stan-italy.stan"]
   `Rscript bayes-env/downstream.R > bayes-env/raw-results.txt`
+end
+
+desc "Estimating phylogenetic signal"
+task :fit_phylo_signal do
+  puts "Hey, if you're expecting this to be smart... Don't do that"
+  `Rscript phylo-env/signal.R`
 end

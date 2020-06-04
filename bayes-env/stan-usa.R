@@ -81,13 +81,11 @@ processed_data <- process_covariates(states = states,
 stan_data <- processed_data$stan_data
 
 # Add envirionmental data
-c(states, m.states) %<-% readRDS("../../clean-data/gadm-states.RDS")
-states <- states[m.states$NAME_0=="United States",]
-m.states <- m.states[m.states$NAME_0=="United States",]
-m.states$code <- sapply(strsplit(m.states$HASC_1, ".", fixed=TRUE), function(x) x[2])
-states <- states[match(names(processed_data$reported_deaths), m.states$code),]
-m.states <- m.states[match(names(processed_data$reported_deaths), m.states$code),]
-env_dat <- readRDS("../../clean-data/worldclim-states.RDS")[m.states$GID_1,,"tmean"]
+states <- readRDS("../../clean-data/gadm-states.RDS")
+states <- states[states$NAME_0=="United States",]
+states$code <- sapply(strsplit(states$HASC_1, ".", fixed=TRUE), function(x) x[2])
+states <- states[match(names(processed_data$reported_deaths), states$code),]
+env_dat <- readRDS("../../clean-data/worldclim-states.RDS")[states$GID_1,,"tmean"]
 env_dat <- env_dat[,rep(2:5, c(27,31,30,27))]
 stan_data$env_dat <- scale(t(env_dat))
 

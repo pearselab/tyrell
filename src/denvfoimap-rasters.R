@@ -29,8 +29,8 @@ avg.poly.clim <- function(shapefile, data, var, shp.metadata, FUNC=median){
 
 
 # Get countries and states
-c(countries, countries_data) %<-% readRDS("clean-data/gadm-countries.RDS")
-c(states, states_data) %<-% readRDS("clean-data/gadm-states.RDS")
+countries <- shapefile("clean-data/gadm-countries.shp")
+states <- shapefile("clean-data/gadm-states.shp")
 
 # Calculate summaries across DENVfoiMap data and write out
 # - MIR - Middle Infrared Reflectance, EVI - Enhanced Vegetation Index, and RFE - Precipitation
