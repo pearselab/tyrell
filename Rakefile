@@ -41,7 +41,7 @@ CLEAN.include("bayes-env/*.txt")
 # Install software and tyrell ##
 ################################
 desc "Install all software and setup tyrell folders"
-task :install => [:before_install, "timestamp.yml", :folders, :r_packages]
+task :install => [:before_install, "timestamp.yml", :folders, :r_packages, :setup_cds_api]
 task :before_install do
   puts "\t ... Installing software and setting up tyrell folders"
 end
@@ -61,11 +61,39 @@ directory 'imptf-models'
 desc "Setup timestamping"
 file "timestamp.yml" do File.open("timestamp.yml", "w") end
 
+task :setup_cds_api do
+  unless File.exists?("config.yml") then
+    puts "\t ... ... No config.yml file; cannot configure CDS data download"
+    next
+  end
+  config = YAML.load_file("config.yml")
+  unless config["cds"]["key"] and config["cds"]["key"]!="your-key-here" then
+    puts "\t ... ... CDS API key missing; cannot download CDS data"
+    next
+  end
+  if File.exists?(File.expand_path("~/.cdsapirc")) then
+    puts "\t ... ... ~/.cdsapirc exists; assuming correctly formatted"
+    next
+  end
+  config = YAML.load_file("config.yml")
+  if config["cds"]["key"] then
+    cds_key = config["cds"]["key"]
+    File.open(File.expand_path("~/.cdsapirc"), "w") do |file|
+      file << "url: https://cds.climate.copernicus.eu/api/v2\n"
+      file << "key: #{cds_key}\n"
+    end
+    puts "\t ... ... CDS key found; ~/.cdsapirc created; this will be not displayed again"
+    puts "\t ... ... ... Remember to register and accept the terms of this download!"
+    next
+  end
+  puts "\t ... ... ~/.cdsapirc does not exist; no CDS API key given; CDS download not possible"
+end
+
 ################################
 # Download raw data ############
 ################################
 desc "Download all raw data"
-task :dwn_data => [:before_dwn_data, :raw_jhu, "raw-data/ecdc-cases.csv", "raw-data/imperial-europe-pred.csv", "raw-data/imperial-usa-pred.csv", :raw_ihme, :raw_nxtstr, "raw-data/who-interventions.xlsx", "raw-data/imperial-interventions.csv", :raw_imptfmods, "rambaut-nomenclature", "raw-data/denvfoimap-raster.RDS", :raw_gadm]
+task :dwn_data => [:before_dwn_data, :raw_jhu, "raw-data/ecdc-cases.csv", "raw-data/imperial-europe-pred.csv", "raw-data/imperial-usa-pred.csv", :raw_ihme, :raw_nxtstr, "raw-data/who-interventions.xlsx", "raw-data/imperial-interventions.csv", :raw_imptfmods, "rambaut-nomenclature", "raw-data/denvfoimap-raster.RDS", :raw_gadm, :raw_cds_ar5]
 task :before_dwn_data do
   puts "\t ... Downloading raw data (can take a long time)"
 end
@@ -194,6 +222,25 @@ desc "Download DENVfoiMap raster data"
 file "raw-data/denvfoimap-raster.RDS" do
   stream_file("https://mrcdata.dide.ic.ac.uk/resources/DENVfoiMap/all_squares_env_var_0_1667_deg.rds", "raw-data/denvfoimap-raster.RDS")
 end
+
+desc "Download CDS AR5 climate data"
+cds_ar5_files = ["raw-data/cdsar5-1month_mean_Global_ea_2t_201901_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_2t_201902_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_2t_201903_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_2t_201904_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_2t_201905_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_2t_201906_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_2t_201907_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_2t_201908_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_2t_201909_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_2t_201910_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_2t_201911_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_2t_201912_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_2t_202001_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_2t_202002_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_2t_202003_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_2t_202004_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_2t_202005_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_r2_201901_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_r2_201902_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_r2_201903_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_r2_201904_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_r2_201905_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_r2_201906_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_r2_201907_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_r2_201908_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_r2_201909_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_r2_201910_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_r2_201911_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_r2_201912_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_r2_202001_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_r2_202002_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_r2_202003_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_r2_202004_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_r2_202005_v02.grib"]
+task :raw_cds_ar5 => cds_ar5_files
+def raw_cds_ar5(files)
+  unless File.exists? File.expand_path("~/.cdsapirc") then return false end
+  Dir.chdir("raw-data") do
+    `python3 ../src/cds-ar5.py`
+    unzip("cds-ar5.zip")
+    Dir["1month_mean_Global_ea*"].each do |filename|
+      FileUtils.mv filename, "cdsar5-#{filename}"
+    end
+    FileUtils.rm "cds-ar5.zip"
+  end
+  files.map {|x| date_metadata(x)}
+  # ... When cleaning this data, perhaps use rgdal:readGDAL to load and then do... something?
+  # ... t is temperature, r is relative humidity I think
+end
+cds_ar5_files.each {|x| file x do raw_cds_ar5(cds_ar5_files) end}
 
 ################################
 # Running external models ######

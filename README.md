@@ -8,7 +8,11 @@ A tool to allow us to build, and then track, a common set of data, models, and f
 
 ## Installation
 
-Ensure you have Ruby (>= 2.5.1) and R (>= 3.6.3) installed on your computer. Then ensure the Ruby gems `rake`, `open-uri`, `rubyzip`, `selenium-webdriver`, and `yaml` are installed (something like `sudo gem install rake` etc. should do the trick). All other dependencies are installed by the script; check error logs if something seems not to be working. A rough guide of what you should be typing is in `install-tyrell.sh`. Downloading the NextStrain data involves setting up ChromeDriver, which `install-tyrell.sh` does, but don't worry if it isn't working yet for you.
+Ensure you have Ruby (>= 2.5.1) and R (>= 3.6.3) installed on your computer. Then ensure the Ruby gems `rake`, `open-uri`, `rubyzip`, `selenium-webdriver`, and `yaml` are installed (something like `sudo gem install rake` etc. should do the trick), along with Python 3 (accessible through `python3`) and the egg `cdsapi` (something like `sudo pip install cdsapi` should work). All other dependencies are installed by the script; check error logs if something seems not to be working. A rough guide of what you should be typing is in `install-tyrell.sh`; you could even try running that script (perhaps with `sudo`) to see if that does it.
+
+Downloading the NextStrain data involves setting up ChromeDriver, which `install-tyrell.sh` does, but don't worry if it isn't working yet for you.
+
+Downloading the CDS AR5 climate data requires you to (1) register for an API key at https://cds.climate.copernicus.eu/#!/home, (2) copy `dummy_config.yml` to `config.yml` and then copy-paste your, and finally (3) select from here (https://cds.climate.copernicus.eu/cdsapp#!/dataset/ecv-for-climate-change?tab=form) 'surface air temp' and 'surface air relative humidity', 'monthly mean', '1 month', '2019 and 2020', all months, 'ERA5', 'zip', and then submit/agree to the download requirements. After that, Tom, you need to decide whether (a) we want daily data (probably, and if so then set that up :p) and (b) how we load this into R :D Perhaps rgdal::readGDAL can help?
 
 ## Usage
 

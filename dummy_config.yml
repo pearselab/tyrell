@@ -1,0 +1,3 @@
+cds:
+  url: https://cds.climate.copernicus.eu/api/v2
+  key: your-key-here

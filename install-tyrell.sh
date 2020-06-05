@@ -11,3 +11,6 @@ apt install ruby r-base-dev chromium-chromedriver gdal-bin
 # Install Ruby gems
 # NOTE: Only for Linux/Mac; Windows is perhaps the same?
 gem install rake open-uri rubyzip yaml selenium-webdriver
+
+# Install Python libraries
+pip install cdsapi
