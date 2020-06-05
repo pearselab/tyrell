@@ -25,12 +25,12 @@ s.clim <- abind(
     along=3
 )
 dimnames(c.clim) <- list(
-    names(countries),
+    row.names(countries),
     c("January","February","March","April","May","June","July","August","September","October","November","December"),
     c("tmean", "tmin", "tmax")
 )
 dimnames(s.clim) <- list(
-    names(states),
+    row.names(states),
     c("January","February","March","April","May","June","July","August","September","October","November","December"),
     c("tmean", "tmin", "tmax")
 )
