@@ -6,8 +6,12 @@ require 'rake/clean'
 
 require './src/tyrell-util.rb'
 
-def shp_fls(stem)
-  return [".cpg",".dbf",".prj",".shp",".shx"].map {|x| "#{stem}#{x}"}
+def shp_fls(stem, drop_cpg=false)
+  if drop_cpg
+    return ["dbf","prj","shp","shx"].map {|x| "#{stem}.#{x}"}
+  else
+    return ["cpg","dbf","prj","shp","shx"].map {|x| "#{stem}.#{x}"}
+  end
 end
 
 ################################
@@ -248,14 +252,14 @@ task :before_cln_data do
 end
 
 desc "Clean and process GADM data"
-task :cln_gadm => shp_fls("clean-data/gadm-countries") + shp_fls("clean-data/gadm-states")
+task :cln_gadm => shp_fls("clean-data/gadm-countries",true) + shp_fls("clean-data/gadm-states",true)
 def gadm_cleaning()
   `ogr2ogr -simplify 0.005 -f "ESRI Shapefile" clean-data/gadm-countries.shp raw-data/gadm36_0.shp`
   `ogr2ogr -simplify 0.005 -f "ESRI Shapefile" clean-data/gadm-states.shp raw-data/gadm36_1.shp`
   #`Rscript src/clean-gadm.R`
   (shp_fls("clean-data/gadm-countries")+shp_fls("clean-data/gadm-states")).each {|x| date_metadata(x)}
 end
-(shp_fls("clean-data/gadm-countries")+shp_fls("clean-data/gadm-states")).each do |sub_file|
+(shp_fls("clean-data/gadm-countries",true)+shp_fls("clean-data/gadm-states",true)).each do |sub_file|
   file sub_file do gadm_cleaning() end
 end
 
@@ -266,11 +270,11 @@ def cln_worldclim()
   date_metadata "clean-data/worldclim-countries.RDS"
   date_metadata "clean-data/worldclim-states.RDS"
 end
-file "clean-data/worldclim-countries.RDS" => shp_fls("clean-data/gadm-countries") do cln_worldclim() end
-file "clean-data/worldclim-states.RDS" => shp_fls("clean-data/gadm-states") do cln_worldclim() end
+file "clean-data/worldclim-countries.RDS" => shp_fls("clean-data/gadm-countries",true) do cln_worldclim() end
+file "clean-data/worldclim-states.RDS" => shp_fls("clean-data/gadm-states",true) do cln_worldclim() end
 
 desc "Clean DENVfoiMap raster data"
-task :cln_denvfoi_rasters => ["clean-data/denvfoimap-rasters-countries.csv", "clean-data/denvfoimap-rasters-states.csv", shp_fls("clean-data/gadm-countries"),shp_fls("clean-data/gadm-states")]
+task :cln_denvfoi_rasters => ["clean-data/denvfoimap-rasters-countries.csv", "clean-data/denvfoimap-rasters-states.csv"]
 def denvfoimap_rasters()
   `Rscript "src/denvfoimap-rasters.R"`
   date_metadata "clean-data/denvfoimap-rasters-countries.csv"
