@@ -14,8 +14,9 @@ deaths_by_country <- processed_data$deaths_by_country
 reported_cases <- processed_data$reported_cases
 
 # Add envirionmental data
-states <- readRDS("../../clean-data/gadm-states.RDS")
-states <- states[states$NAME_0=="Brazil",]
+states <- shapefile("../../clean-data/gadm-states.shp")
+brazil.states <- which(states$NAME_0=="Brazil")
+states <- states[brazil.states,]
 states <- states[states$NAME_1 %in% c("São Paulo","Rio de Janeiro","Pernambuco","Ceará","Amazonas","Pará","Maranhão","Bahia","Espírito Santo","Paraná","Minas Gerais","Paraíba","Rio Grande do Sul","Rio Grande do Norte","Alagoas","Santa Catarina"),] # List taken from table 1 in report
 states$code <- toupper(substr(states$NAME_1, 0, 2))
 states$code[states$NAME_1=="Rio de Janeiro"] <- "RJ"
@@ -27,8 +28,8 @@ states$code[states$NAME_1=="Espírito Santo"] <- "ES"
 states$code[states$NAME_1=="Rio Grande do Sul"] <- "RS"
 states$code[states$NAME_1=="Rio Grande do Norte"] <- "RN"
 states$code[states$NAME_1=="Santa Catarina"] <- "SC"
-states <- states[match(countries, states$code),]
-env_dat <- readRDS("../../clean-data/worldclim-states.RDS")[states$GID_1,,"tmean"]
+env_dat <- readRDS("../../clean-data/worldclim-states.RDS")[brazil.states,,"tmean"]
+env_dat <- env_dat[match(countries, states$code),]
 env_dat <- env_dat[,c(12, rep(1:5, c(31,29,31,30,12)))]
 stan_data$env_dat <- scale(t(env_dat))
 
