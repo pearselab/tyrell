@@ -17,6 +17,8 @@ main_theme <- theme_bw() +
 
 # load the climate data
 countries_climate <- readRDS("clean-data/worldclim-countries.RDS")
+countries_shp <- shapefile("clean-data/gadm-countries.shp")
+rownames(countries_climate) <- countries_shp$NAME_0
 
 # change it to a dataframe
 countries_climate_df <- cbind(row.names(countries_climate),
@@ -80,12 +82,12 @@ states_climate <- readRDS("clean-data/worldclim-states.RDS")
 states_climate_df <- cbind(row.names(states_climate),
                            as.data.frame(states_climate, row.names = FALSE))
 names(states_climate_df)[1] <- "State"
+US_data <- shapefile("clean-data/gadm-states.shp")
 # take the USA states
-USA_states_climate <- states_climate_df[with(states_climate_df, grepl("USA", State)),]
+USA_states_climate <- states_climate_df[US_data$NAME_0=="United States",]
 # get the names to match with imperial's predictions (with 2-letter state codes)
 # first load in our GADM datasets which should have the proper names in it
-c(states, states_data) %<-% readRDS("clean-data/gadm-states.RDS")
-US_data <- states_data[states_data$GID_0 == "USA",]
+US_data <- US_data[US_data$GID_0 == "USA",]
 
 # check if the climate data and GADM data are in the same order of states
 identical(as.character(USA_states_climate$State), US_data$GID_1)

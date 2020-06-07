@@ -5,6 +5,9 @@ figures/*
 models/*
 imptf-models/*
 rambaut-nomenclature/*
+bayes-env/*.txt
+phylo-env/*.txt
+phylo-env/*.RData
 nohup.out
 *~
 *#
