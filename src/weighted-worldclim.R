@@ -1,55 +1,25 @@
 # For Michael
-setwd("/home/michael/Documents/Grad School/Research Projects/Tyrell")
+# setwd("/home/michael/Documents/Grad School/Research Projects/Tyrell")
 
 # Headers
 source("src/packages.R")
 
-# Get countries and states
-countries <- shapefile("clean-data/gadm-countries.shp")
-states <- shapefile("clean-data/gadm-states.shp")
+library(exactextractr)
+library(sf)
 
-# Get WORLDCLIM data
-clim_variables <- c("t_min", "t_mean", "t_max")
-tmean <- velox(getData("worldclim",var="tmean",res=10) / 10)
-tmin <- velox(getData("worldclim",var="tmin",res=10)   / 10)
-tmax <- velox(getData("worldclim",var="tmax",res=10)   / 10)
+# Get countries and states
+# countries <- shapefile("clean-data/gadm-countries.shp")
+states <- shapefile("clean-data/gadm-states.shp")
 
 # overlay() not available in velox
 tmean <- getData("worldclim",var="tmean",res=10)/10
 #tmin <- getData("worldclim",var="tmin",res=10)/10
 #tmax <- getData("worldclim",var="tmax",res=10)/10
 
-# Average across countries and states
-c.clim <- abind(
-    tmean$extract(countries, fun=function(x) median(x, na.rm=TRUE)),
-    tmin$extract(countries, fun=function(x) median(x, na.rm=TRUE)),
-    tmax$extract(countries, fun=function(x) median(x, na.rm=TRUE)),
-    along=3
-)
-s.clim <- abind(
-    tmean$extract(states, fun=function(x) median(x, na.rm=TRUE)),
-    tmin$extract(states, fun=function(x) median(x, na.rm=TRUE)),
-    tmax$extract(states, fun=function(x) median(x, na.rm=TRUE)),
-    along=3
-)
-dimnames(c.clim) <- list(
-    row.names(countries),
-    c("January","February","March","April","May","June","July","August","September","October","November","December"),
-    c("tmean", "tmin", "tmax")
-)
-dimnames(s.clim) <- list(
-    row.names(states),
-    c("January","February","March","April","May","June","July","August","September","October","November","December"),
-    c("tmean", "tmin", "tmax")
-)
-
 # location of population density data: https://sedac.ciesin.columbia.edu/downloads/data/gpw-v4/gpw-v4-population-density-rev11/gpw-v4-population-density-rev11_2020_2pt5_min_tif.zip
 # ^ may need an account to download this directly
 #pop_data <- raster("raw-data/gpw-v4-population-density-rev11_2020_2pt5_min_tif/gpw_v4_population_density_rev11_2020_2pt5_min.tif")
 pop_data <- raster("raw-data/gpw-v4-population-density-rev11_2020_15_min_tif/gpw_v4_population_density_rev11_2020_15_min.tif")
-
-library(exactextractr)
-library(sf)
 
 states_sf <- st_as_sf(states) # exact_extract needs an sf object
 pop_data_project <- projectRaster(pop_data, tmean$tmean1) # converts to same resolution
@@ -78,10 +48,3 @@ if(FALSE){
   pal <- colorRampPalette(c("black","white"))
   plot(pop_clim, breaks=cuts, col = pal(length(cuts)))
 }
-
-
-# remove spaces from the country names
-rownames(c.clim) <- gsub(" ", "_", rownames(c.clim))
-
-saveRDS(c.clim, "clean-data/worldclim-countries.RDS")
-saveRDS(s.clim, "clean-data/worldclim-states.RDS")

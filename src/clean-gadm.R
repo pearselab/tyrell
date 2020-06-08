@@ -1,3 +1,6 @@
+# For Michael
+setwd("/home/michael/Documents/Grad School/Research Projects/Tyrell")
+
 source("src/packages.R")
 
 # Simplifying rasters without losing names (from rgeos::gSimplify)
@@ -22,5 +25,8 @@ saveRDS(list(polygons=countries, metadata=countries_data), "clean-data/gadm-coun
 states <- shapefile("raw-data/gadm36_1.shp")
 states_data <- SpatialPolygonsDataFrame(states, data=states@data)
 states <- gSimplify(states, tol=0.005, topologyPreserve=FALSE)
-states_data <- states_data[states_data$GID_1 %in% row.names(states),]
+#states_data <- states_data[states_data$GID_1 %in% row.names(states),] #I think this wasn't working - Michael
+states_data <- states_data[row.names(states_data) %in% row.names(states),]
+states <- SpatialPolygonsDataFrame(states, data=states_data@data)
+
 saveRDS(list(polygons=states, metadata=states_data), "clean-data/gadm-states.RDS")
