@@ -1,6 +1,3 @@
-# For Michael
-setwd("/home/michael/Documents/Grad School/Research Projects/Tyrell/imptf-models/covid19model-6.0")
-
 source("../../src/packages.R")
 source("Brazil/code/preprocessing-subnation-brazil.r")
 
@@ -18,7 +15,6 @@ reported_cases <- processed_data$reported_cases
 
 # Add envirionmental data
 states <- readRDS("../../clean-data/gadm-states.RDS")
-states <- states$polygons
 states <- states[states$NAME_0=="Brazil",]
 states <- states[states$NAME_1 %in% c("São Paulo","Rio de Janeiro","Pernambuco","Ceará","Amazonas","Pará","Maranhão","Bahia","Espírito Santo","Paraná","Minas Gerais","Paraíba","Rio Grande do Sul","Rio Grande do Norte","Alagoas","Santa Catarina"),] # List taken from table 1 in report
 states$code <- toupper(substr(states$NAME_1, 0, 2))

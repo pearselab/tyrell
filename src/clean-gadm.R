@@ -1,6 +1,3 @@
-# For Michael
-setwd("/home/michael/Documents/Grad School/Research Projects/Tyrell")
-
 source("src/packages.R")
 
 # Simplifying rasters without losing names (from rgeos::gSimplify)
