@@ -37,5 +37,5 @@ dimnames(s.humidity) <- list(
     "November_19","December_19", "January_20","February_20","March_20","April_20","May_20")
 )
 
-saveRDS(c.clim, "clean-data/humidity-countries.RDS")
-saveRDS(s.clim, "clean-data/humidity-states.RDS")
+saveRDS(c.humidity, "clean-data/humidity-countries.RDS")
+saveRDS(s.humidity, "clean-data/humidity-states.RDS")
