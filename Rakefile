@@ -347,7 +347,6 @@ task :cln_gadm => shp_fls("clean-data/gadm-countries",true) + shp_fls("clean-dat
 def gadm_cleaning()
   `ogr2ogr -simplify 0.005 -f "ESRI Shapefile" clean-data/gadm-countries.shp raw-data/gadm36_0.shp`
   `ogr2ogr -simplify 0.005 -f "ESRI Shapefile" clean-data/gadm-states.shp raw-data/gadm36_1.shp`
-  #`Rscript src/clean-gadm.R`
   (shp_fls("clean-data/gadm-countries")+shp_fls("clean-data/gadm-states")).each {|x| date_metadata(x)}
 end
 (shp_fls("clean-data/gadm-countries",true)+shp_fls("clean-data/gadm-states",true)).each do |sub_file|
