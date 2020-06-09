@@ -93,7 +93,7 @@ end
 # Download raw data ############
 ################################
 desc "Download all raw data"
-task :dwn_data => [:before_dwn_data, :raw_jhu, "raw-data/ecdc-cases.csv", "raw-data/imperial-europe-pred.csv", "raw-data/imperial-usa-pred.csv", :raw_ihme, :raw_nxtstr, "raw-data/who-interventions.xlsx", "raw-data/imperial-interventions.csv", "raw-data/oxford-interventions.csv", :raw_imptfmods, "rambaut-nomenclature", "raw-data/denvfoimap-raster.RDS", :raw_gadm, :raw_cds_ar5]
+task :dwn_data => [:before_dwn_data, :raw_jhu, "raw-data/ecdc-cases.csv", "raw-data/imperial-europe-pred.csv", "raw-data/imperial-usa-pred.csv", "raw-data/imperial-LMIC-pred.csv", :raw_ihme, :raw_nxtstr, "raw-data/who-interventions.xlsx", "raw-data/imperial-interventions.csv", "raw-data/oxford-interventions.csv", :raw_imptfmods, "rambaut-nomenclature", "raw-data/denvfoimap-raster.RDS", :raw_gadm, :raw_cds_ar5]
 task :before_dwn_data do
   puts "\t ... Downloading raw data (can take a long time)"
 end
@@ -146,6 +146,10 @@ file "raw-data/imperial-europe-pred.csv" do dwn_file("raw-data", "https://mrc-id
 
 desc "Download Imperial COVID-19 USA predictions"
 file "raw-data/imperial-usa-pred.csv" do dwn_file("raw-data", "https://mrc-ide.github.io/covid19usa/downloads/data-model-estimates.csv", "imperial-usa-pred.csv") end
+
+desc "Download Imperial COVID-19 LMIC predictions"
+file "raw-data/imperial-LMIC-pred.csv" do dwn_file("raw-data", "https://github.com/mrc-ide/global-lmic-reports/raw/master/data/2020-06-06.csv", "imperial-LMIC-pred.csv") end
+
 
 desc "Download NextStrain data"
 nxtstr_files = ["raw-data/nxtstr-sel-meta.tsv", "raw-data/nxtstr-meta.tsv", "raw-data/nxtstr-authors.tsv", "raw-data/nxtstr-tree-mut.tre", "raw-data/nxtstr-tree-date.tre"]
@@ -286,6 +290,7 @@ def raw_cds_ar5(files)
 end
 cds_ar5_files.each {|x| file x do raw_cds_ar5(cds_ar5_files) end}
 
+
 ################################
 # Running external models ######
 ################################
@@ -337,7 +342,7 @@ end
 # Clean data ###################
 ################################
 desc "Process all raw data"
-task :cln_data => [:before_cln_data, :cln_gadm, :cln_denvfoi_rasters, :cln_worldclim]
+task :cln_data => [:before_cln_data, :cln_gadm, :cln_denvfoi_rasters, :cln_worldclim, :cln_cdsar5_monthly]
 task :before_cln_data do
   puts "\t ... Processing raw data"
 end
@@ -372,6 +377,18 @@ def denvfoimap_rasters()
 end
 file "clean-data/denvfoimap-rasters-countries.csv" do denvfoimap_rasters() end
 file "clean-data/denvfoimap-rasters-states.csv" do denvfoimap_rasters() end
+
+
+desc "Clean and process CDS-AR5 monthly humidity data"
+task :cln_cdsar5_monthly => ["clean-data/humidity-countries.RDS","clean-data/humidity-states.RDS"]
+def cln_cdsar5_monthly()
+  `Rscript src/clean_humidity_data.R`
+  date_metadata "clean-data/humidity-countries.RDS"
+  date_metadata "clean-data/humidity-states.RDS"
+end
+file "clean-data/humidity-countries.RDS" => shp_fls("clean-data/gadm-countries",true) do cln_cdsar5_monthly() end
+file "clean-data/humidity-states.RDS" => shp_fls("clean-data/gadm-states",true) do cln_cdsar5_monthly() end
+
 
 ################################
 # Update data ##################
