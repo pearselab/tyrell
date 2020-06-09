@@ -3,6 +3,10 @@ source("../../src/packages.R")
 source('Italy/code/utils/read-data-subnational.r')
 source('Italy/code/utils/process-covariates-italy.r')
 
+# Conflict with MASS in read_obs_data and so need to remove it (and packages it depends on)
+detach("package:caper")
+detach("package:MASS")
+
 args = c('base-italy', 'google', 'interventions',
          '~ -1 + residential + transit + averageMobility',
          '~ -1 + residential + transit + averageMobility'
@@ -54,7 +58,8 @@ reported_deaths <- processed_data$deaths_by_country
 reported_cases <- processed_data$reported_cases
 
 # Add envirionmental data
-states <- readRDS("../../clean-data/gadm-states.RDS")
+states <- shapefile("../../clean-data/gadm-states.shp")
+italy.states <- which(states$NAME_0=="Italy")
 states <- states[states$NAME_0=="Italy",]
 states$NAME_1 <- gsub(" ", "_", states$NAME_1)
 states$NAME_1[states$NAME_1=="Lombardia"] <- "Lombardy"
@@ -67,8 +72,8 @@ match <- match(regions, states$NAME_1)
 # Manually add in Bolzano, which is a city
 match[is.na(match)] <- which(states$NAME_1=="Trento")
 states <- states[match,]
-env_dat <- readRDS("../../clean-data/worldclim-states.RDS")[states$GID_1,,"tmean"]
-env_dat <- env_dat[,rep(1:6, c(4,29,31,30,30,6))]
+env_dat <- readRDS("../../clean-data/worldclim-states.RDS")[italy.states,,"tmean"]
+env_dat <- env_dat[match,rep(1:6, c(4,29,31,30,30,6))]
 stan_data$env_dat <- scale(t(env_dat))
 
 options(mc.cores = parallel::detectCores())

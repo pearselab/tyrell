@@ -55,16 +55,15 @@ transformed parameters {
       for (m in 1:M){
         prediction[1:N0,m] = rep_vector(y[m],N0); // learn the number of cases in the first N0 days
         cumm_sum[2:N0,m] = cumulative_sum(prediction[2:N0,m]);
-        
-        Rt[,m] = mu[m] * 2 * inv_logit(-X[m] * alpha - X_partial[m] * alpha_state[m]);
+        // Added environment to code below (note now element-wise multiply)
+        Rt[,m] = mu[m] * 2 * inv_logit(-X[m] * alpha - X_partial[m] * alpha_state[m]) .* (env_dat[,m]*env_slp);
         Rt_adj[1:N0,m] = Rt[1:N0,m];
         
         for (i in (N0+1):N2) {
           real convolution = dot_product(sub_col(prediction, 1, m, i-1), tail(SI_rev, i-1));
           
           cumm_sum[i,m] = cumm_sum[i-1,m] + prediction[i-1,m];
-	  // Added environmental effect
-          Rt_adj[i,m] = ((pop[m]-cumm_sum[i,m]) / pop[m]) * (Rt[i,m] + env_dat[i,m]*env_slp);
+        Rt_adj[i,m] = ((pop[m]-cumm_sum[i,m]) / pop[m]) * Rt[i,m];
           prediction[i, m] = Rt_adj[i,m] * convolution;
         }
         

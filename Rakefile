@@ -93,7 +93,7 @@ end
 # Download raw data ############
 ################################
 desc "Download all raw data"
-task :dwn_data => [:before_dwn_data, :raw_jhu, "raw-data/ecdc-cases.csv", "raw-data/imperial-europe-pred.csv", "raw-data/imperial-usa-pred.csv", :raw_ihme, :raw_nxtstr, "raw-data/who-interventions.xlsx", "raw-data/imperial-interventions.csv", :raw_imptfmods, "rambaut-nomenclature", "raw-data/denvfoimap-raster.RDS", :raw_gadm, :raw_cds_ar5]
+task :dwn_data => [:before_dwn_data, :raw_jhu, "raw-data/ecdc-cases.csv", "raw-data/imperial-europe-pred.csv", "raw-data/imperial-usa-pred.csv", :raw_ihme, :raw_nxtstr, "raw-data/who-interventions.xlsx", "raw-data/imperial-interventions.csv", "raw-data/oxford-interventions.csv", :raw_imptfmods, "rambaut-nomenclature", "raw-data/denvfoimap-raster.RDS", :raw_gadm, :raw_cds_ar5]
 task :before_dwn_data do
   puts "\t ... Downloading raw data (can take a long time)"
 end
@@ -194,22 +194,66 @@ file "raw-data/imperial-interventions.csv" do
   end
 end
 
+desc "Download Oxford intervention data"
+file "raw-data/oxford-interventions.csv" do
+  Dir.chdir("raw-data") do
+    stream_file("https://github.com/OxCGRT/covid-policy-tracker/raw/master/data/OxCGRT_latest.csv", "oxford-interventions.csv")
+  end
+end
+
 desc "Download Imperial Task Force releases"
-imptf_folders = ["imptf-models/covid19model-1.0", "imptf-models/covid19model-2.0", "imptf-models/covid19model-3.0", "imptf-models/covid19model-4.0", "imptf-models/covid19model-5.0", "imptf-models/covid19model-6.0"]
+imptf_folders = ["imptf-models/covid19model-1.0", "imptf-models/covid19model-2.0", "imptf-models/covid19model-3.0", "imptf-models/covid19model-4.0", "imptf-models/covid19model-5.0", "imptf-models/covid19model-6.0", "imptf-models/squire-master"]
 task :raw_imptfmods => imptf_folders
-def raw_imptfmods(imptf_folders)
+directory "imptf-models/covid19model-1.0" do
   Dir.chdir("imptf-models") do
     unzip(stream_file("https://github.com/ImperialCollegeLondon/covid19model/archive/v1.0.zip", "tf1.zip"))
-    unzip(stream_file("https://github.com/ImperialCollegeLondon/covid19model/archive/v2.0.zip", "tf2.zip"))
-    unzip(stream_file("https://github.com/ImperialCollegeLondon/covid19model/archive/v3.0.zip", "tf3.zip"))
-    unzip(stream_file("https://github.com/ImperialCollegeLondon/covid19model/archive/v4.0.zip", "tf4.zip"))
-    unzip(stream_file("https://github.com/ImperialCollegeLondon/covid19model/archive/v5.0.zip", "tf5.zip"))
-    unzip(stream_file("https://github.com/ImperialCollegeLondon/covid19model/archive/v6.0.zip", "tf6.zip"))
-    FileUtils.rm ["tf1.zip", "tf2.zip", "tf3.zip", "tf4.zip", "tf5.zip", "tf6.zip"]
+    FileUtils.rm "tf1.zip"
   end
-  imptf_folders.map {|x| date_metadata(x)}
+  date_metadata("covid19model-1.0")
 end
-imptf_folders.each {|x| file x do raw_imptfmods(imptf_folders) end}
+directory "imptf-models/covid19model-2.0" do
+  Dir.chdir("imptf-models") do
+    unzip(stream_file("https://github.com/ImperialCollegeLondon/covid19model/archive/v2.0.zip", "tf2.zip"))
+    FileUtils.rm "tf2.zip"
+  end
+  date_metadata("covid19model-2.0")
+end
+directory "imptf-models/covid19model-3.0" do
+  Dir.chdir("imptf-models") do
+    unzip(stream_file("https://github.com/ImperialCollegeLondon/covid19model/archive/v3.0.zip", "tf3.zip"))
+    FileUtils.rm "tf3.zip"
+  end
+  date_metadata("covid19model-3.0")
+end
+directory "imptf-models/covid19model-4.0" do
+  Dir.chdir("imptf-models") do
+    unzip(stream_file("https://github.com/ImperialCollegeLondon/covid19model/archive/v4.0.zip", "tf4.zip"))
+    FileUtils.rm "tf4.zip"
+  end
+  date_metadata("covid19model-4.0")
+end
+directory "imptf-models/covid19model-5.0" do
+  Dir.chdir("imptf-models") do
+    unzip(stream_file("https://github.com/ImperialCollegeLondon/covid19model/archive/v5.0.zip", "tf5.zip"))
+    FileUtils.rm "tf5.zip"
+  end
+  date_metadata("covid19model-5.0")
+end
+directory "imptf-models/covid19model-6.0" do
+  Dir.chdir("imptf-models") do
+    unzip(stream_file("https://github.com/ImperialCollegeLondon/covid19model/archive/v6.0.zip", "tf6.zip"))
+    FileUtils.rm "tf6.zip"
+  end
+  date_metadata("covid19model-6.0")
+end
+directory "imptf-models/squire-master" do
+  Dir.chdir("imptf-models") do
+    unzip(stream_file("https://github.com/mrc-ide/squire/archive/master.zip", "squire.zip"))
+    FileUtils.rm "squire.zip"
+  end
+  date_metadata("squire-master")
+end
+
 
 desc "Download Rambaut et al. phylo-nomenclature"
 directory "rambaut-nomenclature" do

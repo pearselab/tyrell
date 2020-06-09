@@ -57,13 +57,13 @@ transformed parameters {
         for(p in 1:P) {
           linear_effect -= X[m,,p] * (alpha[p] + alpha1[p,m]);
         }
-        Rt[,m] = mu[m] * 2 * inv_logit(linear_effect);
+	// Added environment to code below (note now element-wise multiply)
+        Rt[,m] = (mu[m] * 2 * inv_logit(linear_effect)) .* (env_dat[,m]*env_slp);
         Rt_adj[1:N0,m] = Rt[1:N0,m];
         for (i in (N0+1):N2) {
           real convolution = dot_product(sub_col(prediction, 1, m, i-1), tail(SI_rev, i-1));
           cumm_sum[i,m] = cumm_sum[i-1,m] + prediction[i-1,m];
-	  // Added environment to code below
-          Rt_adj[i,m] = ((pop[m]-cumm_sum[i,m]) / pop[m]) * (Rt[i,m] + env_dat[i,m]*env_slp);
+          Rt_adj[i,m] = ((pop[m]-cumm_sum[i,m]) / pop[m]) * Rt[i,m];
           prediction[i, m] = Rt_adj[i,m] * convolution;
         }
         
