@@ -27,13 +27,13 @@ s.humidity <- sapply(humidityFiles, function(x) avg.humidity(shapefile = states,
 
 dimnames(c.humidity) <- list(
   row.names(countries),
-  c("January_19","February_19","March_19","April_19","May_19","June_19","July_19","August_19","September_19","Octobe_19r",
+  c("January_19","February_19","March_19","April_19","May_19","June_19","July_19","August_19","September_19","October_19",
     "November_19","December_19", "January_20","February_20","March_20","April_20","May_20")
 )
 
 dimnames(s.humidity) <- list(
   row.names(states),
-  c("January_19","February_19","March_19","April_19","May_19","June_19","July_19","August_19","September_19","Octobe_19r",
+  c("January_19","February_19","March_19","April_19","May_19","June_19","July_19","August_19","September_19","October_19",
     "November_19","December_19", "January_20","February_20","March_20","April_20","May_20")
 )
 
