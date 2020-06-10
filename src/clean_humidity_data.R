@@ -26,16 +26,18 @@ c.humidity <- sapply(humidityFiles, function(x) avg.humidity(shapefile = countri
 s.humidity <- sapply(humidityFiles, function(x) avg.humidity(shapefile = states, x))
 
 dimnames(c.humidity) <- list(
-  row.names(countries),
-  c("January_19","February_19","March_19","April_19","May_19","June_19","July_19","August_19","September_19","Octobe_19r",
+  countries$NAME_0,
+  c("January_19","February_19","March_19","April_19","May_19","June_19","July_19","August_19","September_19","October_19",
     "November_19","December_19", "January_20","February_20","March_20","April_20","May_20")
 )
 
 dimnames(s.humidity) <- list(
-  row.names(states),
-  c("January_19","February_19","March_19","April_19","May_19","June_19","July_19","August_19","September_19","Octobe_19r",
+  states$GID_1,
+  c("January_19","February_19","March_19","April_19","May_19","June_19","July_19","August_19","September_19","October_19",
     "November_19","December_19", "January_20","February_20","March_20","April_20","May_20")
 )
+
+rownames(c.humidity) <- gsub(" ", "_", rownames(c.humidity))
 
 saveRDS(c.humidity, "clean-data/humidity-countries.RDS")
 saveRDS(s.humidity, "clean-data/humidity-states.RDS")
