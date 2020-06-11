@@ -10,8 +10,11 @@ source("src/packages.R")
 avg.humidity <- function(shapefile, x){
   # turn the humidity data into a raster
   humidity_raster <- raster(x)
+  # need to swap coordinates from [0 to 360] to [-180 to 180].
+  rotated_raster <- raster::rotate(humidity_raster)
+  humidity_velox <- velox(rotated_raster)
   # average the humidity across each object in the shapefile
-  return(raster::extract(x = humidity_raster, y = shapefile, fun=function(x, na.rm = TRUE)median(x, na.rm = TRUE)))
+  return(humidity_velox$extract(shapefile, fun = function(x)median(x, na.rm = TRUE)))
 }
 
 # Get countries and states
