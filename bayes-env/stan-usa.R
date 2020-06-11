@@ -96,7 +96,7 @@ reported_cases <- processed_data$reported_cases
 options(mc.cores = parallel::detectCores())
 rstan_options(auto_write = TRUE)
 m <- stan_model('stan-models/stan-usa.stan')
-fit = sampling(m,data=stan_data,iter=1800,warmup=1000,chains=5,thin=1,control = list(adapt_delta = 0.95, max_treedepth = 15))
+fit = sampling(m,data=stan_data,iter=1800,warmup=1000,chains=5,thin=1,control = list(adapt_delta = 0.8, max_treedepth = 15))
 
 covariate_data = list(interventions, mobility)
 

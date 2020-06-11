@@ -93,7 +93,7 @@ end
 # Download raw data ############
 ################################
 desc "Download all raw data"
-task :dwn_data => [:before_dwn_data, :raw_jhu, "raw-data/ecdc-cases.csv", "raw-data/imperial-europe-pred.csv", "raw-data/imperial-usa-pred.csv", "raw-data/imperial-LMIC-pred.csv", :raw_ihme, :raw_nxtstr, "raw-data/who-interventions.xlsx", "raw-data/imperial-interventions.csv", "raw-data/oxford-interventions.csv", :raw_imptfmods, "rambaut-nomenclature", "raw-data/denvfoimap-raster.RDS", :raw_gadm, :raw_cds_ar5]
+task :dwn_data => [:before_dwn_data, :raw_jhu, "raw-data/ecdc-cases.csv", "raw-data/uk-phe-deaths.csv", "raw-data/uk-phe-cases.csv", "raw-data/imperial-europe-pred.csv", "raw-data/imperial-usa-pred.csv", "raw-data/imperial-lmic-pred.csv", :raw_ihme, :raw_nxtstr, "raw-data/who-interventions.xlsx", "raw-data/imperial-interventions.csv", "raw-data/oxford-interventions.csv", :raw_imptfmods, "rambaut-nomenclature", "raw-data/denvfoimap-raster.RDS", :raw_gadm, :raw_cds_ar5]
 task :before_dwn_data do
   puts "\t ... Downloading raw data (can take a long time)"
 end
@@ -141,6 +141,24 @@ file "raw-data/jh-global-confirmed.csv" do dwn_file("raw-data", "https://raw.git
 desc "Download ECDC cases"
 file "raw-data/ecdc-cases.csv" do dwn_file("raw-data", "https://opendata.ecdc.europa.eu/covid19/casedistribution/csv", "ecdc-cases.csv") end
 
+desc "Download UK PHE deaths"
+file "raw-data/uk-phe-deaths.csv" do
+  Dir.chdir "raw-data" do
+    `wget https://coronavirus.data.gov.uk/downloads/csv/coronavirus-deaths_latest.csv`
+    FileUtils.mv "coronavirus-deaths_latest.csv", "uk-phe-deaths.csv"
+  end
+  date_metadata "uk-phe-deaths.csv"
+end
+
+desc "Download UK PHE cases"
+file "raw-data/uk-phe-cases.csv" do
+  Dir.chdir "raw-data" do
+    `wget https://coronavirus.data.gov.uk/downloads/csv/coronavirus-cases_latest.csv`
+    FileUtils.mv "coronavirus-cases_latest.csv", "uk-phe-cases.csv"
+  end
+  date_metadata "uk-phe-cases.csv"
+end
+
 desc "Download Imperial COVID-19 Europe predictions"
 file "raw-data/imperial-europe-pred.csv" do dwn_file("raw-data", "https://mrc-ide.github.io/covid19estimates/data/results.csv", "imperial-europe-pred.csv") end
 
@@ -148,7 +166,14 @@ desc "Download Imperial COVID-19 USA predictions"
 file "raw-data/imperial-usa-pred.csv" do dwn_file("raw-data", "https://mrc-ide.github.io/covid19usa/downloads/data-model-estimates.csv", "imperial-usa-pred.csv") end
 
 desc "Download Imperial COVID-19 LMIC predictions"
-file "raw-data/imperial-LMIC-pred.csv" do dwn_file("raw-data", "https://github.com/mrc-ide/global-lmic-reports/raw/master/data/2020-06-06.csv", "imperial-LMIC-pred.csv") end
+file "raw-data/imperial-lmic-pred.csv" do
+  Dir.chdir "raw-data" do
+    unzip(stream_file("https://github.com/mrc-ide/global-lmic-reports-staging/raw/master/data/2020-06-09_v2.csv.zip", "lmic.zip"))
+    FileUtils.mv "2020-06-09_v2.csv", "imperial-lmic-pred.csv"
+    FileUtils.rm "lmic.zip"
+  end
+  date_metadata "imperial-LMIC-pred.csv"
+end
 
 
 desc "Download NextStrain data"

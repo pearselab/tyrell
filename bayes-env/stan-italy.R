@@ -1,11 +1,22 @@
 # Headers
-source("../../src/packages.R")
+library(rstan)
+library(data.table)
+library(lubridate)
+library(gdata)
+library(dplyr)
+library(tidyr)
+library(EnvStats)
+library(scales)
+library(stringr)
+library(abind)
+library(optparse)
+library(ggplot2)
+library(ggrepel)
+library(gtable)
+library(zoo)
+
 source('Italy/code/utils/read-data-subnational.r')
 source('Italy/code/utils/process-covariates-italy.r')
-
-# Conflict with MASS in read_obs_data and so need to remove it (and packages it depends on)
-detach("package:caper")
-detach("package:MASS")
 
 args = c('base-italy', 'google', 'interventions',
          '~ -1 + residential + transit + averageMobility',
@@ -58,6 +69,7 @@ reported_deaths <- processed_data$deaths_by_country
 reported_cases <- processed_data$reported_cases
 
 # Add envirionmental data
+library(raster)
 states <- shapefile("../../clean-data/gadm-states.shp")
 italy.states <- which(states$NAME_0=="Italy")
 states <- states[states$NAME_0=="Italy",]
