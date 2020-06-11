@@ -1,6 +1,6 @@
-########################################################
-# Plot Rt against temperature for Imperial predictions #
-########################################################
+###########################################################
+# Regress Rt against environment for Imperial predictions #
+###########################################################
 
 source("src/packages.R")
 
@@ -15,160 +15,231 @@ main_theme <- theme_bw() +
         legend.title = element_text(size = 16),
         strip.text.x = element_text(size = 14))
 
-# load the climate data
-countries_climate <- readRDS("clean-data/worldclim-countries.RDS")
-countries_shp <- shapefile("clean-data/gadm-countries.shp")
-rownames(countries_climate) <- countries_shp$NAME_0
 
-# change it to a dataframe
-countries_climate_df <- cbind(row.names(countries_climate),
-                              as.data.frame(countries_climate, row.names = FALSE))
+########################################################
+# -- Step 1: load the various climate data and bind -- #
+# -- together into a single data frame              -- #
+########################################################
+
+# temperature
+countries_temperature <- readRDS("clean-data/worldclim-countries.RDS")
+states_temperature <- readRDS("clean-data/worldclim-states.RDS")
+
+# humidity
+countries_humidity <- readRDS("clean-data/humidity-countries.RDS")
+states_humidity <- readRDS("clean-data/humidity-states.RDS")
+
+# population density
+countries_popdensity <- readRDS("clean-data/population-density-countries.RDS")
+states_popdensity <- readRDS("clean-data/population-density-states.RDS")
+
+# order is the same - as it should be, its all been done in the same way
+identical(row.names(countries_temperature), row.names(countries_popdensity))
+identical(row.names(countries_temperature), row.names(countries_humidity))
+
+# put all of the climate/population data into 1 massive dataframe
+countries_climate_df <- cbind(row.names(countries_temperature),
+                              as.data.frame(countries_temperature, row.names = FALSE),
+                              as.data.frame(countries_humidity, row.names = FALSE),
+                              as.data.frame(countries_popdensity, row.names = FALSE))
 names(countries_climate_df)[1] <- "Country"
 
-# read the imperial predictions data
-imperial_predictions <- read.csv("raw-data/imperial-europe-pred.csv")
-imperial_lockdown <- read.csv("raw-data/imperial-interventions.csv")
+# repeat for states - check names match first
+identical(row.names(states_temperature), row.names(states_popdensity))
+identical(row.names(states_temperature), row.names(states_humidity))
 
-# make date columns
-imperial_predictions$date <- as.Date(imperial_predictions$time)
-imperial_lockdown$date <- as.Date(imperial_lockdown$Date.effective, format = "%d.%m.%y")
-
-# ------ Chop Rt predictions to pre-lockdown ------- #
-
-# countries list
-countries <- as.character(unique(imperial_predictions$country))
-
-# loop through the countries and select
-# only the pre-lockdown data for each
-
-# first a df to put the resultant rows
-pre_lockdown <- as.data.frame(matrix(NA, nrow = 0, ncol = ncol(imperial_predictions)))
-names(pre_lockdown) <- names(imperial_predictions)
-
-# now loop through the countries
-for(i in 1:length(countries)){
-  
-  lockdown_date <- min(imperial_lockdown[imperial_lockdown$Country == countries[i],]$date, na.rm = TRUE)
-  
-  pred_subs <- imperial_predictions[imperial_predictions$country == countries[i] & 
-                                      imperial_predictions$date < lockdown_date,]
-  
-  # bind into dataframe
-  pre_lockdown <- rbind(pre_lockdown, pred_subs)
-  
-}
-# I'm sure theres a much more elegant way to do that
-
-# basic first steps - take a mean pre-lockdown Rt for each country
-pre_lockdown_avs <- setNames(aggregate(pre_lockdown[,"mean_time_varying_reproduction_number_R.t."], list(pre_lockdown$country), mean),
-                             c("Country", "Rt"))
-
-# when is lockdown date for each country?
-aggregate(date ~ Country, imperial_lockdown, function(x) min(x))
-# early-mid march (greece late feb)
-
-# -- add climate data -- #
-
-# take a mean of jan-feb temps as lockdown mostly occurred early in march
-countries_climate_df$pre_lockdown_tmean <- rowMeans(countries_climate_df[,c("January.tmean", "February.tmean", "March.tmean")], na.rm=TRUE)
-
-plotting_data_countries <- merge(pre_lockdown_avs, countries_climate_df[, c("Country", "pre_lockdown_tmean")], by="Country")
-
-
-# Now repeat for the USA data
-
-# load data and turn into dataframe
-states_climate <- readRDS("clean-data/worldclim-states.RDS")
-states_climate_df <- cbind(row.names(states_climate),
-                           as.data.frame(states_climate, row.names = FALSE))
+states_climate_df <- cbind(row.names(states_temperature),
+                              as.data.frame(states_temperature, row.names = FALSE),
+                              as.data.frame(states_humidity, row.names = FALSE),
+                              as.data.frame(states_popdensity, row.names = FALSE))
 names(states_climate_df)[1] <- "State"
-US_data <- shapefile("clean-data/gadm-states.shp")
-# take the USA states
-USA_states_climate <- states_climate_df[US_data$NAME_0=="United States",]
-# get the names to match with imperial's predictions (with 2-letter state codes)
-# first load in our GADM datasets which should have the proper names in it
-US_data <- US_data[US_data$GID_0 == "USA",]
 
+
+#######################################################
+# -- Step 2: load the Rt data for Europe/USA/LMIC --- #
+# --- and estimate R0 as the pre-intervention Rt  --- #
+#######################################################
+
+# --- read the various imperial predictions data --- #
+
+# -- europe -- #
+europe_Rt <- read.csv("raw-data/imperial-europe-pred.csv")
+europe_lockdown <- read.csv("raw-data/imperial-interventions.csv") # when did lockdown start in europe?
+
+# -- LMIC -- #
+LMIC_data <- read.csv("~/Documents/COVID/2020-06-06_v2.csv")
+# need to strip this down to only the Rt data
+LMIC_Rt <- LMIC_data[LMIC_data$compartment == "Rt" & LMIC_data$scenario == "Maintain Status Quo",]
+
+# -- US states -- #
+USA_Rt <- read.csv("raw-data/imperial-usa-pred.csv")
+
+# make date columns for everything
+europe_Rt$date <- as.Date(europe_Rt$time)
+europe_lockdown$date <- as.Date(europe_lockdown$Date.effective, format = "%d.%m.%y")
+LMIC_Rt$date <- as.Date(LMIC_Rt$date)
+USA_Rt$date <- as.Date(USA_Rt$date)
+
+
+# -- Get "R0" from Rt estimates -- #
+# for now, we're going to very simply estimate
+# R0 as the earliest (i.e. date) Rt estimate
+# they're in order from earlier to latest date
+# so we can just match unique to get the first value
+
+europe_R0 <- europe_Rt[match(unique(europe_Rt$country), europe_Rt$country),]
+LMIC_R0 <- LMIC_Rt[match(unique(LMIC_Rt$country), LMIC_Rt$country),]
+USA_R0 <- USA_Rt[match(unique(USA_Rt$state), USA_Rt$state),]
+
+# get these formatted the same for later
+europe_R0_df <- europe_R0[,c("country", "mean_time_varying_reproduction_number_R.t.", "date")]
+names(europe_R0_df) <- c("Location", "R0", "date")
+europe_R0_df$dataset <- "Europe"
+
+LMIC_R0_df <- LMIC_R0[,c("country", "y_mean", "date")]
+names(LMIC_R0_df) <- c("Location", "R0", "date")
+LMIC_R0_df$dataset <- "LMIC"
+
+USA_R0_df <- USA_R0[,c("state", "mean_time_varying_reproduction_number_R.t.", "date")]
+names(USA_R0_df) <- c("Location", "R0", "date")
+USA_R0_df$dataset <- "USA"
+
+
+
+########################################################
+# -- Step 3: combine the Rt data with climate data --- #
+########################################################
+
+# as lockdown happened in early March basically everywhere, but the pandemic didn't get
+# going in some places until feb, maybe the sensible (albeit coarse) thing to do, is
+# take the climate parameters for february only? 
+#
+# later on we can think about complicating it by doing something about the
+# date when R0 was estimated from... or something?
+#
+
+
+# first we can just merge the climate data into the countries/states datasets
+europe_climate_df <- merge(europe_R0_df, countries_climate_df, by.x = "Location", by.y = "Country")
+LMIC_climate_df <- merge(LMIC_R0_df, countries_climate_df, by.x = "Location", by.y = "Country")
+
+# USA a little more complicated, we need to match state GID1 codes (USA.1_1 e.g.)
+# to the 2-letter state codes in the imperial predictions file
+
+# bring the states climate df to USA only
+USA_states_climate <- states_climate_df[with(states_climate_df, grepl("USA", State)),]
+# load the original GADM files again...
+c(states, states_data) %<-% readRDS("clean-data/gadm-states.RDS")
+US_data <- states_data[states_data$GID_0 == "USA",]
 # check if the climate data and GADM data are in the same order of states
 identical(as.character(USA_states_climate$State), US_data$GID_1)
 # TRUE - so we can take the state codes in the GADM data ($HASC_1) and add them to our climate dataframe
 USA_states_climate$State <- gsub("US.", "", US_data$HASC_1)
 
-# imperial predictions for USA:
-imperial_predictions_USA <- read.csv("raw-data/imperial-usa-pred.csv")
-# make date column
-imperial_predictions_USA$date <- as.Date(imperial_predictions_USA$date)
-
-# for USA, take only the first Rt estimate (earliest date)
-USA_pre_lockdown <- imperial_predictions_USA[match(unique(imperial_predictions_USA$state), imperial_predictions_USA$state),]
-names(USA_pre_lockdown)[c(1,11)] <- c("State", "Rt")
-USA_pre_lockdown <- USA_pre_lockdown[,c("State", "Rt")]
-
-# make jan/feb mean climate
-USA_states_climate$pre_lockdown_tmean <- rowMeans(USA_states_climate[,c("January.tmean", "February.tmean")], na.rm=TRUE)
-
-plotting_data_states <- merge(USA_pre_lockdown, USA_states_climate[, c("State", "pre_lockdown_tmean")], by="State")
-
-# and finally remove those data which were recorded after some distancing measures
+# now do the merge
+USA_climate_df <- merge(USA_R0_df, USA_states_climate, by.x="Location", by.y = "State")
+# and specifically for the US, we need to remove the states that clearly have
+# R0 measured after lockdown measures have already started:
 dropped_states <- c("AK", "HI", "MT", "ND", "SD", "UT", "WV", "WY")
-plotting_data_states <- plotting_data_states[!(plotting_data_states$State %in% dropped_states),]
+USA_climate_df <- USA_climate_df[!(USA_climate_df$Location %in% dropped_states),]
 
-# now bind the countries and states together so we can plot them at the same time
-# with another field to differentiate them by
-names(plotting_data_countries)[1] <- "Location"
-names(plotting_data_states)[1] <- "Location"
 
-plotting_data_countries$Location_type <- "Europe"
-plotting_data_states$Location_type <- "USA"
+######################################
+# -- Step 4: bind these all together #
+# -- and do regressions/plotting     #
+######################################
 
-plotting_data <- rbind(plotting_data_countries, plotting_data_states)
+full_climate_df <- rbind(europe_climate_df, LMIC_climate_df, USA_climate_df)
 
-# all together
-all_plot <- ggplot(plotting_data, aes(x = pre_lockdown_tmean, y = Rt)) + 
-  geom_point(aes(fill = Location_type), shape = 21, size = 3, alpha = 0.8) +
+
+# -- plot everything just to have a look -- #
+
+
+# temperature
+all_plot_temperature <- ggplot(full_climate_df, aes(x = February.tmean, y = R0)) + 
+  geom_point(aes(fill = dataset), shape = 21, size = 3, alpha = 0.8) +
   geom_smooth(method = lm) +
-  labs(x = expression(paste("Mean Temperature (", degree*C, ")")), y = expression(R[t])) +
-  geom_text(aes(label = Location), hjust = 0, vjust = 0, position = position_nudge(y = 0.05)) +
+  labs(x = expression(paste("Mean Temperature (", degree*C, ")")), y = expression(R[0])) +
+  #geom_text(aes(label = Location), hjust = 0, vjust = 0, position = position_nudge(y = 0.05)) +
   main_theme +
   theme(legend.title = element_blank())
-all_plot
+all_plot_temperature
 
-# states seperate to europe
-seperate_plot <- ggplot(plotting_data, aes(x = pre_lockdown_tmean, y = Rt, fill = Location_type)) + 
-  geom_point(shape = 21, size = 3, alpha = 0.8) +
-  geom_smooth(method = lm, aes(col = Location_type)) +
-  labs(x = expression(paste("Mean Temperature (", degree*C, ")")), y = expression(R[t])) +
-  geom_text(aes(label = Location), hjust = 0, vjust = 0, position = position_nudge(y = 0.05)) +
+# humidity
+all_plot_humidity <- ggplot(full_climate_df, aes(x = February_20, y = R0)) + 
+  geom_point(aes(fill = dataset), shape = 21, size = 3, alpha = 0.8) +
+  geom_smooth(method = lm) +
+  labs(x = "Relative Humidity", y = expression(R[0])) +
+  #geom_text(aes(label = Location), hjust = 0, vjust = 0, position = position_nudge(y = 0.05)) +
   main_theme +
   theme(legend.title = element_blank())
-seperate_plot
+all_plot_humidity
 
-EU_plot <- ggplot(plotting_data_countries, aes(x = pre_lockdown_tmean, y = Rt)) + 
-  geom_point(size = 3, alpha = 0.8) +
+# population density
+all_plot_popdensity <- ggplot(full_climate_df, aes(x = Pop_density, y = R0)) + 
+  geom_point(aes(fill = dataset), shape = 21, size = 3, alpha = 0.8) +
   geom_smooth(method = lm) +
-  xlim(-8, 11) +
-  ylim(1, 6) +
-  labs(x = expression(paste("Mean Temperature (", degree*C, ")")), y = expression(R[t])) +
-  geom_text(aes(label = Location), hjust = 1, vjust = 0, position = position_nudge(y = 0.05)) +
+  labs(x = "Population Density (people per sq. km)", y = expression(R[0])) +
+  #geom_text(aes(label = Location), hjust = 0, vjust = 0, position = position_nudge(y = 0.05)) +
   main_theme +
-  theme(legend.title = element_blank()) +
-  ggtitle("European Countries")
-EU_plot
+  theme(legend.title = element_blank())
+all_plot_popdensity
 
-US_plot <- ggplot(plotting_data_states, aes(x = pre_lockdown_tmean, y = Rt)) + 
-  geom_point(size = 3, alpha = 0.8) +
+
+# Interesting USA plots:
+USA_plot_temperature <-  ggplot(full_climate_df[full_climate_df$dataset == "USA",], aes(x = February.tmean, y = R0)) + 
+  geom_point(aes(fill = dataset), shape = 21, size = 3, alpha = 0.8) +
   geom_smooth(method = lm) +
-  labs(x = expression(paste("Mean Temperature (", degree*C, ")")), y = expression(R[t])) +
-  geom_text(aes(label = Location), hjust = 1, vjust = 0, position = position_nudge(y = 0.05)) +
+  labs(x = expression(paste("Median February Temperature (", degree*C, ")")), y = expression(R[0])) +
+  geom_text(aes(label = Location), hjust = 0, vjust = 0, position = position_nudge(y = 0.05)) +
   main_theme +
-  theme(legend.title = element_blank()) +
-  ggtitle("US States")
-US_plot
+  theme(legend.position = "none")
+USA_plot_temperature  
 
-ggsave("../figures/EU_US_plot.png", all_plot)
-ggsave("../figures/EU_US_plot_seperate.png", seperate_plot)
-ggsave("../figures/COVID/EU_plot.png", EU_plot)
-ggsave("../figures/COVID/US_plot.png", US_plot)
+USA_plot_popdensity <-  ggplot(full_climate_df[full_climate_df$dataset == "USA",], aes(x = Pop_density, y = R0)) + 
+  geom_point(aes(fill = dataset), shape = 21, size = 3, alpha = 0.8) +
+  geom_smooth(method = lm) +
+  labs(x = expression(paste("Population Density (People ", km^-2, ")")), y = expression(R[0])) +
+  geom_text(aes(label = Location), hjust = 0, vjust = 0, position = position_nudge(y = 0.05)) +
+  main_theme +
+  theme(legend.position = "none")
+USA_plot_popdensity
 
-linmod <- lm(Rt ~ pre_lockdown_tmean, data = plotting_data[plotting_data$Location_type == "USA",])
-summary(linmod)
+USA_plot_humidity <-  ggplot(full_climate_df[full_climate_df$dataset == "USA",], aes(x = February_20, y = R0)) + 
+  geom_point(aes(fill = dataset), shape = 21, size = 3, alpha = 0.8) +
+  geom_smooth(method = lm) +
+  labs(x = "Relative Humidity", y = expression(R[0])) +
+  geom_text(aes(label = Location), hjust = 0, vjust = 0, position = position_nudge(y = 0.05)) +
+  main_theme +
+  theme(legend.position = "none")
+USA_plot_humidity
+
+
+png("figures/USA_plots.png", width = 1000)
+grid.arrange(USA_plot_temperature, USA_plot_popdensity, nrow = 1)
+dev.off()
+
+# --- regression models --- #
+
+
+full_regression_model <- lm(R0 ~ February.tmean + February_20 + Pop_density, data = full_climate_df)
+summary(full_regression_model)
+
+full_regression_model_no_humidity <- lm(R0 ~ February.tmean + Pop_density, data = full_climate_df)
+summary(full_regression_model_no_humidity)
+
+Europe_regression_model <- lm(R0 ~ February.tmean + February_20 + Pop_density, data = full_climate_df[full_climate_df$dataset == "Europe",])
+summary(Europe_regression_model)
+
+LMIC_regression_model <- lm(R0 ~ February.tmean + February_20 + Pop_density, data = full_climate_df[full_climate_df$dataset == "LMIC",])
+summary(LMIC_regression_model)
+
+USA_regression_model <- lm(R0 ~ February.tmean + February_20 + Pop_density, data = full_climate_df[full_climate_df$dataset == "USA",])
+summary(USA_regression_model)
+
+
+# should we transform pop density?
+ggplot(full_climate_df, aes(x = Pop_density)) + geom_histogram()
+ggplot(full_climate_df, aes(x = sqrt(Pop_density))) + geom_histogram()
+ggplot(full_climate_df, aes(x = log(Pop_density))) + geom_histogram()
+# guess we'd better log it to make it more normally distributed

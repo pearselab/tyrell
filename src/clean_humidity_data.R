@@ -10,8 +10,11 @@ source("src/packages.R")
 avg.humidity <- function(shapefile, x){
   # turn the humidity data into a raster
   humidity_raster <- raster(x)
+  # need to swap coordinates from [0 to 360] to [-180 to 180].
+  rotated_raster <- raster::rotate(humidity_raster)
+  humidity_velox <- velox(rotated_raster)
   # average the humidity across each object in the shapefile
-  return(raster::extract(x = humidity_raster, y = shapefile, fun=function(x, na.rm = TRUE)median(x, na.rm = TRUE)))
+  return(humidity_velox$extract(shapefile, fun = function(x)median(x, na.rm = TRUE)))
 }
 
 # Get countries and states
@@ -26,16 +29,18 @@ c.humidity <- sapply(humidityFiles, function(x) avg.humidity(shapefile = countri
 s.humidity <- sapply(humidityFiles, function(x) avg.humidity(shapefile = states, x))
 
 dimnames(c.humidity) <- list(
-  row.names(countries),
+  countries$NAME_0,
   c("January_19","February_19","March_19","April_19","May_19","June_19","July_19","August_19","September_19","October_19",
     "November_19","December_19", "January_20","February_20","March_20","April_20","May_20")
 )
 
 dimnames(s.humidity) <- list(
-  row.names(states),
+  states$GID_1,
   c("January_19","February_19","March_19","April_19","May_19","June_19","July_19","August_19","September_19","October_19",
     "November_19","December_19", "January_20","February_20","March_20","April_20","May_20")
 )
+
+rownames(c.humidity) <- gsub(" ", "_", rownames(c.humidity))
 
 saveRDS(c.humidity, "clean-data/humidity-countries.RDS")
 saveRDS(s.humidity, "clean-data/humidity-states.RDS")
