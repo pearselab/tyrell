@@ -8,7 +8,7 @@ usa <- unlist(rstan::extract(fit, "env_slp"))
 load("imptf-models/covid19model-6.0/results/env-brazil-stanfit.Rdata")
 brazil <- unlist(rstan::extract(fit, "env_slp"))
 load("imptf-models/covid19model-6.0/results/env-italy-stanfit.Rdata")
-italy <- unlist(rstan::extract(fit, "env_slp"))ra
+italy <- unlist(rstan::extract(fit, "env_slp"))
 
 # Estimate impacts and probabilities
 print("Europe:")

@@ -57,6 +57,7 @@ directory 'figures'
 directory 'models'
 directory 'forecasts'
 directory 'imptf-models'
+directory 'ext-data'
 
 desc "Setup timestamping"
 file "timestamp.yml" do File.open("timestamp.yml", "w") end
@@ -93,7 +94,7 @@ end
 # Download raw data ############
 ################################
 desc "Download all raw data"
-task :dwn_data => [:before_dwn_data, :raw_jhu, "raw-data/ecdc-cases.csv", "raw-data/uk-phe-deaths.csv", "raw-data/uk-phe-cases.csv", "raw-data/imperial-europe-pred.csv", "raw-data/imperial-usa-pred.csv", "raw-data/imperial-lmic-pred.csv", :raw_ihme, :raw_nxtstr, "raw-data/who-interventions.xlsx", "raw-data/imperial-interventions.csv", "raw-data/oxford-interventions.csv", :raw_imptfmods, "rambaut-nomenclature", "raw-data/denvfoimap-raster.RDS", :raw_gadm, :raw_cds_ar5]
+task :dwn_data => [:before_dwn_data, :raw_jhu, "raw-data/ecdc-cases.csv", "raw-data/uk-phe-deaths.csv", "raw-data/uk-phe-cases.csv", "raw-data/imperial-europe-pred.csv", "raw-data/imperial-usa-pred.csv", "raw-data/imperial-lmic-pred.csv", :raw_ihme, :raw_nxtstr, "raw-data/who-interventions.xlsx", "raw-data/imperial-interventions.csv", "raw-data/oxford-interventions.csv", :raw_imptfmods, "rambaut-nomenclature", "raw-data/denvfoimap-raster.RDS", :raw_gadm, :raw_cds_ar5, "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif"]
 task :before_dwn_data do
   puts "\t ... Downloading raw data (can take a long time)"
 end
@@ -174,7 +175,6 @@ file "raw-data/imperial-lmic-pred.csv" do
   end
   date_metadata "imperial-LMIC-pred.csv"
 end
-
 
 desc "Download NextStrain data"
 nxtstr_files = ["raw-data/nxtstr-sel-meta.tsv", "raw-data/nxtstr-meta.tsv", "raw-data/nxtstr-authors.tsv", "raw-data/nxtstr-tree-mut.tre", "raw-data/nxtstr-tree-date.tre"]
@@ -315,6 +315,22 @@ def raw_cds_ar5(files)
 end
 cds_ar5_files.each {|x| file x do raw_cds_ar5(cds_ar5_files) end}
 
+desc "Get NASA GPW 2pt5 population density data"
+file "ext-data/gpw_v4_population_density_rev11_2020_2pt5_min.tif" do
+  puts "To get a missing external data dependency:"
+  puts "(1) Go to https://sedac.ciesin.columbia.edu/data/set/gpw-v4-population-density-rev11"
+  puts "(2) Register and agree to terms"
+  puts "(3) Go to https://sedac.ciesin.columbia.edu/downloads/data/gpw-v4/gpw-v4-population-density-rev11/gpw-v4-population-density-rev11_2020_2pt5_min_tif.zip"
+  puts "(4) Extract the .tif file and put it in 'ext-data'"
+end
+desc "Get NASA GPW 15min population density data"
+file "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif" do
+  puts "To get a missing external data dependency:"
+  puts "(1) Go to https://sedac.ciesin.columbia.edu/data/set/gpw-v4-population-density-rev11"
+  puts "(2) Register and agree to terms"
+  puts "(3) Go to https://sedac.ciesin.columbia.edu/downloads/data/gpw-v4/gpw-v4-population-density-rev11/gpw-v4-population-density-rev11_2020_15_min_tif.zip"
+  puts "(4) Extract the .tif file and put it in 'ext-data'"
+end
 
 ################################
 # Running external models ######
@@ -367,7 +383,7 @@ end
 # Clean data ###################
 ################################
 desc "Process all raw data"
-task :cln_data => [:before_cln_data, :cln_gadm, :cln_denvfoi_rasters, :cln_worldclim, :cln_cdsar5_monthly]
+task :cln_data => [:before_cln_data, :cln_gadm, :cln_denvfoi_rasters, :cln_worldclim, :cln_cdsar5_monthly, :cln_gpw_popdens]
 task :before_cln_data do
   puts "\t ... Processing raw data"
 end
@@ -413,6 +429,16 @@ def cln_cdsar5_monthly()
 end
 file "clean-data/humidity-countries.RDS" => shp_fls("clean-data/gadm-countries",true) do cln_cdsar5_monthly() end
 file "clean-data/humidity-states.RDS" => shp_fls("clean-data/gadm-states",true) do cln_cdsar5_monthly() end
+
+desc "Clean and process NASA GPW population density data"
+task :cln_gpw_popdens => ["clean-data/population-density-countries.RDS","clean-data/population-density-states.RDS"]
+def cln_gpw_popdens()
+  `Rscript src/clean_population_density_data.R`
+  date_metadata "clean-data/population-density-countries.RDS"
+  date_metadata "clean-data/population-density-states.RDS"
+end
+file "clean-data/population-density-countries.RDS" => "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif" do cln_gpw_popdens() end
+file "clean-data/population-density-states.RDS" => "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif" do cln_gpw_popdens() end
 
 
 ################################
