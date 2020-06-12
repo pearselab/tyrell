@@ -433,7 +433,7 @@ file "clean-data/humidity-states.RDS" => shp_fls("clean-data/gadm-states",true) 
 desc "Clean and process NASA GPW population density data"
 task :cln_gpw_popdens => ["clean-data/population-density-countries.RDS","clean-data/population-density-states.RDS"]
 def cln_gpw_popdens()
-  `Rscript src/clean_population_density_data.R`
+  `Rscript src/clean_popdensity_data.R`
   date_metadata "clean-data/population-density-countries.RDS"
   date_metadata "clean-data/population-density-states.RDS"
 end
