@@ -24,12 +24,18 @@ cbPalette <- c("#CC0000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2",
 ########################################################
 
 # temperature
-countries_temperature <- readRDS("clean-data/worldclim-countries.RDS")
-states_temperature <- readRDS("clean-data/worldclim-states.RDS")
+# countries_temperature <- readRDS("clean-data/worldclim-countries.RDS")
+# states_temperature <- readRDS("clean-data/worldclim-states.RDS")
+countries_temperature <- readRDS("clean-data/temperature-countries.RDS")
+states_temperature <- readRDS("clean-data/temperature-states.RDS")
 
-# humidity
-countries_humidity <- readRDS("clean-data/humidity-countries.RDS")
-states_humidity <- readRDS("clean-data/humidity-states.RDS")
+# relative humidity
+countries_humidity <- readRDS("clean-data/relative-humidity-countries.RDS")
+states_humidity <- readRDS("clean-data/relative-humidity-states.RDS")
+
+# absolute_humidity
+countries_abs_humidity <- readRDS("clean-data/absolute-humidity-countries.RDS")
+states_abs_humidity <- readRDS("clean-data/absolute-humidity-states.RDS")
 
 # population density
 countries_popdensity <- readRDS("clean-data/population-density-countries.RDS")
@@ -38,11 +44,13 @@ states_popdensity <- readRDS("clean-data/population-density-states.RDS")
 # order is the same - as it should be, its all been done in the same way
 identical(row.names(countries_temperature), row.names(countries_popdensity))
 identical(row.names(countries_temperature), row.names(countries_humidity))
+identical(row.names(countries_temperature), row.names(countries_abs_humidity))
 
 # put all of the climate/population data into 1 massive dataframe
 countries_climate_df <- cbind(row.names(countries_temperature),
                               as.data.frame(countries_temperature, row.names = FALSE),
                               as.data.frame(countries_humidity, row.names = FALSE),
+                              as.data.frame(countries_abs_humidity, row.names = FALSE),
                               as.data.frame(countries_popdensity, row.names = FALSE))
 names(countries_climate_df)[1] <- "Country"
 
@@ -53,6 +61,7 @@ identical(row.names(states_temperature), row.names(states_humidity))
 states_climate_df <- cbind(row.names(states_temperature),
                               as.data.frame(states_temperature, row.names = FALSE),
                               as.data.frame(states_humidity, row.names = FALSE),
+                              as.data.frame(states_abs_humidity, row.names = FALSE),
                               as.data.frame(states_popdensity, row.names = FALSE))
 names(states_climate_df)[1] <- "State"
 
@@ -69,7 +78,7 @@ europe_Rt <- read.csv("raw-data/imperial-europe-pred.csv")
 europe_lockdown <- read.csv("raw-data/imperial-interventions.csv") # when did lockdown start in europe?
 
 # -- LMIC -- #
-LMIC_data <- read.csv("ext-data/2020-06-06_v2.csv")
+LMIC_data <- read.csv("raw-data/imperial-lmic-pred.csv")
 # need to strip this down to only the Rt data
 LMIC_Rt <- LMIC_data[LMIC_data$compartment == "Rt" & LMIC_data$scenario == "Maintain Status Quo",]
 # remove spaces from the country names
@@ -177,10 +186,10 @@ LMIC_climate_df <- LMIC_climate_df[!(LMIC_climate_df$Location %in% dropped_LMIC)
 # bring the states climate df to USA only
 USA_states_climate <- states_climate_df[with(states_climate_df, grepl("USA", State)),]
 # load the original GADM files again...
-# c(states, states_data) %<-% readRDS("clean-data/gadm-states.RDS")
-# US_data <- states_data[states_data$GID_0 == "USA",]
+c(states, states_data) %<-% readRDS("clean-data/gadm-states.RDS")
+US_data <- states_data[states_data$GID_0 == "USA",]
 # check if the climate data and GADM data are in the same order of states
-# identical(as.character(USA_states_climate$State), US_data$GID_1)
+identical(as.character(USA_states_climate$State), US_data$GID_1)
 # TRUE - so we can take the state codes in the GADM data ($HASC_1) and add them to our climate dataframe
 USA_states_climate$State <- gsub("US.", "", US_data$HASC_1)
 
@@ -227,27 +236,38 @@ full_climate_df_lockdown <- rbind(europe_climate_df_may, LMIC_climate_df_may, US
 
 
 # temperature
-all_plot_temperature <- ggplot(full_climate_df_R0, aes(x = February.tmean, y = R0)) + 
+all_plot_temperature <- ggplot(full_climate_df_R0, aes(x = February_20_TC, y = R0)) + 
   geom_point(aes(fill = dataset), shape = 21, size = 3, alpha = 0.6) +
   geom_smooth(method = lm, col = "black") +
   labs(x = expression(paste("February Temperature (", degree*C, ")")), y = expression(R[0])) +
   scale_fill_manual(values=cbPalette) +
   main_theme +
-  annotate("text", x = -25, y = 5.5, label = "A", size = 10) +
+  annotate("text", x = -18, y = 5.5, label = "A", size = 10) +
   theme(legend.title = element_blank(),
         legend.position = c(0.2, 0.8))
 all_plot_temperature
 
-# humidity
-all_plot_humidity <- ggplot(full_climate_df_R0, aes(x = February_20, y = R0)) + 
+# relative humidity
+all_plot_humidity_rel <- ggplot(full_climate_df_R0, aes(x = February_20_RH, y = R0)) + 
   geom_point(aes(fill = dataset), shape = 21, size = 3, alpha = 0.8) +
   geom_smooth(method = lm, col = "black") +
-  labs(x = "February Relative Humidity", y = expression(R[0])) +
+  labs(x = expression(paste("February Relative Humidity (", '%', ")")), y = expression(R[0])) +
   scale_fill_manual(values=cbPalette) +
   annotate("text", x = 15, y = 5.5, label = "B", size = 10) +
   main_theme +
   theme(legend.position = "none")
-all_plot_humidity
+all_plot_humidity_rel
+
+# absolute humidity
+all_plot_humidity_abs <- ggplot(full_climate_df_R0, aes(x = February_20_AH, y = R0)) + 
+  geom_point(aes(fill = dataset), shape = 21, size = 3, alpha = 0.8) +
+  geom_smooth(method = lm, col = "black") +
+  labs(x = expression(paste("February Absolute Humidity (g", m^-3, ")")) , y = expression(R[0])) +
+  scale_fill_manual(values=cbPalette) +
+  annotate("text", x = 0.7, y = 5.5, label = "B", size = 10) +
+  main_theme +
+  theme(legend.position = "none")
+all_plot_humidity_abs
 
 # population density
 all_plot_popdensity <- ggplot(full_climate_df_R0, aes(x = log(Pop_density), y = R0)) + 
@@ -261,14 +281,14 @@ all_plot_popdensity <- ggplot(full_climate_df_R0, aes(x = log(Pop_density), y = 
 all_plot_popdensity
 
 png("figures/all_datasets_plot.png", width = 1200, height = 400)
-grid.arrange(all_plot_temperature, all_plot_humidity, all_plot_popdensity, nrow = 1)
+grid.arrange(all_plot_temperature, all_plot_humidity_abs, all_plot_popdensity, nrow = 1)
 dev.off()
 
 
 # --- compare to post-lockdown Rt vs May climate --- #
 
 # temperature
-lockdown_plot_temperature <- ggplot(full_climate_df_lockdown, aes(x = May.tmean, y = Rt)) + 
+lockdown_plot_temperature <- ggplot(full_climate_df_lockdown, aes(x = May_20_TC, y = Rt)) + 
   geom_point(aes(fill = dataset), shape = 21, size = 3, alpha = 0.6) +
   geom_smooth(method = lm, col = "black") +
   labs(x = expression(paste("May Temperature (", degree*C, ")")), y = expression(paste("May ", R[t]))) +
@@ -281,16 +301,16 @@ lockdown_plot_temperature
 
 # add to previous figure
 png("figures/all_datasets_plot_R0_Rt.png", width = 1600, height = 400)
-grid.arrange(all_plot_temperature, all_plot_humidity, all_plot_popdensity, lockdown_plot_temperature, nrow = 1)
+grid.arrange(all_plot_temperature, all_plot_humidity_abs, all_plot_popdensity, lockdown_plot_temperature, nrow = 1)
 dev.off()
 
 # --- USA only --- #
 
 # Interesting USA plots:
-USA_plot_temperature <-  ggplot(full_climate_df_R0[full_climate_df_R0$dataset == "USA",], aes(x = February.tmean, y = R0)) + 
+USA_plot_temperature <-  ggplot(full_climate_df_R0[full_climate_df_R0$dataset == "USA",], aes(x = February_20_TC, y = R0)) + 
   geom_point(aes(fill = dataset), shape = 21, size = 3, alpha = 0.8) +
   geom_smooth(method = lm, col = "black") +
-  labs(x = expression(paste("Median February Temperature (", degree*C, ")")), y = expression(R[0])) +
+  labs(x = expression(paste("Median February 2020 Temperature (", degree*C, ")")), y = expression(R[0])) +
   geom_text(aes(label = Location), hjust = 0, vjust = 0, position = position_nudge(y = 0.05)) +
   scale_fill_manual(values=c("#56B4E9")) +
   main_theme +
@@ -307,10 +327,10 @@ USA_plot_popdensity <-  ggplot(full_climate_df_R0[full_climate_df_R0$dataset == 
   theme(legend.position = "none")
 USA_plot_popdensity
 
-USA_plot_humidity <-  ggplot(full_climate_df_R0[full_climate_df_R0$dataset == "USA",], aes(x = February_20, y = R0)) + 
+USA_plot_humidity <-  ggplot(full_climate_df_R0[full_climate_df_R0$dataset == "USA",], aes(x = February_20_AH, y = R0)) + 
   geom_point(aes(fill = dataset), shape = 21, size = 3, alpha = 0.8) +
   geom_smooth(method = lm, col = "black") +
-  labs(x = "Relative Humidity", y = expression(R[0])) +
+  labs(x = expression(paste("February Absolute Humidity (g", m^-3, ")")), y = expression(R[0])) +
   geom_text(aes(label = Location), hjust = 0, vjust = 0, position = position_nudge(y = 0.05)) +
   scale_fill_manual(values=c("#56B4E9")) +
   main_theme +
@@ -325,28 +345,28 @@ dev.off()
 # --- regression models --- #
 
 
-full_regression_model <- lm(R0 ~ February.tmean + February_20 + log(Pop_density), data = full_climate_df_R0)
+full_regression_model <- lm(R0 ~ February_20_TC + February_20_AH + log(Pop_density), data = full_climate_df_R0)
 summary(full_regression_model)
 
-Europe_regression_model <- lm(R0 ~ February.tmean + February_20 + log(Pop_density), data = full_climate_df_R0[full_climate_df_R0$dataset == "Europe",])
+Europe_regression_model <- lm(R0 ~ February_20_TC + February_20_AH + log(Pop_density), data = full_climate_df_R0[full_climate_df_R0$dataset == "Europe",])
 summary(Europe_regression_model)
 
-LMIC_regression_model <- lm(R0 ~ February.tmean + February_20 + log(Pop_density), data = full_climate_df_R0[full_climate_df_R0$dataset == "LMIC",])
+LMIC_regression_model <- lm(R0 ~ February_20_TC + February_20_AH + log(Pop_density), data = full_climate_df_R0[full_climate_df_R0$dataset == "LMIC",])
 summary(LMIC_regression_model)
 
-USA_regression_model <- lm(R0 ~ February.tmean + February_20 + log(Pop_density), data = full_climate_df_R0[full_climate_df_R0$dataset == "USA",])
+USA_regression_model <- lm(R0 ~ February_20_TC + February_20_AH + log(Pop_density), data = full_climate_df_R0[full_climate_df_R0$dataset == "USA",])
 summary(USA_regression_model)
 
 
-full_regression_model_lockdown <- lm(Rt ~ May.tmean + May_20 + log(Pop_density), data = full_climate_df_lockdown)
+full_regression_model_lockdown <- lm(Rt ~ May_20_TC + May_20_AH + log(Pop_density), data = full_climate_df_lockdown)
 summary(full_regression_model_lockdown)
 
-USA_regression_model_lockdown <- lm(Rt ~ May.tmean + May_20 + log(Pop_density), data = full_climate_df_lockdown[full_climate_df_lockdown$dataset == "USA",])
+USA_regression_model_lockdown <- lm(Rt ~ May_20_TC + May_20_AH + log(Pop_density), data = full_climate_df_lockdown[full_climate_df_lockdown$dataset == "USA",])
 summary(USA_regression_model_lockdown)
 
 # plot the residuals from the USA model
 
-d <- full_climate_df_R0[full_climate_df_R0$dataset == "USA" & full_climate_df_R0$Location != "DC",c("February.tmean", "February_20", "Pop_density", "R0", "Location")]
+d <- full_climate_df_R0[full_climate_df_R0$dataset == "USA" & full_climate_df_R0$Location != "DC",c("February_20_TC", "February_20_AH", "Pop_density", "R0", "Location")]
 names(d) <- c("Temperature", "Humidity", "Pop_density", "R0", "State")
 # Fit the model
 fit <- lm(R0 ~ Temperature + Humidity + log(Pop_density), data = d)
@@ -377,7 +397,7 @@ residual_plot_humidity <- ggplot(d, aes(x = Humidity, y = R0)) +
   scale_color_gradient2(low = "blue", mid = "white", high = "red") +
   guides(color = FALSE) +
   geom_text(aes(label = State), hjust = 0, vjust = 0, position = position_nudge(y = 0.05)) +
-  annotate("text", x = 42, y = 3.5, label = "B", size = 10) +
+  annotate("text", x = 2, y = 3.5, label = "B", size = 10) +
   main_theme +
   theme(legend.position = "none")
 residual_plot_humidity
@@ -399,3 +419,19 @@ residual_plot_pop
 png("figures/USA_residual_plots.png", width = 800, height = 400)
 grid.arrange(residual_plot_temp, residual_plot_pop, nrow = 1)
 dev.off()
+
+
+# alternative residual plotting attempt
+# - take the residuals from R0 vs pop density, and plot vs temperature/humidity?
+# - or, correct R0 by the residuals from pop density, then plot vs temperature/humidity?
+
+d$pop_residuals <- residuals(lm(R0 ~ Pop_density, data = d))
+
+ggplot(d, aes(x = Temperature, y = R0)) + geom_point() + geom_smooth(method = lm) + main_theme
+ggplot(d, aes(x = Temperature, y = pop_residuals)) + geom_point() + geom_smooth(method = lm) + main_theme
+# colder states tend to over-estimate pop density??
+ggplot(d, aes(x = Temperature, y = R0-pop_residuals)) + geom_point() + geom_smooth(method = lm) + main_theme
+# effect of temperature appears to go away if we correct for population density?
+
+ggplot(d, aes(x = Humidity, y = pop_residuals)) + geom_point() + geom_smooth(method = lm) + main_theme
+ggplot(d, aes(x = Humidity, y = R0-pop_residuals)) + geom_point() + geom_smooth(method = lm) + main_theme
