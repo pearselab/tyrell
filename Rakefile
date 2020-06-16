@@ -1,4 +1,4 @@
-################################
+###############################
 # Headers ######################
 ################################
 require 'rake'
@@ -94,7 +94,7 @@ end
 # Download raw data ############
 ################################
 desc "Download all raw data"
-task :dwn_data => [:before_dwn_data, :raw_jhu, "raw-data/ecdc-cases.csv", "raw-data/uk-phe-deaths.csv", "raw-data/uk-phe-cases.csv", "raw-data/cvodidh-admin1.csv", "raw-data/cvodidh-admin2.csv", "raw-data/cvodidh-admin3.csv", "raw-data/imperial-europe-pred.csv", "raw-data/imperial-usa-pred.csv", "raw-data/imperial-lmic-pred.csv", :raw_ihme, :raw_nxtstr, "raw-data/who-interventions.xlsx", "raw-data/imperial-interventions.csv", "raw-data/oxford-interventions.csv", :raw_imptfmods, "rambaut-nomenclature", "raw-data/denvfoimap-raster.RDS", :raw_gadm, :raw_cds_ar5, "raw-data/cds-era5-temp-midday.grib", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif"]
+task :dwn_data => [:before_dwn_data, :raw_jhu, "raw-data/ecdc-cases.csv", "raw-data/ecjrcdc-regions.csv", "raw-data/ecjrcdc-countries.csv", "raw-data/uk-phe-deaths.csv", "raw-data/uk-phe-cases.csv", "raw-data/cvodidh-admin1.csv", "raw-data/cvodidh-admin2.csv", "raw-data/cvodidh-admin3.csv", "raw-data/imperial-europe-pred.csv", "raw-data/imperial-usa-pred.csv", "raw-data/imperial-lmic-pred.csv", :raw_ihme, :raw_nxtstr, "raw-data/who-interventions.xlsx", "raw-data/imperial-interventions.csv", "raw-data/oxford-interventions.csv", :raw_imptfmods, "rambaut-nomenclature", "raw-data/denvfoimap-raster.RDS", :raw_gadm, :raw_cds_ar5, "raw-data/cds-era5-temp-midday.grib", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif"]
 task :before_dwn_data do
   puts "\t ... Downloading raw data (can take a long time)"
 end
@@ -142,6 +142,11 @@ file "raw-data/jh-global-confirmed.csv" do dwn_file("raw-data", "https://raw.git
 desc "Download ECDC cases"
 file "raw-data/ecdc-cases.csv" do dwn_file("raw-data", "https://opendata.ecdc.europa.eu/covid19/casedistribution/csv", "ecdc-cases.csv") end
 
+desc "Download EC-JRC region summary"
+file "raw-data/ecjrcdc-regions.csv" do dwn_file("raw-data", "https://github.com/ec-jrc/COVID-19/raw/master/data-by-region/jrc-covid-19-all-days-by-regions.csv", "ecjrc-regions.csv") end
+desc "Download EC-JRC country summary"
+file "raw-data/ecjrcdc-countries.csv" do dwn_file("raw-data", "https://github.com/ec-jrc/COVID-19/raw/master/data-by-country/jrc-covid-19-all-days-by-country.csv", "ecjrc-countries.csv") end
+
 desc "Download UK PHE deaths"
 file "raw-data/uk-phe-deaths.csv" do
   Dir.chdir "raw-data" do
@@ -161,20 +166,11 @@ file "raw-data/uk-phe-cases.csv" do
 end
 
 desc "Download COVID-19 Data Hub admin1 case data"
-file "raw-data/cvodidh-admin1.csv" do
-  dwn_file("raw-data", "https://storage.covid19datahub.io/data-1.csv", "cvodidh-admin1.csv")
-  date_metadata "raw-data/cvodidh-admin1.csv"
-end
+file "raw-data/cvodidh-admin1.csv" do dwn_file("raw-data", "https://storage.covid19datahub.io/data-1.csv", "cvodidh-admin1.csv") end
 desc "Download COVID-19 Data Hub admin2 case data"
-file "raw-data/cvodidh-admin2.csv" do
-  dwn_file("raw-data", "https://storage.covid19datahub.io/data-2.csv", "cvodidh-admin2.csv")
-  date_metadata "raw-data/cvodidh-admin2.csv"
-end
+file "raw-data/cvodidh-admin2.csv" do dwn_file("raw-data", "https://storage.covid19datahub.io/data-2.csv", "cvodidh-admin2.csv") end
 desc "Download COVID-19 Data Hub admin3 case data"
-file "raw-data/cvodidh-admin3.csv" do
-  dwn_file("raw-data", "https://storage.covid19datahub.io/data-3.csv", "cvodidh-admin3.csv")
-  date_metadata "raw-data/cvodidh-admin3.csv"
-end
+file "raw-data/cvodidh-admin3.csv" do dwn_file("raw-data", "https://storage.covid19datahub.io/data-3.csv", "cvodidh-admin3.csv") end
 
 desc "Download Imperial COVID-19 Europe predictions"
 file "raw-data/imperial-europe-pred.csv" do dwn_file("raw-data", "https://mrc-ide.github.io/covid19estimates/data/results.csv", "imperial-europe-pred.csv") end
@@ -330,10 +326,15 @@ def raw_cds_ar5(files)
 end
 cds_ar5_files.each {|x| file x do raw_cds_ar5(cds_ar5_files) end}
 
-desc "Get midday (daily) CDS-ERA5 temperature day"
+desc "Get midday (daily) CDS-ERA5 temperature data"
 file "raw-data/cds-era5-temp-midday.grib" do
   Dir.chdir("raw-data") do `python3 ../src/cds-era5-temp.py` end
   date_metadata "raw-data/cds-era5-temp-midday.grib"
+end
+desc "Get midday (daily) CDS-ERA5 humidity data"
+file "raw-data/cds-era5-temp-midday.grib" do
+  Dir.chdir("raw-data") do `python3 ../src/cds-era5-humid.py` end
+  date_metadata "raw-data/cds-era5-humid-midday.grib"
 end
 
 desc "Get NASA GPW 2pt5 population density data"
@@ -462,14 +463,18 @@ file "clean-data/temperature-states.RDS" => shp_fls("clean-data/gadm-states",tru
 
 
 desc "Clean and process CDS-EAR5 midday (daily) temperature data"
-task :cln_cdsear5_daily => ["clean-data/temp-midday-countries.RDS","clean-data/temp-midday-states.RDS"]
+task :cln_cdsear5_daily => ["clean-data/temp-midday-countries.RDS","clean-data/temp-midday-states.RDS","clean-data/humid-midday-countries.RDS","clean-data/humid-midday-states.RDS"]
 def cln_cdsear5_daily()
-  `Rscript src/clean_temp_midday_data.R`
+  `Rscript src/clean_cds-era5.R`
   date_metadata "clean-data/temp-midday-countries.RDS"
   date_metadata "clean-data/temp-midday-states.RDS"
+  date_metadata "clean-data/humid-midday-countries.RDS"
+  date_metadata "clean-data/humid-midday-states.RDS"
 end
 file "clean-data/temp-midday-countries.RDS" => shp_fls("clean-data/gadm-countries",true) do cln_cdsar5_monthly() end
 file "clean-data/temp-midday-states.RDS" => shp_fls("clean-data/gadm-states",true) do cln_cdsar5_monthly() end
+file "clean-data/temp-humid-countries.RDS" => shp_fls("clean-data/gadm-countries",true) do cln_cdsar5_monthly() end
+file "clean-data/temp-humid-states.RDS" => shp_fls("clean-data/gadm-states",true) do cln_cdsar5_monthly() end
 
 desc "Clean and process NASA GPW population density data"
 task :cln_gpw_popdens => ["clean-data/population-density-countries.RDS","clean-data/population-density-states.RDS"]
