@@ -74,12 +74,14 @@ transformed parameters {
         cumm_sum[2:N0,m] = cumulative_sum(prediction[2:N0,m]);
 
 	// Added environment to code below (note now element-wise multiply)
-        Rt[,m] = (mu[m] + pop_dat[m]*pop_slp + env_const[m]*env_const_slp) *
-                          2 * inv_logit(-X[m] * alpha 
+        Rt[,m] = rep_vector(mu[m] + pop_dat[m]*pop_slp + env_const[m]*env_const_slp, N2);
+	//(mu[m] + pop_dat[m]*pop_slp + env_const[m]*env_const_slp)
+	       // + env_time[,m]*env_time_slp;
+	Rt[,m] = (2 * inv_logit(-X[m] * alpha 
                           -X_partial_regional[m] * alpha_region[Region[m]] 
                           -X_partial_state[m] * alpha_state[m] 
                           -weekly_effect[week_index[m],m]
-			  ) .* (env_time[,m]*env_time_slp);
+			  )) .* Rt[,m];
         Rt_adj[1:N0,m] = Rt[1:N0,m];
          for (i in 2:N0){
           real convolution = 0;

@@ -81,7 +81,7 @@ processed_data <- process_covariates(states = states,
 stan_data <- processed_data$stan_data
 
 # Add envirionmental data
-env <- readRDS("../../clean-data/worldclim-states.RDS")[,,"tmean"]
+env <- readRDS("../../clean-data/midday-temp-states.RDS")
 pop <- readRDS("../../clean-data/population-density-states.RDS")
 meta <- shapefile("../../clean-data/gadm-states.shp")
 env <- env[meta$NAME_0=="United States",]
@@ -92,8 +92,11 @@ env <- env[match(names(processed_data$reported_deaths), meta$code),]
 pop <- log10(pop[match(names(processed_data$reported_deaths), meta$code)])
 env_const <- env[,2]
 env_time <- env[,rep(2:5, c(27,31,30,27))]
+env_time <- (env_time-mean(env_time)) / sd(env_time)
 env_time <- apply(env_time, 2, function(x) x-env_const)
 pop[is.na(pop)] <- median(pop, na.rm=TRUE)
+pop <- as.numeric(scale(pop))
+env_const <- as.numeric(scale(env_const))
 stan_data$env_time <- t(env_time); stan_data$env_const <- env_const; stan_data$pop_dat <- pop
 
 dates <- processed_data$dates
@@ -102,7 +105,7 @@ reported_cases <- processed_data$reported_cases
 options(mc.cores = parallel::detectCores())
 rstan_options(auto_write = TRUE)
 m <- stan_model('stan-models/stan-usa-pop.stan')
-fit = sampling(m,data=stan_data,iter=1800,warmup=1000,chains=5,thin=1,control = list(adapt_delta = 0.8, max_treedepth = 15))
+fit = sampling(m,data=stan_data,iter=1800,warmup=1000,chains=5,thin=1,control = list(adapt_delta = 0.9, max_treedepth = 15))
 #fit = sampling(m,data=stan_data,iter=900,warmup=500,chains=5,thin=1,control = list(adapt_delta = 0.8, max_treedepth = 15))
 
 covariate_data = list(interventions, mobility)
