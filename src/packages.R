@@ -3,7 +3,7 @@ silent.require <- function(x) suppressMessages(require(package=x, character.only
 # Load packages that are already installed
 packages <- c("rstan",
               "zeallot", #src/clean-gadm.R (and because Will likes it)
-              "raster", "sp", "lubridate", "rgeos", "RColorBrewer", "abind", # worldclim and gadm cleaning
+              "raster", "sp", "lubridate", "rgeos", "RColorBrewer", "abind", "exactextractr", "sf", # worldclim and gadm cleaning
               "devtools", # to install GitHub packages (like Lorenzo's)
               "matrixStats","data.table","gdata","dplyr","tidyr","EnvStats","scales","tidyverse","dplyr","abind","ggplot2","gridExtra","ggpubr","bayesplot","cowplot","optparse", "lubridate", "zoo", "ggstance", "geofacet", "denstrip", "svglite", "forecast", # Imperial models
               "ape", "caper", "phytools", "viridis", "plotrix" # Phylogenetics
