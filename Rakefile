@@ -50,7 +50,7 @@ desc "Install R packages"
 task :r_packages do `Rscript "src/packages.R"` end
 
 desc "Setup tyrell folders"
-task :folders => ["raw-data", "clean-data", "figures", "models", "forecasts", "imptf-models"]
+task :folders => ["raw-data", "clean-data", "figures", "models", "forecasts", "imptf-models", "ext-data"]
 directory 'raw-data'
 directory 'clean-data'
 directory 'figures'

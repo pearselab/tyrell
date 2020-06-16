@@ -22,6 +22,25 @@ avg.climate <- function(shapefile, x){
   return(climate_velox$extract(shapefile, fun = function(x)median(x, na.rm = TRUE)))
 }
 
+# similar to above function, but the climate data is weighted
+# by population density - i.e. climate is more representative
+# of where people are located
+avg.climate.weighted <- function(shapefile, pop_density, x){
+  # turn the humidity data into a raster
+  climate_raster <- raster(x)
+  # need to swap coordinates from [0 to 360] to [-180 to 180].
+  rotated_raster <- raster::rotate(climate_raster)
+  
+  shapefile_sf <- st_as_sf(shapefile) # exact_extract needs an sf object
+  pop_data_project <- projectRaster(pop_density, rotated_raster) # converts to same resolution
+  clim_pop_stack <- stack(rotated_raster, pop_data_project) # stacks population density and climate data
+  values(pop_data_project)[which(is.na(values(pop_data_project)))] <- 0 # needed to do this because the weighted_mean algorithm craps out when there are NA gaps in the polygon
+  
+  # average the humidity across each object in the shapefile,
+  # weighted by pop density
+  return(exact_extract(rotated_raster, shapefile_sf, fun="weighted_mean", weights=pop_data_project))
+}
+
 # calculate vapor pressure
 # - a measure of absolute humidity
 # VP is calculated from ambient temperature and relative humidity 
@@ -74,12 +93,16 @@ humidityFiles <- lapply(Sys.glob("raw-data/cdsar5-1month_mean_Global_ea_r2*.grib
 # also read all of the monthly temperature data
 temperatureFiles <- lapply(Sys.glob("raw-data/cdsar5-1month_mean_Global_ea_2t*.grib"), rgdal::readGDAL)
 
+# get the population data for weighted means
+pop_data <- raster("ext-data/gpw_v4_population_density_rev11_2020_15_min.tif")
+
 # apply the function to extract median humidity across the countries and states data
-c.humidity <- sapply(humidityFiles, function(x) avg.climate(shapefile = countries, x))
-s.humidity <- sapply(humidityFiles, function(x) avg.climate(shapefile = states, x))
+# c.humidity <- sapply(humidityFiles, function(x) avg.climate(shapefile = countries, x))
+c.humidity <- sapply(humidityFiles, function(x) avg.climate.weighted(shapefile = countries, pop_density = pop_data, x))
+s.humidity <- sapply(humidityFiles, function(x) avg.climate.weighted(shapefile = states, pop_density = pop_data, x))
 # repeat for CDS temperature data
-c.temperature <- sapply(temperatureFiles, function(x) avg.climate(shapefile = countries, x))
-s.temperature <- sapply(temperatureFiles, function(x) avg.climate(shapefile = states, x))
+c.temperature <- sapply(temperatureFiles, function(x) avg.climate.weighted(shapefile = countries, pop_density = pop_data, x))
+s.temperature <- sapply(temperatureFiles, function(x) avg.climate.weighted(shapefile = states, pop_density = pop_data, x))
 
 # use these temperatures and humidities to calculate vapor pressure (or absolute humidity)
 # countries first
