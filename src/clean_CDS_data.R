@@ -75,7 +75,10 @@ humidityFiles <- lapply(Sys.glob("raw-data/cdsar5-1month_mean_Global_ea_r2*.grib
 temperatureFiles <- lapply(Sys.glob("raw-data/cdsar5-1month_mean_Global_ea_2t*.grib"), rgdal::readGDAL)
 
 # apply the function to extract median humidity across the countries and states data
-c.humidity <- sapply(humidityFiles, function(x) avg.climate(shapefile = countries, x))
+c.humidity <- do.call(cbind, mcMap(
+                                 humidityFiles, function(x) avg.climate(shapefile = countries, x),
+                                 humidityFiles))
+
 s.humidity <- sapply(humidityFiles, function(x) avg.climate(shapefile = states, x))
 # repeat for CDS temperature data
 c.temperature <- sapply(temperatureFiles, function(x) avg.climate(shapefile = countries, x))

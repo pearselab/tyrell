@@ -410,13 +410,14 @@ task :before_cln_data do
 end
 
 desc "Clean and process GADM data"
-task :cln_gadm => shp_fls("clean-data/gadm-countries",true) + shp_fls("clean-data/gadm-states",true)
+task :cln_gadm => shp_fls("clean-data/gadm-countries",true) + shp_fls("clean-data/gadm-states",true)+ shp_fls("clean-data/gadm-counties",true)
 def gadm_cleaning()
   `ogr2ogr -simplify 0.005 -f "ESRI Shapefile" clean-data/gadm-countries.shp raw-data/gadm36_0.shp`
   `ogr2ogr -simplify 0.005 -f "ESRI Shapefile" clean-data/gadm-states.shp raw-data/gadm36_1.shp`
-  (shp_fls("clean-data/gadm-countries")+shp_fls("clean-data/gadm-states")).each {|x| date_metadata(x)}
+  `ogr2ogr -simplify 0.005 -f "ESRI Shapefile" clean-data/gadm-counties.shp raw-data/gadm36_2.shp`
+  (shp_fls("clean-data/gadm-countries")+shp_fls("clean-data/gadm-states")+shp_fls("clean-data/gadm-counties")).each {|x| date_metadata(x)}
 end
-(shp_fls("clean-data/gadm-countries",true)+shp_fls("clean-data/gadm-states",true)).each do |sub_file|
+(shp_fls("clean-data/gadm-countries",true)+shp_fls("clean-data/gadm-states",true)+shp_fls("clean-data/gadm-counties",true)).each do |sub_file|
   file sub_file do gadm_cleaning() end
 end
 
