@@ -310,8 +310,7 @@ def raw_cds_ar5(files)
     FileUtils.rm "cds-ar5.zip"
   end
   files.map {|x| date_metadata(x)}
-  # ... When cleaning this data, perhaps use rgdal:readGDAL to load and then do... something?
-  # ... t is temperature, r is relative humidity I think
+  # ... t is temperature, r is relative humidity
 end
 cds_ar5_files.each {|x| file x do raw_cds_ar5(cds_ar5_files) end}
 
@@ -420,15 +419,24 @@ file "clean-data/denvfoimap-rasters-countries.csv" do denvfoimap_rasters() end
 file "clean-data/denvfoimap-rasters-states.csv" do denvfoimap_rasters() end
 
 
-desc "Clean and process CDS-AR5 monthly humidity data"
-task :cln_cdsar5_monthly => ["clean-data/humidity-countries.RDS","clean-data/humidity-states.RDS"]
+desc "Clean and process CDS-AR5 monthly temperature and humidity data"
+task :cln_cdsar5_monthly => ["clean-data/relative-humidity-countries.RDS","clean-data/relative-humidity-states.RDS", "clean-data/absolute-humidity-countries.RDS","clean-data/absolute-humidity-states.RDS", "clean-data/temperature-countries.RDS","clean-data/temperature-states.RDS"]
 def cln_cdsar5_monthly()
-  `Rscript src/clean_humidity_data.R`
-  date_metadata "clean-data/humidity-countries.RDS"
-  date_metadata "clean-data/humidity-states.RDS"
+  `Rscript src/clean_CDS_data.R`
+  date_metadata "clean-data/relative-humidity-countries.RDS"
+  date_metadata "clean-data/relative-humidity-states.RDS"
+  date_metadata "clean-data/absolute-humidity-countries.RDS"
+  date_metadata "clean-data/absolute-humidity-states.RDS"
+  date_metadata "clean-data/temperature-countries.RDS"
+  date_metadata "clean-data/temperature-states.RDS"
 end
-file "clean-data/humidity-countries.RDS" => shp_fls("clean-data/gadm-countries",true) do cln_cdsar5_monthly() end
-file "clean-data/humidity-states.RDS" => shp_fls("clean-data/gadm-states",true) do cln_cdsar5_monthly() end
+file "clean-data/relative-humidity-countries.RDS" => shp_fls("clean-data/gadm-countries",true) do cln_cdsar5_monthly() end
+file "clean-data/relative-humidity-states.RDS" => shp_fls("clean-data/gadm-states",true) do cln_cdsar5_monthly() end
+file "clean-data/absolute-humidity-countries.RDS" => shp_fls("clean-data/gadm-countries",true) do cln_cdsar5_monthly() end
+file "clean-data/absolute-humidity-states.RDS" => shp_fls("clean-data/gadm-states",true) do cln_cdsar5_monthly() end
+file "clean-data/temperature-countries.RDS" => shp_fls("clean-data/gadm-countries",true) do cln_cdsar5_monthly() end
+file "clean-data/temperature-states.RDS" => shp_fls("clean-data/gadm-states",true) do cln_cdsar5_monthly() end
+
 
 desc "Clean and process NASA GPW population density data"
 task :cln_gpw_popdens => ["clean-data/population-density-countries.RDS","clean-data/population-density-states.RDS"]
