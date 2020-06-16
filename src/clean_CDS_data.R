@@ -76,7 +76,7 @@ temperatureFiles <- lapply(Sys.glob("raw-data/cdsar5-1month_mean_Global_ea_2t*.g
 
 # apply the function to extract median humidity across the countries and states data
 c.humidity <- do.call(cbind, mcMap(
-                                 humidityFiles, function(x) avg.climate(shapefile = countries, x),
+                                 function(x) avg.climate(shapefile = countries, x),
                                  humidityFiles))
 
 s.humidity <- sapply(humidityFiles, function(x) avg.climate(shapefile = states, x))
