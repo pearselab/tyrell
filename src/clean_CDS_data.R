@@ -82,8 +82,8 @@ temperatureFiles <- lapply(Sys.glob("raw-data/cdsar5-1month_mean_Global_ea_2t*.g
 
 c.humidity <- .avg.wrapper(humidityFiles, countries)
 s.humidity <- .avg.wrapper(humidityFiles, states)
-c.humidity <- .avg.wrapper(temperatureFiles, countries)
-s.humidity <- .avg.wrapper(temperatureFiles, states)
+c.temperature <- .avg.wrapper(temperatureFiles, countries)
+s.temperature <- .avg.wrapper(temperatureFiles, states)
 
 # use these temperatures and humidities to calculate vapor pressure (or absolute humidity)
 # countries first

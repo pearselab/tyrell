@@ -94,7 +94,7 @@ end
 # Download raw data ############
 ################################
 desc "Download all raw data"
-task :dwn_data => [:before_dwn_data, :raw_jhu, "raw-data/ecdc-cases.csv", "raw-data/ecjrcdc-regions.csv", "raw-data/ecjrcdc-countries.csv", "raw-data/uk-phe-deaths.csv", "raw-data/uk-phe-cases.csv", "raw-data/cvodidh-admin1.csv", "raw-data/cvodidh-admin2.csv", "raw-data/cvodidh-admin3.csv", "raw-data/imperial-europe-pred.csv", "raw-data/imperial-usa-pred.csv", "raw-data/imperial-lmic-pred.csv", :raw_ihme, :raw_nxtstr, "raw-data/who-interventions.xlsx", "raw-data/imperial-interventions.csv", "raw-data/oxford-interventions.csv", :raw_imptfmods, "rambaut-nomenclature", "raw-data/denvfoimap-raster.RDS", :raw_gadm, :raw_cds_ar5, "raw-data/cds-era5-temp-midday.grib", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif"]
+task :dwn_data => [:before_dwn_data, :raw_jhu, "raw-data/ecdc-cases.csv", "raw-data/ecjrcdc-regions.csv", "raw-data/ecjrcdc-countries.csv", "raw-data/uk-phe-deaths.csv", "raw-data/uk-phe-cases.csv", "raw-data/cvodidh-admin1.csv", "raw-data/cvodidh-admin2.csv", "raw-data/cvodidh-admin3.csv", "raw-data/imperial-europe-pred.csv", "raw-data/imperial-usa-pred.csv", "raw-data/imperial-lmic-pred.csv", :raw_ihme, :raw_nxtstr, "raw-data/who-interventions.xlsx", "raw-data/imperial-interventions.csv", "raw-data/oxford-interventions.csv", :raw_imptfmods, "rambaut-nomenclature", "raw-data/denvfoimap-raster.RDS", :raw_gadm, :raw_cds_ar5, "raw-data/cds-era5-temp-midday.grib", "raw-data/cds-era5-humid-midday.grib", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif"]
 task :before_dwn_data do
   puts "\t ... Downloading raw data (can take a long time)"
 end
@@ -332,7 +332,7 @@ file "raw-data/cds-era5-temp-midday.grib" do
   date_metadata "raw-data/cds-era5-temp-midday.grib"
 end
 desc "Get midday (daily) CDS-ERA5 humidity data"
-file "raw-data/cds-era5-temp-midday.grib" do
+file "raw-data/cds-era5-humid-midday.grib" do
   Dir.chdir("raw-data") do `python3 ../src/cds-era5-humid.py` end
   date_metadata "raw-data/cds-era5-humid-midday.grib"
 end
@@ -471,10 +471,10 @@ def cln_cdsear5_daily()
   date_metadata "clean-data/humid-midday-countries.RDS"
   date_metadata "clean-data/humid-midday-states.RDS"
 end
-file "clean-data/temp-midday-countries.RDS" => shp_fls("clean-data/gadm-countries",true) do cln_cdsar5_monthly() end
-file "clean-data/temp-midday-states.RDS" => shp_fls("clean-data/gadm-states",true) do cln_cdsar5_monthly() end
-file "clean-data/temp-humid-countries.RDS" => shp_fls("clean-data/gadm-countries",true) do cln_cdsar5_monthly() end
-file "clean-data/temp-humid-states.RDS" => shp_fls("clean-data/gadm-states",true) do cln_cdsar5_monthly() end
+file "clean-data/temp-midday-countries.RDS" => shp_fls("clean-data/gadm-countries",true) do cln_cdsear5_daily() end
+file "clean-data/temp-midday-states.RDS" => shp_fls("clean-data/gadm-states",true) do cln_cdsear5_daily() end
+file "clean-data/humid-midday-countries.RDS" => shp_fls("clean-data/gadm-countries",true) do cln_cdsear5_daily() end
+file "clean-data/humid-midday-states.RDS" => shp_fls("clean-data/gadm-states",true) do cln_cdsear5_daily() end
 
 desc "Clean and process NASA GPW population density data"
 task :cln_gpw_popdens => ["clean-data/population-density-countries.RDS","clean-data/population-density-states.RDS"]
