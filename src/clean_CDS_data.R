@@ -95,14 +95,17 @@ temperatureFiles <- lapply(Sys.glob("raw-data/cdsar5-1month_mean_Global_ea_2t*.g
 
 # get the population data for weighted means
 pop_data <- raster("ext-data/gpw_v4_population_density_rev11_2020_15_min.tif")
+                               
+# Extract humidity and temperature across files
+.avg.wrapper <- function(climate, region)
+    return(do.call(cbind, mcMap(
+                                 function(x) avg.climate(shapefile=region, x),
+                       climate)))
 
-# apply the function to extract median humidity across the countries and states data
-# c.humidity <- sapply(humidityFiles, function(x) avg.climate(shapefile = countries, x))
-c.humidity <- sapply(humidityFiles, function(x) avg.climate.weighted(shapefile = countries, pop_density = pop_data, x))
-s.humidity <- sapply(humidityFiles, function(x) avg.climate.weighted(shapefile = states, pop_density = pop_data, x))
-# repeat for CDS temperature data
-c.temperature <- sapply(temperatureFiles, function(x) avg.climate.weighted(shapefile = countries, pop_density = pop_data, x))
-s.temperature <- sapply(temperatureFiles, function(x) avg.climate.weighted(shapefile = states, pop_density = pop_data, x))
+c.humidity <- .avg.wrapper(humidityFiles, countries)
+s.humidity <- .avg.wrapper(humidityFiles, states)
+c.temperature <- .avg.wrapper(temperatureFiles, countries)
+s.temperature <- .avg.wrapper(temperatureFiles, states)
 
 # use these temperatures and humidities to calculate vapor pressure (or absolute humidity)
 # countries first
@@ -119,43 +122,14 @@ c.temperature <- c.temperature-273.15
 s.temperature <- s.temperature-273.15
 
 
-# add names to the matrices
-dimnames(c.humidity) <- list(
-  countries$NAME_0,
-  c("January_19_RH","February_19_RH","March_19_RH","April_19_RH","May_19_RH","June_19_RH","July_19_RH","August_19_RH","September_19_RH",
-    "October_19_RH", "November_19_RH","December_19_RH", "January_20_RH","February_20_RH","March_20_RH","April_20_RH","May_20_RH")
-)
-
-dimnames(s.humidity) <- list(
-  states$GID_1,
-  c("January_19_RH","February_19_RH","March_19_RH","April_19_RH","May_19_RH","June_19_RH","July_19_RH","August_19_RH","September_19_RH",
-    "October_19_RH", "November_19_RH","December_19_RH", "January_20_RH","February_20_RH","March_20_RH","April_20_RH","May_20_RH")
-)
-
-# TC for temperature (Celsius)
-dimnames(c.temperature) <- list(
-  countries$NAME_0,
-  c("January_19_TC","February_19_TC","March_19_TC","April_19_TC","May_19_TC","June_19_TC","July_19_TC","August_19_TC","September_19_TC",
-    "October_19_TC", "November_19_TC","December_19_TC", "January_20_TC","February_20_TC","March_20_TC","April_20_TC","May_20_TC")
-)
-
-dimnames(s.temperature) <- list(
-  states$GID_1,
-  c("January_19_TC","February_19_TC","March_19_TC","April_19_TC","May_19_TC","June_19_TC","July_19_TC","August_19_TC","September_19_TC",
-    "October_19_TC", "November_19_TC","December_19_TC", "January_20_TC","February_20_TC","March_20_TC","April_20_TC","May_20_TC")
-)
-
-dimnames(c.abs_hum) <- list(
-  countries$NAME_0,
-  c("January_19_AH","February_19_AH","March_19_AH","April_19_AH","May_19_AH","June_19_AH","July_19_AH","August_19_AH","September_19_AH",
-    "October_19_AH", "November_19_AH","December_19_AH", "January_20_AH","February_20_AH","March_20_AH","April_20_AH","May_20_AH")
-)
-
-dimnames(s.abs_hum) <- list(
-  states$GID_1,
-  c("January_19_AH","February_19_AH","March_19_AH","April_19_AH","May_19_AH","June_19_AH","July_19_AH","August_19_AH","September_19_AH",
-    "October_19_AH", "November_19_AH","December_19_AH", "January_20_AH","February_20_AH","March_20_AH","April_20_AH","May_20_AH")
-)
+# add names to the matrices (TC -> Temperature Celsius)
+month.year <- c("January_19","February_19","March_19","April_19","May_19","June_19","July_19","August_19","September_19","October_19", "November_19","December_19", "January_20","February_20","March_20","April_20","May_20")
+dimnames(c.humidity) <- list(countries$NAME_0, paste0(month.year,"_RH"))
+dimnames(s.humidity) <- list(states$GID_1, paste0(month.year,"_RH"))
+dimnames(c.temperature) <- list(countries$NAME_0, paste0(month.year,"_TC"))
+dimnames(s.humidity) <- list(states$GID_1, paste0(month.year,"_TC"))
+dimnames(c.abs_hum) <- list(countries$NAME_0, paste0(month.year,"_AH"))
+dimnames(s.abs_hum) <- list(states$GID_1, paste0(month.year,"_AH"))
 
 rownames(c.humidity) <- gsub(" ", "_", rownames(c.humidity))
 rownames(c.temperature) <- gsub(" ", "_", rownames(c.temperature))

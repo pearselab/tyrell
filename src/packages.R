@@ -1,7 +1,7 @@
 silent.require <- function(x) suppressMessages(require(package=x, character.only=TRUE, quietly=TRUE))
 
 # Load packages that are already installed
-packages <- c("rstan",
+packages <- c("rstan", "parallel", "yaml",
               "zeallot", #src/clean-gadm.R (and because Will likes it)
               "raster", "sp", "lubridate", "rgeos", "RColorBrewer", "abind", "exactextractr", "sf", # worldclim and gadm cleaning
               "devtools", # to install GitHub packages (like Lorenzo's)
@@ -32,4 +32,16 @@ if(!silent.require("velox")){ # src/clean-gadm.R and src/worldclim.R
     install_github("hunzikp/velox", upgrade=FALSE)
     if(!silent.require("velox"))
         stop("Cannot install velox")
+}
+
+
+# Set number of cores (if desired)
+library(yaml)
+if(file.exists("config.yml")){
+    config <- read_yaml("config.yml")
+    if("r" %in% names(config)){
+        r.config <- config$r
+        if("mc.cores" %in% names(r.config))
+            options(mc.cores=r.config$mc.cores)
+    }
 }
