@@ -127,7 +127,7 @@ month.year <- c("January_19","February_19","March_19","April_19","May_19","June_
 dimnames(c.humidity) <- list(countries$NAME_0, paste0(month.year,"_RH"))
 dimnames(s.humidity) <- list(states$GID_1, paste0(month.year,"_RH"))
 dimnames(c.temperature) <- list(countries$NAME_0, paste0(month.year,"_TC"))
-dimnames(s.humidity) <- list(states$GID_1, paste0(month.year,"_TC"))
+dimnames(s.temperature) <- list(states$GID_1, paste0(month.year,"_TC"))
 dimnames(c.abs_hum) <- list(countries$NAME_0, paste0(month.year,"_AH"))
 dimnames(s.abs_hum) <- list(states$GID_1, paste0(month.year,"_AH"))
 
