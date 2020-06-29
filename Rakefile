@@ -417,7 +417,7 @@ end
 # Clean data ###################
 ################################
 desc "Process all raw data"
-task :cln_data => [:before_cln_data, :cln_gadm, :cln_denvfoi_rasters, :cln_worldclim, :cln_cdsar5_monthly, :cln_cdsear5_daily, :cln_gpw_popdens, :cln_uv_monthly]
+task :cln_data => [:before_cln_data, :cln_gadm, :cln_denvfoi_rasters, :cln_worldclim, :cln_cdsar5_monthly, :cln_cdsear5_daily, :cln_gpw_popdens, :cln_uv_monthly, :join_R_climate]
 task :before_cln_data do
   puts "\t ... Processing raw data"
 end
@@ -508,6 +508,18 @@ def cln_uv_monthly()
 end
 file "clean-data/monthly-avg-UV-countries.RDS" => shp_fls("clean-data/gadm-countries",true) do cln_uv_monthly() end
 file "clean-data/monthly-avg-UV-states.RDS" => shp_fls("clean-data/gadm-states",true) do cln_uv_monthly() end
+
+
+desc "Combine cleaned environmental data with R0/Rt estimates"
+task :join_R_climate => ["clean-data/climate_and_R0.csv","clean-data/climate_and_lockdown_Rt.csv"]
+def join_R_climate()
+  `Rscript src/combine-R0-and-monthly-environment.R`
+  date_metadata "clean-data/climate_and_R0.csv"
+  date_metadata "clean-data/climate_and_lockdown_Rt.csv"
+end
+# Need to specify the below files all exist?
+#file "clean-data/climate_and_R0.csv" => ["clean-data/temperature-countries.RDS", "clean-data/temperature-states.RDS", "clean-data/relative-humidity-countries.RDS", "clean-data/relative-humidity-states.RDS", "clean-data/absolute-humidity-countries.RDS", "clean-data/absolute-humidity-states.RDS", "clean-data/population-density-countries.RDS", "clean-data/population-density-states.RDS", "clean-data/monthly-avg-UV-countries.RDS", "clean-data/monthly-avg-UV-states.RDS", "raw-data/imperial-europe-pred.csv", "raw-data/imperial-interventions.csv", "raw-data/imperial-lmic-pred.csv", "raw-data/imperial-usa-pred.csv"] do join_R_climate() end
+#file "clean-data/climate_and_lockdown_Rt.csv" =>  do join_R_climate() end
 
 
 ################################
