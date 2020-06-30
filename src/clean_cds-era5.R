@@ -13,7 +13,7 @@ states <- shapefile("clean-data/gadm-states.shp")
 
 # Load temperature data and subset into rasters for each day of the year
 # - NOTE: assumes Tom's humidity script applies here too
-days <- as.Date("2020-01-01") + 0:151
+days <- as.character(as.Date("2020-01-01") + 0:151)
 temp <- rgdal::readGDAL("raw-data/cds-era5-temp-midday.grib")
 humid <- rgdal::readGDAL("raw-data/cds-era5-humid-midday.grib")
 .drop.col <- function(i, sp.df){
@@ -40,7 +40,7 @@ saveRDS(
     "clean-data/temp-midday-countries.RDS"
 )
 saveRDS(
-    .give.names(.avg.wrapper(temp, states), states$GID_1, days)
+    .give.names(.avg.wrapper(temp, states), states$GID_1, days),
     "clean-data/temp-midday-states.RDS"
 )
 saveRDS(

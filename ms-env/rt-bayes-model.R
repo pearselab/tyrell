@@ -81,21 +81,28 @@ processed_data <- process_covariates(states = states,
 stan_data <- processed_data$stan_data
 
 # Add envirionmental data
-states <- shapefile("../../clean-data/gadm-states.shp")
-us.states <- which(states$NAME_0=="United States")
-states <- states[us.states,]
-states$code <- sapply(strsplit(states$HASC_1, ".", fixed=TRUE), function(x) x[2])
-env_dat <- readRDS("../../clean-data/worldclim-states.RDS")[us.states,,"tmean"]
-env_dat <- env_dat[match(names(processed_data$reported_deaths), states$code),]
-env_dat <- env_dat[,rep(2:5, c(27,31,30,27))]
-stan_data$env_dat <- scale(t(env_dat))
+env <- readRDS("../../clean-data/temp-midday-states.RDS")
+pop <- readRDS("../../clean-data/population-density-states.RDS")
+meta <- shapefile("../../clean-data/gadm-states.shp")
+env <- env[meta$NAME_0=="United States",]
+pop <- pop[meta$NAME_0=="United States",]
+meta <- meta[meta$NAME_0=="United States",]
+meta$code <- sapply(strsplit(meta$HASC_1, ".", fixed=TRUE), function(x) x[2])
+env <- env[match(names(processed_data$reported_deaths), meta$code),]
+pop <- log10(pop[match(names(processed_data$reported_deaths), meta$code)])
+env_time <- env[,34:148]
+env_time[is.na(env_time)] <- mean(env_time, na.rm=TRUE)
+env_time <- (env_time-mean(env_time)) / sd(env_time)
+pop[is.na(pop)] <- median(pop, na.rm=TRUE)
+pop <- as.numeric(scale(pop))
+stan_data$env_time <- t(env_time); stan_data$pop_dat <- pop
 
 dates <- processed_data$dates
 reported_deaths <- processed_data$reported_deaths
 reported_cases <- processed_data$reported_cases
 options(mc.cores = parallel::detectCores())
 rstan_options(auto_write = TRUE)
-m <- stan_model('stan-models/stan-usa.stan')
+m <- stan_model('stan-models/rt-bayes.stan')
 fit = sampling(m,data=stan_data,iter=1800,warmup=1000,chains=5,thin=1,control = list(adapt_delta = 0.8, max_treedepth = 15))
 
 covariate_data = list(interventions, mobility)
@@ -108,4 +115,4 @@ estimated_deaths_cf <- out$E_deaths0
 save(fit, dates, reported_cases, reported_deaths, states,
      estimated_cases_raw, estimated_deaths_raw, estimated_deaths_cf,
      formula, formula_partial_regional,formula_partial_state, stan_data,covariate_data, 
-     file='results/env-usa-stanfit.Rdata')
+     file='results/rt-bayes.Rdata')

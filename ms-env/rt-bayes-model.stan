@@ -20,7 +20,7 @@ data {
   real SI[N2]; // fixed SI using empirical data
   // Added environmental data	 
   matrix[N2, M] env_time; // Changing environmental data
-  real env_const[M]; // Day 1 environment data
+  //real env_const[M]; // Day 1 environment data
   real pop_dat[M]; // Population density data for all states
   
 }
@@ -40,13 +40,13 @@ transformed data {
 }
 
 parameters {
-  real<lower=0> mu[M]; 
+  real<lower=0> mu;//[M]; // Modified for env model
   vector[P] alpha; 
   vector[P_partial_regional] alpha_region[Q];
   vector[P_partial_state] alpha_state[M];
   real<lower=0> gamma_region;
   real<lower=0> gamma_state;
-  real<lower=0> kappa;
+  // real<lower=0> kappa; // Removed for env model
   real<lower=0> y[M];
   real<lower=0> phi;
   real<lower=0> tau;
@@ -56,7 +56,7 @@ parameters {
   real<lower=0, upper=1> weekly_rho1;
   real<lower=0> weekly_sd;
   real env_time_slp; // Environmental effect through time
-  real env_const_slp; // Environmental effect across states
+//  real env_const_slp; // Environmental effect across states
   real pop_slp; // Population density effect
 }
 
@@ -74,7 +74,8 @@ transformed parameters {
         cumm_sum[2:N0,m] = cumulative_sum(prediction[2:N0,m]);
 
 	// Added environment to code below (note now element-wise multiply)
-        Rt[,m] = rep_vector(mu[m] + pop_dat[m]*pop_slp + env_const[m]*env_const_slp, N2);
+	Rt[,m] = mu + pop_dat[m]*pop_slp + env_time[,m]*env_time_slp;
+        //Rt[,m] = rep_vector(mu[m] + pop_dat[m]*pop_slp + env_const[m]*env_const_slp, N2);// + env_time[,m]*env_time_slp;
 	//(mu[m] + pop_dat[m]*pop_slp + env_const[m]*env_const_slp)
 	       // + env_time[,m]*env_time_slp;
 	Rt[,m] = (2 * inv_logit(-X[m] * alpha 
@@ -126,13 +127,13 @@ model {
      alpha_state[q] ~ normal(0,gamma_state);
   }
   phi ~ normal(0,5);
-  kappa ~ normal(0,0.5);
-  mu ~ normal(3.28, kappa); // citation: https://academic.oup.com/jtm/article/27/2/taaa021/5735319
+  // kappa ~ normal(0,0.5); // Removed for env model
+  mu ~ normal(3.28, 0.5); // citation: https://academic.oup.com/jtm/article/27/2/taaa021/5735319 // Modified to have a prior that makes it difficult for env to have an effect
   alpha ~ normal(0,0.5);
   ifr_noise ~ normal(1,0.1);
-  env_const_slp ~ normal(0, .1); // Added environment; strong prior for 0 effect
-  env_time_slp ~ normal(0, .1); // Added environment; strong prior for 0 effect
-  pop_slp ~ normal(0, .1); // Added environment; strong prior for 0 effect
+  //env_const_slp ~ normal(0, .1); // Added environment; strong prior for 0 effect
+  env_time_slp ~ normal(0, .5); // Added environment; strong prior for 0 effect
+  pop_slp ~ normal(0, .5); // Added environment; strong prior for 0 effect
   for(m in 1:M){
     deaths[EpidemicStart[m]:N[m], m] ~ neg_binomial_2(E_deaths[EpidemicStart[m]:N[m], m], phi);
    }
