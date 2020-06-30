@@ -4,8 +4,6 @@
 
 source("src/packages.R")
 
-library("countrycode")
-
 ########################################################
 # -- Step 1: load the various climate data and bind -- #
 # -- together into a single data frame              -- #
