@@ -39,7 +39,7 @@ CLEAN.include("ms-env/*.pdf")
 # Install software and tyrell ##
 ################################
 desc "Install all software and setup tyrell folders"
-task :install => [:before_install, "timestamp.yml", :folders, :r_packages, :setup_cds_api]
+task :install => [:before_install, "timestamp.yml", :folders, :r_packages, :setup_cds_api,:setup_nasa_api]
 task :before_install do
   puts "\t ... Installing software and setting up tyrell folders"
 end
@@ -83,6 +83,45 @@ task :setup_cds_api do
     next
   end
   puts "\t ... ... ~/.cdsapirc does not exist; no CDS API key given; CDS download not possible"
+end
+
+task :setup_nasa_api do
+  unless File.exists?("config.yml") then
+    puts "\t ... ... No config.yml file; cannot configure NASA data download"
+    next
+  end
+  config = YAML.load_file("config.yml")
+  unless config["nasa"]["user"] and config["nasa"]["user"]!="your-username-here" then
+    puts "\t ... ... NASA username missing; cannot download NASA data"
+    next
+  end
+  unless config["nasa"]["passwd"] and config["nasa"]["passwd"]!="your-password-here" then
+    puts "\t ... ... NASA password missing; cannot download NASA data"
+    next
+  end
+  if File.exists?(File.expand_path("~/.netrc")) then
+    puts "\t ... ... ~/.netrc exists; assuming contains correctly formatted NASA credentials"
+    next
+  end
+  config = YAML.load_file("config.yml")
+  if config["nasa"]["user"] and config["nasa"]["passwd"] then
+    nasa_user = config["nasa"]["user"]
+    nasa_passwd = config["nasa"]["passwd"]
+    File.open(File.expand_path("~/.netrc"), "w") do |file|
+      file << "machine urs.earthdata.nasa.gov login #{nasa_user} password #{nasa_passwd}\n"
+    end
+    
+    puts "\t ... ... NASA credentials found; ~/.netrc created; this will be not displayed again"
+  end
+  puts "\t ... ... ~/.netrc does not exist; no CDS API key given; CDS download not possible"
+  if File.exists?(File.expand_path("~/.urs_cookies")) then
+    puts "\t ... ... ~/.urs_cookies exists; assuming valid"
+  else
+    File.open(File.expand_path("~/.urs_cookies"), "w") do |file|
+      file << ""
+    end
+    puts "\t ... ... blank ~/.urs_cookies created; this will not be displayed again"
+  end
 end
 
 ################################
@@ -326,7 +365,11 @@ cds_ar5_files.each {|x| file x do raw_cds_ar5(cds_ar5_files) end}
 
 # temporarily do this - ask Will how to do it more sensibly!
 desc "Download February UV data"
-file "raw-data/glUV_february_mean.asc" do dwn_file("raw-data", "https://www.ufz.de/export/data/443/56466_glUV_February_monthly_mean.asc", "glUV_february_mean.asc") end
+file "raw-data/glUV_february_mean.asc" do
+  `wget --load-cookies ~/.urs_cookies --save-cookies ~/.urs_cookies --keep-session-cookies --content-disposition https://acdisc.gsfc.nasa.gov/data/Aura_OMI_Level2G/OMUVBG.003/2020/OMI-Aura_L2G-OMUVBG_2020m0611_v003-2020m0614t090001.he5 -P ./raw-data/`
+  FileUtils.mv "raw-data/OMI-Aura_L2G-OMUVBG_2020m0611_v003-2020m0614t090001.he5", "raw-data/glUV_february_mean.asc"
+  date_metadata "glUV_february_mean.asc"
+end
 desc "Download May UV data"
 file "raw-data/glUV_may_mean.asc" do dwn_file("raw-data", "https://www.ufz.de/export/data/443/56469_glUV_February_monthly_mean.asc", "glUV_May_mean.asc") end
 
