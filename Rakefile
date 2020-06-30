@@ -518,7 +518,7 @@ def join_R_climate()
   date_metadata "clean-data/climate_and_lockdown_Rt.csv"
 end
 file "clean-data/climate_and_R0.csv" => ["clean-data/temperature-countries.RDS", "clean-data/temperature-states.RDS", "clean-data/relative-humidity-countries.RDS", "clean-data/relative-humidity-states.RDS", "clean-data/absolute-humidity-countries.RDS", "clean-data/absolute-humidity-states.RDS", "clean-data/population-density-countries.RDS", "clean-data/population-density-states.RDS", "clean-data/monthly-avg-UV-countries.RDS", "clean-data/monthly-avg-UV-states.RDS", "raw-data/imperial-europe-pred.csv", "raw-data/imperial-interventions.csv", "raw-data/imperial-lmic-pred.csv", "raw-data/imperial-usa-pred.csv"] do join_R_climate() end
-file "clean-data/climate_and_lockdown_Rt.csv" =>  do join_R_climate() end
+file "clean-data/climate_and_lockdown_Rt.csv" do join_R_climate() end
 
 
 ################################
