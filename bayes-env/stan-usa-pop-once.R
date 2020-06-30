@@ -90,17 +90,17 @@ meta <- meta[meta$NAME_0=="United States",]
 meta$code <- sapply(strsplit(meta$HASC_1, ".", fixed=TRUE), function(x) x[2])
 env <- env[match(names(processed_data$reported_deaths), meta$code),]
 pop <- log10(pop[match(names(processed_data$reported_deaths), meta$code)])
-#env_const <- env[,2]
-#env_const[is.na(env_const)] <- mean(env_const, na.rm=TRUE)
-env_time <- env[,34:148]
-env_time[is.na(env_time)] <- mean(env_time, na.rm=TRUE)
+env_const <- env[,2]
+env_const[is.na(env_const)] <- mean(env_const, na.rm=TRUE)
+#env_time <- env[,34:148]
+#env_time[is.na(env_time)] <- mean(env_time, na.rm=TRUE)
 #env_time <- apply(env_time, 2, function(x) x-env_const)
-env_time <- (env_time-mean(env_time)) / sd(env_time)
+#env_time <- (env_time-mean(env_time)) / sd(env_time)
 pop[is.na(pop)] <- median(pop, na.rm=TRUE)
 pop <- as.numeric(scale(pop))
-#env_const <- as.numeric(scale(env_const))
-stan_data$env_time <- t(env_time)#;
-#stan_data$env_const <- env_const;
+env_const <- as.numeric(scale(env_const))
+#stan_data$env_time <- t(env_time)#;
+stan_data$env_const <- env_const;
 stan_data$pop_dat <- pop
 
 dates <- processed_data$dates
@@ -108,7 +108,7 @@ reported_deaths <- processed_data$reported_deaths
 reported_cases <- processed_data$reported_cases
 options(mc.cores = parallel::detectCores())
 rstan_options(auto_write = TRUE)
-m <- stan_model('stan-models/stan-usa-pop.stan')
+m <- stan_model('stan-models/stan-usa-pop-once.stan')
 fit = sampling(m,data=stan_data,iter=1800,warmup=1000,chains=5,thin=1,control = list(adapt_delta = 0.8, max_treedepth = 15))
 #fit = sampling(m,data=stan_data,iter=900,warmup=500,chains=5,thin=1,control = list(adapt_delta = 0.8, max_treedepth = 15))
 
@@ -122,4 +122,4 @@ estimated_deaths_cf <- out$E_deaths0
 save(fit, dates, reported_cases, reported_deaths, states,
      estimated_cases_raw, estimated_deaths_raw, estimated_deaths_cf,
      formula, formula_partial_regional,formula_partial_state, stan_data,covariate_data, 
-     file='results/env-pop-usa-stanfit.Rdata')
+     file='results/env-pop-usa-once-stanfit.Rdata')

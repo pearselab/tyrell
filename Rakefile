@@ -535,11 +535,11 @@ task :fit_env_imp do
   FileUtils.cp ["bayes-env/stan-europe.R","bayes-env/stan-usa.R","bayes-env/stan-usa-pop.R","bayes-env/stan-brazil.R","bayes-env/stan-italy.R"], "imptf-models/covid19model-6.0/"
   FileUtils.cp ["bayes-env/stan-europe.stan","bayes-env/stan-usa.stan","bayes-env/stan-usa-pop.stan","bayes-env/stan-brazil.stan", "bayes-env/stan-italy.stan"], "imptf-models/covid19model-6.0/stan-models/"
   Dir.chdir "imptf-models/covid19model-6.0/" do
-    `Rscript stan-europe.R > ../../bayes-env/STDOUT-europe`
+    #`Rscript stan-europe.R > ../../bayes-env/STDOUT-europe`
     `Rscript stan-usa-pop.R > ../../bayes-env/STDOUT-usa-pop`
     #`Rscript stan-usa.R > ../../bayes-env/STDOUT-usa`
-    `Rscript stan-brazil.R > ../../bayes-env/STDOUT-brazil`
-    `Rscript stan-italy.R > ../../bayes-env/STDOUT-italy`
+    #`Rscript stan-brazil.R > ../../bayes-env/STDOUT-brazil`
+    #`Rscript stan-italy.R > ../../bayes-env/STDOUT-italy`
   end
   FileUtils.rm ["bayes-env/stan-europe.R","bayes-env/stan-usa.R","bayes-env/stan-usa-pop.R""bayes-env/stan-brazil.R","bayes-env/stan-italy.R", "bayes-env/stan-europe.stan","bayes-env/stan-usa.stan","bayes-env/stan-usa-pop.stan","bayes-env/stan-brazil.stan","bayes-env/stan-italy.stan"]
   `Rscript bayes-env/downstream.R > bayes-env/raw-results.txt`
