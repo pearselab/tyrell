@@ -32,10 +32,8 @@ CLOBBER.include("raw-data/*")
 CLOBBER.include("imptf-models/*")
 CLOBBER.include("rambaut-nomenclature/*")
 CLEAN.include("clean-data/*")
-CLEAN.include("figures/*")
-CLEAN.include("models/*")
-CLEAN.include("forecasts/*")
-CLEAN.include("bayes-env/*.txt")
+CLEAN.include("ms-env/*.txt")
+CLEAN.include("ms-env/*.pdf")
 
 ################################
 # Install software and tyrell ##
@@ -50,12 +48,9 @@ desc "Install R packages"
 task :r_packages do `Rscript "src/packages.R"` end
 
 desc "Setup tyrell folders"
-task :folders => ["raw-data", "clean-data", "figures", "models", "forecasts", "imptf-models", "ext-data"]
+task :folders => ["raw-data", "clean-data", "imptf-models", "ext-data"]
 directory 'raw-data'
 directory 'clean-data'
-directory 'figures'
-directory 'models'
-directory 'forecasts'
 directory 'imptf-models'
 directory 'ext-data'
 
@@ -94,7 +89,7 @@ end
 # Download raw data ############
 ################################
 desc "Download all raw data"
-task :dwn_data => [:before_dwn_data, :raw_jhu, "raw-data/ecdc-cases.csv", "raw-data/ecjrcdc-regions.csv", "raw-data/ecjrcdc-countries.csv", "raw-data/uk-phe-deaths.csv", "raw-data/uk-phe-cases.csv", "raw-data/cvodidh-admin1.csv", "raw-data/cvodidh-admin2.csv", "raw-data/cvodidh-admin3.csv", "raw-data/imperial-europe-pred.csv", "raw-data/imperial-usa-pred.csv", "raw-data/imperial-lmic-pred.csv", :raw_ihme, :raw_nxtstr, "raw-data/who-interventions.xlsx", "raw-data/imperial-interventions.csv", "raw-data/oxford-interventions.csv", :raw_imptfmods, "rambaut-nomenclature", "raw-data/denvfoimap-raster.RDS", :raw_gadm, :raw_cds_ar5, "raw-data/cds-era5-temp-midday.grib", "raw-data/cds-era5-humid-midday.grib", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif", "raw-data/glUV_february_mean.asc", "raw-data/glUV_february_mean.asc"]
+task :dwn_data => [:before_dwn_data, :raw_jhu, "raw-data/ecdc-cases.csv", "raw-data/ecjrcdc-regions.csv", "raw-data/ecjrcdc-countries.csv", "raw-data/uk-phe-deaths.csv", "raw-data/uk-phe-cases.csv", "raw-data/cvodidh-admin1.csv", "raw-data/cvodidh-admin2.csv", "raw-data/cvodidh-admin3.csv", "raw-data/imperial-europe-pred.csv", "raw-data/imperial-usa-pred.csv", "raw-data/imperial-lmic-pred.csv", :raw_ihme, :raw_nxtstr, "raw-data/who-interventions.xlsx", "raw-data/imperial-interventions.csv", "raw-data/oxford-interventions.csv", :raw_imptfmods, "raw-data/rambaut-nomenclature", "raw-data/denvfoimap-raster.RDS", :raw_gadm, :raw_cds_ar5, "raw-data/cds-era5-temp-midday.grib", "raw-data/cds-era5-humid-midday.grib", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif", "raw-data/glUV_february_mean.asc", "raw-data/glUV_february_mean.asc"]
 task :before_dwn_data do
   puts "\t ... Downloading raw data (can take a long time)"
 end
@@ -297,10 +292,12 @@ end
 
 
 desc "Download Rambaut et al. phylo-nomenclature"
-directory "rambaut-nomenclature" do
-  unzip(stream_file("https://github.com/hCoV-2019/lineages/archive/master.zip", "rambaut-nomenclature.zip"))
-  FileUtils.mv "lineages-master", "rambaut-nomenclature"
-  FileUtils.rm "rambaut-nomenclature.zip"
+directory "raw-data/rambaut-nomenclature" do
+  Dir.chdir "raw-data" do
+    unzip(stream_file("https://github.com/hCoV-2019/lineages/archive/master.zip", "rambaut-nomenclature.zip"))
+    FileUtils.mv "lineages-master", "rambaut-nomenclature"
+    FileUtils.rm "rambaut-nomenclature.zip"
+  end
 end
 
 desc "Download DENVfoiMap raster data"
