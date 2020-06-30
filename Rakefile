@@ -94,7 +94,7 @@ end
 # Download raw data ############
 ################################
 desc "Download all raw data"
-task :dwn_data => [:before_dwn_data, :raw_jhu, "raw-data/ecdc-cases.csv", "raw-data/ecjrcdc-regions.csv", "raw-data/ecjrcdc-countries.csv", "raw-data/uk-phe-deaths.csv", "raw-data/uk-phe-cases.csv", "raw-data/cvodidh-admin1.csv", "raw-data/cvodidh-admin2.csv", "raw-data/cvodidh-admin3.csv", "raw-data/imperial-europe-pred.csv", "raw-data/imperial-usa-pred.csv", "raw-data/imperial-lmic-pred.csv", :raw_ihme, :raw_nxtstr, "raw-data/who-interventions.xlsx", "raw-data/imperial-interventions.csv", "raw-data/oxford-interventions.csv", :raw_imptfmods, "rambaut-nomenclature", "raw-data/denvfoimap-raster.RDS", :raw_gadm, :raw_cds_ar5, "raw-data/cds-era5-temp-midday.grib", "raw-data/cds-era5-humid-midday.grib", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif"]
+task :dwn_data => [:before_dwn_data, :raw_jhu, "raw-data/ecdc-cases.csv", "raw-data/ecjrcdc-regions.csv", "raw-data/ecjrcdc-countries.csv", "raw-data/uk-phe-deaths.csv", "raw-data/uk-phe-cases.csv", "raw-data/cvodidh-admin1.csv", "raw-data/cvodidh-admin2.csv", "raw-data/cvodidh-admin3.csv", "raw-data/imperial-europe-pred.csv", "raw-data/imperial-usa-pred.csv", "raw-data/imperial-lmic-pred.csv", :raw_ihme, :raw_nxtstr, "raw-data/who-interventions.xlsx", "raw-data/imperial-interventions.csv", "raw-data/oxford-interventions.csv", :raw_imptfmods, "rambaut-nomenclature", "raw-data/denvfoimap-raster.RDS", :raw_gadm, :raw_cds_ar5, "raw-data/cds-era5-temp-midday.grib", "raw-data/cds-era5-humid-midday.grib", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif", "raw-data/glUV_february_mean.asc", "raw-data/glUV_february_mean.asc"]
 task :before_dwn_data do
   puts "\t ... Downloading raw data (can take a long time)"
 end
@@ -326,6 +326,14 @@ def raw_cds_ar5(files)
 end
 cds_ar5_files.each {|x| file x do raw_cds_ar5(cds_ar5_files) end}
 
+
+# temporarily do this - ask Will how to do it more sensibly!
+desc "Download February UV data"
+file "raw-data/glUV_february_mean.asc" do dwn_file("raw-data", "https://www.ufz.de/export/data/443/56466_glUV_February_monthly_mean.asc", "glUV_february_mean.asc") end
+desc "Download May UV data"
+file "raw-data/glUV_may_mean.asc" do dwn_file("raw-data", "https://www.ufz.de/export/data/443/56469_glUV_February_monthly_mean.asc", "glUV_May_mean.asc") end
+
+
 desc "Get midday (daily) CDS-ERA5 temperature data"
 file "raw-data/cds-era5-temp-midday.grib" do
   Dir.chdir("raw-data") do `python3 ../src/cds-era5-temp.py` end
@@ -405,7 +413,7 @@ end
 # Clean data ###################
 ################################
 desc "Process all raw data"
-task :cln_data => [:before_cln_data, :cln_gadm, :cln_denvfoi_rasters, :cln_worldclim, :cln_cdsar5_monthly, :cln_cdsear5_daily, :cln_gpw_popdens]
+task :cln_data => [:before_cln_data, :cln_gadm, :cln_denvfoi_rasters, :cln_worldclim, :cln_cdsar5_monthly, :cln_cdsear5_daily, :cln_gpw_popdens, :cln_uv_monthly]
 task :before_cln_data do
   puts "\t ... Processing raw data"
 end
@@ -485,6 +493,17 @@ def cln_gpw_popdens()
 end
 file "clean-data/population-density-countries.RDS" => "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif" do cln_gpw_popdens() end
 file "clean-data/population-density-states.RDS" => "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif" do cln_gpw_popdens() end
+
+
+desc "Clean and process monthly glUV data"
+task :cln_uv_monthly => ["clean-data/monthly-avg-UV-countries.RDS","clean-data/monthly-avg-UV-states.RDS"]
+def cln_uv_monthly()
+  `Rscript src/clean-monthly-uv-data.R`
+  date_metadata "clean-data/monthly-avg-UV-countries.RDS"
+  date_metadata "clean-data/monthly-avg-UV-states.RDS"
+end
+file "clean-data/monthly-avg-UV-countries.RDS" => shp_fls("clean-data/gadm-countries",true) do cln_uv_monthly() end
+file "clean-data/monthly-avg-UV-states.RDS" => shp_fls("clean-data/gadm-states",true) do cln_uv_monthly() end
 
 
 ################################
