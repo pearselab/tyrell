@@ -5,7 +5,7 @@ source("src/packages.R")
 # function to average UV across shapefile
 avg.uv <- function(shapefile, x){
   # average the UV across each object in the shapefile
-  return(x$extract(shapefile, fun = function(x)median(x, na.rm = TRUE)))
+  return(x$extract(shapefile, small = TRUE, fun = function(x)median(x, na.rm = TRUE)))
 }
 
 # Get countries and states
