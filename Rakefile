@@ -535,6 +535,35 @@ task :purge_clean_data do
 end
 
 ################################
+# MS1 - Environmental impacts ##
+################################
+desc "Repeating manusript #1 - environmental impacts"
+task :ms1_env => [:before_ms1_env, :r0_models, :rt_models, :ms_build]
+task :before_ms1_env do
+  puts "\t ... Repeating MS#1 - environmental impacts"
+end
+
+desc "Fit R0 environmental models"
+task :r0_models => ["humidity-countries","humidity-states","population-density-countries","population-density-states"].map {|x| "clean-data/#{x}.RDS"} do
+  `Rscript ms-env/r0-models-plots.R`
+end
+
+desc "Fit Rt epidemiological models"
+task :r0_models => ["temp-midday-states","population-density-states"].map!{|x| "clean-data/#{x}.RDS"} + [:raw_imptfmods] do
+    FileUtils.cp ["ms-env/rt-bayes-model.R","ms-env/rt-bayes-model.stan"], "imptf-models/covid19model-6.0/"
+  Dir.chdir "imptf-models/covid19model-6.0/" do
+    `Rscript rt-bayes-model.R > ../../ms-env/STDOUT-rt-bayes-model.txt`
+    FileUtils.rm ["bayes-env/stan-europe.R","bayes-env/stan-usa.R","bayes-env/stan-usa-pop.R""bayes-env/stan-brazil.R","bayes-env/stan-italy.R", "bayes-env/stan-europe.stan","bayes-env/stan-usa.stan","bayes-env/stan-usa-pop.stan","bayes-env/stan-brazil.stan","bayes-env/stan-italy.stan"]
+  end
+  `Rscript ms-env/rt-bayes-downstream.R > ms-env/rt-bayes-downstream.txt`
+end
+
+desc "Build MS#1 manuscript"
+task :ms_build do
+  puts "Still on Overleaf right now"
+end
+
+################################
 # Fit models ###################
 ################################
 desc "Fitting our models"
@@ -546,22 +575,6 @@ end
 desc "Fitting proposal models"
 task :fit_proposal do
   puts "Yeah, I'm working on it, OK?..."
-end
-
-desc "Fitting modified Imperial models"
-task :fit_env_imp do
-  puts "Hey, if you're expecting this to work... Don't do that"
-  FileUtils.cp ["bayes-env/stan-europe.R","bayes-env/stan-usa.R","bayes-env/stan-usa-pop.R","bayes-env/stan-brazil.R","bayes-env/stan-italy.R"], "imptf-models/covid19model-6.0/"
-  FileUtils.cp ["bayes-env/stan-europe.stan","bayes-env/stan-usa.stan","bayes-env/stan-usa-pop.stan","bayes-env/stan-brazil.stan", "bayes-env/stan-italy.stan"], "imptf-models/covid19model-6.0/stan-models/"
-  Dir.chdir "imptf-models/covid19model-6.0/" do
-    #`Rscript stan-europe.R > ../../bayes-env/STDOUT-europe`
-    `Rscript stan-usa-pop.R > ../../bayes-env/STDOUT-usa-pop`
-    #`Rscript stan-usa.R > ../../bayes-env/STDOUT-usa`
-    #`Rscript stan-brazil.R > ../../bayes-env/STDOUT-brazil`
-    #`Rscript stan-italy.R > ../../bayes-env/STDOUT-italy`
-  end
-  FileUtils.rm ["bayes-env/stan-europe.R","bayes-env/stan-usa.R","bayes-env/stan-usa-pop.R""bayes-env/stan-brazil.R","bayes-env/stan-italy.R", "bayes-env/stan-europe.stan","bayes-env/stan-usa.stan","bayes-env/stan-usa-pop.stan","bayes-env/stan-brazil.stan","bayes-env/stan-italy.stan"]
-  `Rscript bayes-env/downstream.R > bayes-env/raw-results.txt`
 end
 
 desc "Estimating phylogenetic signal"
