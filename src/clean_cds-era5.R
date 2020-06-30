@@ -1,9 +1,5 @@
 # --- Get average humidity for countries/states --- #
 #
-# ISSUES:
-# - currently this isn't working properly for small area countries/states
-#   and we're just generating NAs for those :(
-# - (above copy-pasted from humidity data, because I'm assuming the same is true for that)
 
 source("src/packages.R")
 
@@ -26,7 +22,7 @@ humid <- lapply(seq_along(days), function(i, sp.df) velox(raster::rotate(raster(
 # Do work; format and save
 .avg.wrapper <- function(climate, region)
     return(do.call(cbind, mcMap(
-                              function(r) r$extract(region, fun = function(x) median(x, na.rm = TRUE)),
+                              function(r) r$extract(region, small = TRUE, fun = function(x) median(x, na.rm = TRUE)),
                               climate)))
 .give.names <- function(output, rows, cols, rename=FALSE){
     dimnames(output) <- list(rows, cols)
