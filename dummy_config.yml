@@ -3,3 +3,6 @@ cds:
   key: your-key-here
 r:
   mc.cores: 12
+nasa:
+  user: your-username-here
+  passwd: your-password-here

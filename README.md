@@ -14,6 +14,8 @@ Downloading the NextStrain data involves setting up ChromeDriver, which `install
 
 Downloading the CDS AR5 climate data requires you to (1) register for an API key at https://cds.climate.copernicus.eu/#!/home, (2) copy `dummy_config.yml` to `config.yml` and then copy-paste your, and finally (3) select from here (https://cds.climate.copernicus.eu/cdsapp#!/dataset/ecv-for-climate-change?tab=form) 'surface air temp' and 'surface air relative humidity', 'monthly mean', '1 month', '2019 and 2020', all months, 'ERA5', 'zip', and then submit/agree to the download requirements. After that, Tom, you need to decide whether (a) we want daily data (probably, and if so then set that up :p) and (b) how we load this into R :D Perhaps rgdal::readGDAL can help?
 
+Downloading the NASA data requires you to (1) register for an earthdata account following the instructions here (https://wiki.earthdata.nasa.gov/display/EL/How+To+Register+For+an+EarthData+Login+Profile), then (2) link GES DISC data to your account following the instructions here (2) https://disc.gsfc.nasa.gov/earthdata-login. Finally, add your username and password to `config.yml` (assuming you have made one following the instructions in the paragraph above).
+
 ## Usage
 
 Open a terminal window and type `rake`. Wait a while (several gigabytes of data are downloaded and processed). Note that `timestamp.yml` is updated every time new files are downloaded, time-stamping everything with when it was accessed.
