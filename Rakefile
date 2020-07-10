@@ -128,7 +128,7 @@ end
 # Download raw data ############
 ################################
 desc "Download all raw data"
-task :dwn_data => [:before_dwn_data, :raw_jhu, "raw-data/ecdc-cases.csv", "raw-data/ecjrcdc-regions.csv", "raw-data/ecjrcdc-countries.csv", "raw-data/uk-phe-deaths.csv", "raw-data/uk-phe-cases.csv", "raw-data/cvodidh-admin1.csv", "raw-data/cvodidh-admin2.csv", "raw-data/cvodidh-admin3.csv", "raw-data/imperial-europe-pred.csv", "raw-data/imperial-usa-pred.csv", "raw-data/imperial-lmic-pred.csv", :raw_ihme, :raw_nxtstr, "raw-data/who-interventions.xlsx", "raw-data/imperial-interventions.csv", "raw-data/oxford-interventions.csv", :raw_imptfmods, "raw-data/rambaut-nomenclature", "raw-data/denvfoimap-raster.RDS", :raw_gadm, :raw_cds_ar5, "raw-data/cds-era5-temp-midday.grib", "raw-data/cds-era5-humid-midday.grib", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif", "raw-data/glUV_february_mean.asc", "raw-data/glUV_february_mean.asc"]
+task :dwn_data => [:before_dwn_data, :raw_jhu, "raw-data/ecdc-cases.csv", "raw-data/ecjrcdc-regions.csv", "raw-data/ecjrcdc-countries.csv", "raw-data/uk-phe-deaths.csv", "raw-data/uk-phe-cases.csv", "raw-data/cvodidh-admin1.csv", "raw-data/cvodidh-admin2.csv", "raw-data/cvodidh-admin3.csv", "raw-data/imperial-europe-pred.csv", "raw-data/imperial-usa-pred.csv", "raw-data/imperial-lmic-pred.csv", :raw_ihme, :raw_nxtstr, "raw-data/who-interventions.xlsx", "raw-data/imperial-interventions.csv", "raw-data/oxford-interventions.csv", :raw_imptfmods, "raw-data/rambaut-nomenclature", "raw-data/denvfoimap-raster.RDS", :raw_gadm, :raw_cds_ar5, "raw-data/cds-era5-temp-midday.grib", "raw-data/cds-era5-humid-midday.grib", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif", "raw-data/glUV_february_mean.asc", "raw-data/glUV_february_mean.asc", "raw-data/google-mobility.csv"]
 task :before_dwn_data do
   puts "\t ... Downloading raw data (can take a long time)"
 end
@@ -385,6 +385,15 @@ file "raw-data/cds-era5-humid-midday.grib" do
   date_metadata "raw-data/cds-era5-humid-midday.grib"
 end
 
+desc "Get NASA GPW 30s population density data - large file, 300mb"
+file "ext-data/gpw_v4_population_density_rev11_2020_2pt5_min.tif" do
+  puts "To get a missing external data dependency:"
+  puts "(1) Go to https://sedac.ciesin.columbia.edu/data/set/gpw-v4-population-density-rev11"
+  puts "(2) Register and agree to terms"
+  puts "(3) Go to https://sedac.ciesin.columbia.edu/downloads/data/gpw-v4/gpw-v4-population-density-rev11/gpw-v4-population-density-rev11_2020_30_sec_tif.zip"
+  puts "(4) Extract the .tif file and put it in 'ext-data'"
+end
+
 desc "Get NASA GPW 2pt5 population density data"
 file "ext-data/gpw_v4_population_density_rev11_2020_2pt5_min.tif" do
   puts "To get a missing external data dependency:"
@@ -401,6 +410,10 @@ file "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif" do
   puts "(3) Go to https://sedac.ciesin.columbia.edu/downloads/data/gpw-v4/gpw-v4-population-density-rev11/gpw-v4-population-density-rev11_2020_15_min_tif.zip"
   puts "(4) Extract the .tif file and put it in 'ext-data'"
 end
+
+desc "Get google mobility data"
+file "raw-data/google-mobility.csv" do dwn_file("raw-data", "https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv", "google-mobility.csv") end
+
 
 ################################
 # Running external models ######
@@ -453,7 +466,7 @@ end
 # Clean data ###################
 ################################
 desc "Process all raw data"
-task :cln_data => [:before_cln_data, :cln_gadm, :cln_denvfoi_rasters, :cln_worldclim, :cln_cdsar5_monthly, :cln_cdsear5_daily, :cln_gpw_popdens, :cln_uv_monthly]
+task :cln_data => [:before_cln_data, :cln_gadm, :cln_denvfoi_rasters, :cln_worldclim, :cln_cdsar5_monthly, :cln_cdsear5_daily, :cln_gpw_popdens, :cln_uv_monthly, :join_R_climate]
 task :before_cln_data do
   puts "\t ... Processing raw data"
 end
@@ -544,6 +557,17 @@ def cln_uv_monthly()
 end
 file "clean-data/monthly-avg-UV-countries.RDS" => shp_fls("clean-data/gadm-countries",true) do cln_uv_monthly() end
 file "clean-data/monthly-avg-UV-states.RDS" => shp_fls("clean-data/gadm-states",true) do cln_uv_monthly() end
+
+
+desc "Combine cleaned environmental data with R0/Rt estimates"
+task :join_R_climate => ["clean-data/climate_and_R0.csv","clean-data/climate_and_lockdown_Rt.csv"]
+def join_R_climate()
+  `Rscript src/combine-R0-and-monthly-environment.R`
+  date_metadata "clean-data/climate_and_R0.csv"
+  date_metadata "clean-data/climate_and_lockdown_Rt.csv"
+end
+file "clean-data/climate_and_R0.csv" => ["clean-data/temperature-countries.RDS", "clean-data/temperature-states.RDS", "clean-data/relative-humidity-countries.RDS", "clean-data/relative-humidity-states.RDS", "clean-data/absolute-humidity-countries.RDS", "clean-data/absolute-humidity-states.RDS", "clean-data/population-density-countries.RDS", "clean-data/population-density-states.RDS", "clean-data/monthly-avg-UV-countries.RDS", "clean-data/monthly-avg-UV-states.RDS", "raw-data/imperial-europe-pred.csv", "raw-data/imperial-interventions.csv", "raw-data/imperial-lmic-pred.csv", "raw-data/imperial-usa-pred.csv"] do join_R_climate() end
+file "clean-data/climate_and_lockdown_Rt.csv" do join_R_climate() end
 
 
 ################################

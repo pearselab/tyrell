@@ -13,8 +13,8 @@ states <- shapefile("clean-data/gadm-states.shp")
 #pop_data <- raster("../COVID/Pop_density/gpw_v4_population_density_rev11_2020_2pt5_min.tif")
 pop_data <- velox("ext-data/gpw_v4_population_density_rev11_2020_15_min.tif")
 
-c.popdensity <- pop_data$extract(countries, fun=function(x)mean(x, na.rm = TRUE))
-s.popdensity <- pop_data$extract(states, fun=function(x)mean(x, na.rm = TRUE))
+c.popdensity <- pop_data$extract(countries, small = TRUE, fun=function(x)mean(x, na.rm = TRUE))
+s.popdensity <- pop_data$extract(states, small = TRUE, fun=function(x)mean(x, na.rm = TRUE))
 
 # add names
 dimnames(c.popdensity) <- list(

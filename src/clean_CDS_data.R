@@ -1,8 +1,4 @@
 # --- Get average humidity for countries/states --- #
-#
-# ISSUES:
-# - currently this isn't working properly for small area countries/states
-# and we're just generating NAs for those :(
 
 source("src/packages.R")
 
@@ -19,7 +15,7 @@ avg.climate <- function(shapefile, x){
   rotated_raster <- raster::rotate(climate_raster)
   climate_velox <- velox(rotated_raster)
   # average the humidity across each object in the shapefile
-  return(climate_velox$extract(shapefile, fun = function(x)median(x, na.rm = TRUE)))
+  return(climate_velox$extract(shapefile, small = TRUE, fun = function(x)median(x, na.rm = TRUE)))
 }
 
 # similar to above function, but the climate data is weighted
@@ -127,7 +123,7 @@ month.year <- c("January_19","February_19","March_19","April_19","May_19","June_
 dimnames(c.humidity) <- list(countries$NAME_0, paste0(month.year,"_RH"))
 dimnames(s.humidity) <- list(states$GID_1, paste0(month.year,"_RH"))
 dimnames(c.temperature) <- list(countries$NAME_0, paste0(month.year,"_TC"))
-dimnames(s.humidity) <- list(states$GID_1, paste0(month.year,"_TC"))
+dimnames(s.temperature) <- list(states$GID_1, paste0(month.year,"_TC"))
 dimnames(c.abs_hum) <- list(countries$NAME_0, paste0(month.year,"_AH"))
 dimnames(s.abs_hum) <- list(states$GID_1, paste0(month.year,"_AH"))
 
