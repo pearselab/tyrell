@@ -385,6 +385,15 @@ file "raw-data/cds-era5-humid-midday.grib" do
   date_metadata "raw-data/cds-era5-humid-midday.grib"
 end
 
+desc "Get NASA GPW 30s population density data - large file, 300mb"
+file "ext-data/gpw_v4_population_density_rev11_2020_2pt5_min.tif" do
+  puts "To get a missing external data dependency:"
+  puts "(1) Go to https://sedac.ciesin.columbia.edu/data/set/gpw-v4-population-density-rev11"
+  puts "(2) Register and agree to terms"
+  puts "(3) Go to https://sedac.ciesin.columbia.edu/downloads/data/gpw-v4/gpw-v4-population-density-rev11/gpw-v4-population-density-rev11_2020_30_sec_tif.zip"
+  puts "(4) Extract the .tif file and put it in 'ext-data'"
+end
+
 desc "Get NASA GPW 2pt5 population density data"
 file "ext-data/gpw_v4_population_density_rev11_2020_2pt5_min.tif" do
   puts "To get a missing external data dependency:"
