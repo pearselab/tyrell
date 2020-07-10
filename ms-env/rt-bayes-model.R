@@ -79,6 +79,7 @@ processed_data <- process_covariates(states = states,
                                      formula = formula, formula_partial_regional = formula_partial_regional,
                                      formula_partial_state = formula_partial_state)
 stan_data <- processed_data$stan_data
+saveRDS(processed_data, "../../ms-env/processed_data_usa.RDS")
 
 # Add envirionmental data
 env <- readRDS("../../clean-data/temp-midday-states.RDS")

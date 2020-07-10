@@ -100,7 +100,7 @@ task :setup_nasa_api do
     next
   end
   if File.exists?(File.expand_path("~/.netrc")) then
-    puts "\t ... ... ~/.netrc exists; assuming contains correctly formatted NASA credentials"
+    puts "\t ... ... ~/.netrc exists; assuming contains NASA credentials"
     next
   end
   config = YAML.load_file("config.yml")
