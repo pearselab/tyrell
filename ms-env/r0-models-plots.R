@@ -65,9 +65,9 @@ summary(USA_regression_model)
 xtable(summary(lm(R0 ~ scale(February_20_TC) + scale(log(Pop_density)), data = USA_R0_data)))
 
 # 4. check effects of lockdown
-USA_regression_model_lockdown <- lm(Rt ~ May_20_TC + May_20_AH + May_UV + log(Pop_density), data = USA_Rt_data[USA_Rt_data$Location %in% USA_R0_data$Location,])
+USA_regression_model_lockdown <- lm(Rt ~ May_20_TC + log(Pop_density), data = USA_Rt_data[USA_Rt_data$Location %in% USA_R0_data$Location,])
 summary(USA_regression_model_lockdown)
-summary(lm(Rt~ scale(May_20_TC) + scale(May_20_AH) + scale(May_UV) + scale(log(Pop_density)), data = USA_Rt_data[USA_Rt_data$Location %in% USA_R0_data$Location,]))
+summary(lm(Rt~ scale(May_20_TC) +  scale(log(Pop_density)), data = USA_Rt_data[USA_Rt_data$Location %in% USA_R0_data$Location,]))
 # much lower correlations
 
 # 5. t-test of R0 vs Rt to show importance of lockdown
@@ -84,65 +84,58 @@ for(i in 1:length(locations)){
 
 t.test(USA_R0_data$R0, USA_R0_data$Rt, paired = TRUE, alternative = "greater", na.rm = TRUE)
 
-# 6. Combine temperature and population density into one 3d plot with shadows
+# 6. Combine temperature and population density into one 3d plot with trend surface
+# plot_ly method?
 
-df <- USA_R0_data[,c("February_20_TC", "Pop_density", "R0")]
-df$Pop_density <- log(df$Pop_density)
-names(df) <- c("temperature", "log_pop_density", "r0")
+# predict model over sensible grid of values
+temps <- seq(-9.5, 20, by = 0.1)
+pops <- exp(seq(1.8, 8, by = 0.1))
+grid <- with(USA_R0_data, expand.grid(temps, pops))
+d <- setNames(data.frame(grid), c("February_20_TC", "Pop_density"))
+vals <- predict(USA_regression_model, newdata = d)
 
-plot_range_x <- c(min(df$temperature)*1.1, max(df$temperature)*1.1)
-plot_range_y <- c(min(df$log_pop_density)*0.9, max(df$log_pop_density)*1.1)
-plot_range_z <- c(0, 3.8)
+# form matrix and give to plotly
+R0 <- matrix(vals, nrow = length(unique(d$February_20_TC)), ncol = length(unique(d$Pop_density)))
 
-shadow_x <- df
-shadow_y <- df
-shadow_z <- df
-shadow_x$temperature <- rep(max(plot_range_x),length(shadow_y$log_pop_density))
-shadow_y$log_pop_density <- rep(max(plot_range_y),length(shadow_y$log_pop_density))
-shadow_z$r0 <- rep(min(plot_range_z),length(shadow_y$log_pop_density))
-df_shadows <- rbind(df, shadow_x, shadow_y, shadow_z)
-png("figures/USA_3d_R0.png")
-cloud(df_shadows$r0 ~ 
-        df_shadows$temperature*df_shadows$log_pop_density,
-      screen=list(z = 50, x = -70, y = 0),
-      scales=list(arrows=FALSE, cex=0.6, col="black", font=3,
-                  tck=0.6, distance=1),
-      pch=c(rep(19, 43), rep(19, 129)), 
-      col=c(rep("blue", 43), rep("gray", 129)),
-      cex = 1.5,
-      xlim=plot_range_x, ylim=plot_range_y, zlim=plot_range_z,
-      xlab = "Temperature", ylab = "log(Pop density)", zlab = expression(R[0]))
-dev.off()
+R0_3d <- plot_ly() %>% 
+  add_surface(x = ~log(pops), y = ~temps, z = ~R0, opacity = 0.9, cmin = 0, cmax = 4) %>%
+  add_trace(x = log(USA_R0_data$Pop_density), 
+            y = USA_R0_data$February_20_TC,
+            z = USA_R0_data$R0, 
+            type = "scatter3d", 
+            mode = "markers",
+            marker = list(color = "grey", size = 3,
+                          line = list(color = "black",width = 1)),
+            opacity = 1) %>% 
+  layout(scene = list(xaxis = list(title = "log(Population Density)", autorange = "reversed"),
+                      yaxis = list(title = "Temperature (°C)", autotick = F, tickmode = "array", tickvals = c(-5, 0, 5, 10, 15, 20)),
+                      zaxis = list(title = "R0", range = c(0, 4.2), autotick = F, tickmode = "array", tickvals = c(1, 2, 3, 4))))
+R0_3d
 
-# repeat for post-lockdown
-df_2 <- USA_R0_data[,c("May_20_TC", "Pop_density", "Rt")]
-df_2$Pop_density <- log(df_2$Pop_density)
-names(df_2) <- c("temperature", "log_pop_density", "rt")
+# repeat for Rt data
+# predict model over sensible grid of values
+temps <- seq(7, 25, by = 0.1)
+pops <- exp(seq(1.8, 8, by = 0.1))
+grid <- with(USA_Rt_data[USA_Rt_data$Location %in% USA_R0_data$Location,], expand.grid(temps, pops))
+d <- setNames(data.frame(grid), c("May_20_TC", "Pop_density"))
+vals <- predict(USA_regression_model_lockdown, newdata = d)
 
-plot_range_x <- c(min(df_2$temperature)*1.1, max(df_2$temperature)*1.1)
-plot_range_y <- c(min(df_2$log_pop_density)*0.9, max(df_2$log_pop_density)*1.1)
-plot_range_z <- c(0, 3.8)
+Rt <- matrix(vals, nrow = length(unique(d$May_20_TC)), ncol = length(unique(d$Pop_density)))
 
-shadow_x <- df_2
-shadow_y <- df_2
-shadow_z <- df_2
-shadow_x$temperature <- rep(max(plot_range_x),length(shadow_y$log_pop_density))
-shadow_y$log_pop_density <- rep(max(plot_range_y),length(shadow_y$log_pop_density))
-shadow_z$rt <- rep(min(plot_range_z),length(shadow_y$log_pop_density))
-df_2_shadows <- rbind(df_2, shadow_x, shadow_y, shadow_z)
-png("figures/USA_3d_Rt.png")
-cloud(df_2_shadows$rt ~ 
-        df_2_shadows$temperature*df_2_shadows$log_pop_density,
-      screen=list(z = 50, x = -70, y = 0),
-      scales=list(arrows=FALSE, cex=0.6, col="black", font=3,
-                  tck=0.6, distance=1),
-      pch=c(rep(19, 43), rep(19, 129)), 
-      col=c(rep("blue", 43), rep("gray", 129)),
-      cex = 1.5,
-      xlim=plot_range_x, ylim=plot_range_y, zlim=plot_range_z,
-      xlab = "Temperature", ylab = "log(Pop density)", zlab = expression(R[t]))
-dev.off()
-
+Rt_3d <- plot_ly() %>% 
+  add_surface(x = ~log(pops), y = ~temps, z = ~Rt, opacity = 0.9, cmin = 0, cmax = 4) %>%
+  add_trace(x = log(USA_Rt_data[USA_Rt_data$Location %in% USA_R0_data$Location,]$Pop_density), 
+            y = USA_Rt_data[USA_Rt_data$Location %in% USA_R0_data$Location,]$May_20_TC,
+            z = USA_Rt_data[USA_Rt_data$Location %in% USA_R0_data$Location,]$Rt, 
+            type = "scatter3d", 
+            mode = "markers",
+            marker = list(color = "grey", size = 3,
+                          line = list(color = "black",width = 1)),
+            opacity = 1) %>% 
+  layout(scene = list(xaxis = list(title = "log(Population Density)", autorange = "reversed"),
+                      yaxis = list(title = "Temperature (°C)"),
+                      zaxis = list(title = "Rt", range = c(0, 4.2), autotick = F, tickmode = "array", tickvals = c(1, 2, 3, 4)))) 
+Rt_3d
 
 # 7. plot residuals from pop density regression against temperature
 
@@ -157,11 +150,32 @@ USA_residual_plot <- ggplot(d, aes(x = Temperature, y = pop_residuals)) +
   labs(x = expression(paste("Median February 2020 Temperature (", degree*C, ")")), 
        y = expression(paste("Corrected ", R[0]))) +
   geom_text(aes(label = State), hjust = 0, vjust = 0, position = position_nudge(y = 0.05)) +
-  main_theme
+  main_theme +
+  theme(aspect.ratio = 1)
 USA_residual_plot
 
 ggsave("figures/USA_pop_residuals_vs_temperature.png", USA_residual_plot)
 
+# 8. Plot heatmap of temp vs population density, with
+# cells coloured by R0, with datapoints overlayed
+
+predicted_R0 <- data.frame(grid, vals)
+names(predicted_R0) <- c("Temperature", "Pop_density", "R0")
+
+heatmap_plot <- ggplot(predicted_R0, aes(x = Temperature, y = log(Pop_density))) + 
+  geom_tile(aes(fill = R0)) +
+  geom_point(data = USA_R0_data, aes(x = February_20_TC, y = log(Pop_density), fill = R0), size = 4, shape = 21) +
+  geom_text(data = USA_R0_data, aes(x = February_20_TC, y = log(Pop_density), label = Location), hjust = 0, vjust = 0, position = position_nudge(y = 0.1)) +
+  scale_fill_gradient(low = "blue", high = "yellow") +
+  scale_x_continuous(expand = c(0, 0)) +
+  scale_y_continuous(expand = c(0, 0)) +
+  labs(x = "Temperature (°C)",
+       y = "log(Population density)") +
+  main_theme +
+  theme(aspect.ratio = 1)
+heatmap_plot
+
+ggsave("figures/heatmap_R0.png", heatmap_plot)
 
 
 
@@ -219,19 +233,34 @@ dev.off()
 # --- regression models for other datasets --- #
 
 
-Europe_regression_model <- lm(R0 ~ scale(February_20_TC) + scale(February_20_AH) + scale(Feb_UV) + scale(log(Pop_density)), data = full_climate_df_R0[full_climate_df_R0$dataset == "Europe",])
+Europe_regression_model <- lm(R0 ~ scale(February_20_TC) +  scale(log(Pop_density)), data = full_climate_df_R0[full_climate_df_R0$dataset == "Europe",])
 xtable(summary(Europe_regression_model))
 
-LMIC_regression_model <- lm(R0 ~ scale(February_20_TC) + scale(February_20_AH) + scale(Feb_UV) + scale(log(Pop_density)), data = full_climate_df_R0[full_climate_df_R0$dataset == "LMIC",])
+LMIC_regression_model <- lm(R0 ~ scale(February_20_TC) + scale(log(Pop_density)), data = full_climate_df_R0[full_climate_df_R0$dataset == "LMIC",])
 xtable(summary(LMIC_regression_model))
 
 
-europe_regression_model_lockdown <- lm(Rt ~ February_20_TC + log(Pop_density) + lockdown_strength, data = full_climate_df_lockdown[full_climate_df_lockdown$dataset == "Europe",])
-summary(europe_regression_model_lockdown)
+Europe_regression_model_lockdown <- lm(Rt ~ February_20_TC + log(Pop_density) + lockdown_strength, data = full_climate_df_lockdown[full_climate_df_lockdown$dataset == "Europe",])
+summary(Europe_regression_model_lockdown)
 
 LMIC_regression_model_lockdown <- lm(Rt ~ February_20_TC + log(Pop_density) + lockdown_strength, data = full_climate_df_lockdown[full_climate_df_lockdown$dataset == "LMIC",])
 summary(LMIC_regression_model_lockdown)
 
+
+# --- Do contact matrices matter? --- #
+
+LMIC_contact_regression <- lm(R0 ~ scale(February_20_TC) + scale(log(Pop_density)) + n_contacts, data = full_climate_df_R0[full_climate_df_R0$dataset == "LMIC",])
+summary(LMIC_contact_regression)
+
+Europe_contact_regression <- lm(R0 ~ scale(February_20_TC) + scale(log(Pop_density)) + n_contacts, data = full_climate_df_R0[full_climate_df_R0$dataset == "Europe",])
+summary(Europe_contact_regression)
+
+# --- Does choice of month matter? --- #
+
+# Jan
+xtable(summary(lm(R0 ~ January_20_TC + log(Pop_density), data = USA_R0_data)))
+# March
+xtable(summary(lm(R0 ~ March_20_TC + log(Pop_density), data = USA_R0_data)))
 
 #
 #
@@ -533,4 +562,64 @@ summary(LMIC_regression_model_lockdown)
 # grid.arrange(residual_plot_temp, residual_plot_pop, nrow = 1)
 # dev.off()
 
+# 3d plot with shadows:
+
+# lattice method
+# df <- USA_R0_data[,c("February_20_TC", "Pop_density", "R0")]
+# df$Pop_density <- log(df$Pop_density)
+# names(df) <- c("temperature", "log_pop_density", "r0")
+# 
+# plot_range_x <- c(min(df$temperature)*1.1, max(df$temperature)*1.1)
+# plot_range_y <- c(min(df$log_pop_density)*0.9, max(df$log_pop_density)*1.1)
+# plot_range_z <- c(0, 3.8)
+# 
+# shadow_x <- df
+# shadow_y <- df
+# shadow_z <- df
+# shadow_x$temperature <- rep(max(plot_range_x),length(shadow_y$log_pop_density))
+# shadow_y$log_pop_density <- rep(max(plot_range_y),length(shadow_y$log_pop_density))
+# shadow_z$r0 <- rep(min(plot_range_z),length(shadow_y$log_pop_density))
+# df_shadows <- rbind(df, shadow_x, shadow_y, shadow_z)
+# png("figures/USA_3d_R0.png")
+# cloud(df_shadows$r0 ~ 
+#         df_shadows$temperature*df_shadows$log_pop_density,
+#       screen=list(z = 50, x = -70, y = 0),
+#       scales=list(arrows=FALSE, cex=0.6, col="black", font=3,
+#                   tck=0.6, distance=1),
+#       pch=c(rep(19, 43), rep(19, 129)), 
+#       col=c(rep("blue", 43), rep("gray", 129)),
+#       cex = 1.5,
+#       xlim=plot_range_x, ylim=plot_range_y, zlim=plot_range_z,
+#       xlab = "Temperature", ylab = "log(Pop density)", zlab = expression(R[0]))
+# dev.off()
+# 
+# 
+# # repeat for post-lockdown
+# df_2 <- USA_R0_data[,c("May_20_TC", "Pop_density", "Rt")]
+# df_2$Pop_density <- log(df_2$Pop_density)
+# names(df_2) <- c("temperature", "log_pop_density", "rt")
+# 
+# plot_range_x <- c(min(df_2$temperature)*1.1, max(df_2$temperature)*1.1)
+# plot_range_y <- c(min(df_2$log_pop_density)*0.9, max(df_2$log_pop_density)*1.1)
+# plot_range_z <- c(0, 3.8)
+# 
+# shadow_x <- df_2
+# shadow_y <- df_2
+# shadow_z <- df_2
+# shadow_x$temperature <- rep(max(plot_range_x),length(shadow_y$log_pop_density))
+# shadow_y$log_pop_density <- rep(max(plot_range_y),length(shadow_y$log_pop_density))
+# shadow_z$rt <- rep(min(plot_range_z),length(shadow_y$log_pop_density))
+# df_2_shadows <- rbind(df_2, shadow_x, shadow_y, shadow_z)
+# png("figures/USA_3d_Rt.png")
+# cloud(df_2_shadows$rt ~ 
+#         df_2_shadows$temperature*df_2_shadows$log_pop_density,
+#       screen=list(z = 50, x = -70, y = 0),
+#       scales=list(arrows=FALSE, cex=0.6, col="black", font=3,
+#                   tck=0.6, distance=1),
+#       pch=c(rep(19, 43), rep(19, 129)), 
+#       col=c(rep("blue", 43), rep("gray", 129)),
+#       cex = 1.5,
+#       xlim=plot_range_x, ylim=plot_range_y, zlim=plot_range_z,
+#       xlab = "Temperature", ylab = "log(Pop density)", zlab = expression(R[t]))
+# dev.off()
 
