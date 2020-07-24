@@ -294,9 +294,32 @@ for(i in 1:length(state_names)){
   }
 }
 
+############################################
+# -- Step 5: add the contact matrices data #
+# -- for countries                         #
+# -- We'll do this with "try" to catch     #
+# -- any errors due to not having the      #
+# -- ext-data file                         #
+############################################
+
+contact_numbers <- try(read.csv("ext-data/Contact_rates_by_country.csv"), silent = TRUE)
+# check the file was read
+if(class(contact_numbers) != "try-error"){
+  # remove spaces from the country names
+  contact_numbers$country <- gsub(" ", "_", contact_numbers$country)
+  
+  # merge into the LMIC and Europe data
+  europe_climate_df <- merge(europe_climate_df, contact_numbers[1:2], by.x = "Location", by.y = "country")
+  LMIC_climate_df <- merge(LMIC_climate_df, contact_numbers[1:2], by.x = "Location", by.y = "country")
+  
+  names(europe_climate_df)[59] <- "n_contacts"
+  names(LMIC_climate_df)[59] <- "n_contacts"
+  USA_climate_df$n_contacts <- "NA"
+}
+
 
 ########################################
-# -- Step 5: bind these all together   #
+# -- Step 6: bind these all together   #
 # -- into a single dataset and export  #
 ########################################
 

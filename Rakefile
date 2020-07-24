@@ -128,7 +128,7 @@ end
 # Download raw data ############
 ################################
 desc "Download all raw data"
-task :dwn_data => [:before_dwn_data, :raw_jhu, "raw-data/ecdc-cases.csv", "raw-data/ecjrcdc-regions.csv", "raw-data/ecjrcdc-countries.csv", "raw-data/uk-phe-deaths.csv", "raw-data/uk-phe-cases.csv", "raw-data/cvodidh-admin1.csv", "raw-data/cvodidh-admin2.csv", "raw-data/cvodidh-admin3.csv", "raw-data/imperial-europe-pred.csv", "raw-data/imperial-usa-pred.csv", "raw-data/imperial-lmic-pred.csv", :raw_ihme, :raw_nxtstr, "raw-data/who-interventions.xlsx", "raw-data/imperial-interventions.csv", "raw-data/oxford-interventions.csv", :raw_imptfmods, "raw-data/rambaut-nomenclature", "raw-data/denvfoimap-raster.RDS", :raw_gadm, :raw_cds_ar5, "raw-data/cds-era5-temp-midday.grib", "raw-data/cds-era5-humid-midday.grib", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif", "raw-data/glUV_february_mean.asc", "raw-data/glUV_february_mean.asc", "raw-data/google-mobility.csv"]
+task :dwn_data => [:before_dwn_data, :raw_jhu, "raw-data/ecdc-cases.csv", "raw-data/ecjrcdc-regions.csv", "raw-data/ecjrcdc-countries.csv", "raw-data/uk-phe-deaths.csv", "raw-data/uk-phe-cases.csv", "raw-data/cvodidh-admin1.csv", "raw-data/cvodidh-admin2.csv", "raw-data/cvodidh-admin3.csv", "raw-data/imperial-europe-pred.csv", "raw-data/imperial-usa-pred.csv", "raw-data/imperial-lmic-pred.csv", :raw_ihme, :raw_nxtstr, "raw-data/who-interventions.xlsx", "raw-data/imperial-interventions.csv", "raw-data/oxford-interventions.csv", :raw_imptfmods, "raw-data/rambaut-nomenclature", "raw-data/denvfoimap-raster.RDS", :raw_gadm, :raw_cds_ar5, "raw-data/cds-era5-temp-midday.grib", "raw-data/cds-era5-humid-midday.grib", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif", "raw-data/glUV_february_mean.asc", "raw-data/glUV_may_mean.asc", "raw-data/google-mobility.csv"]
 task :before_dwn_data do
   puts "\t ... Downloading raw data (can take a long time)"
 end
@@ -363,15 +363,19 @@ end
 cds_ar5_files.each {|x| file x do raw_cds_ar5(cds_ar5_files) end}
 
 
-# temporarily do this - ask Will how to do it more sensibly!
-desc "Download February UV data"
-file "raw-data/glUV_february_mean.asc" do
-  `wget --load-cookies ~/.urs_cookies --save-cookies ~/.urs_cookies --keep-session-cookies --content-disposition https://acdisc.gsfc.nasa.gov/data/Aura_OMI_Level2G/OMUVBG.003/2020/OMI-Aura_L2G-OMUVBG_2020m0611_v003-2020m0614t090001.he5 -P ./raw-data/`
-  FileUtils.mv "raw-data/OMI-Aura_L2G-OMUVBG_2020m0611_v003-2020m0614t090001.he5", "raw-data/glUV_february_mean.asc"
-  date_metadata "glUV_february_mean.asc"
-end
-desc "Download May UV data"
-file "raw-data/glUV_may_mean.asc" do dwn_file("raw-data", "https://www.ufz.de/export/data/443/56469_glUV_February_monthly_mean.asc", "glUV_May_mean.asc") end
+# this is for the daily UV data from NASA - temporarily removed until we decide what to do with it
+#~ desc "Download February UV data"
+#~ file "raw-data/glUV_february_mean.asc" do
+  #~ `wget --load-cookies ~/.urs_cookies --save-cookies ~/.urs_cookies --keep-session-cookies --content-disposition https://acdisc.gsfc.nasa.gov/data/Aura_OMI_Level2G/OMUVBG.003/2020/OMI-Aura_L2G-OMUVBG_2020m0611_v003-2020m0614t090001.he5 -P ./raw-data/`
+  #~ FileUtils.mv "raw-data/OMI-Aura_L2G-OMUVBG_2020m0611_v003-2020m0614t090001.he5", "raw-data/glUV_february_mean.asc"
+  #~ date_metadata "glUV_february_mean.asc"
+#~ end
+
+desc "Download February monthly UV data"
+file "raw-data/glUV_february_mean.asc" do dwn_file("raw-data", "https://www.ufz.de/export/data/443/56466_glUV_February_monthly_mean.asc", "glUV_february_mean.asc") end
+
+desc "Download May monthly UV data"
+file "raw-data/glUV_may_mean.asc" do dwn_file("raw-data", "https://www.ufz.de/export/data/443/56469_glUV_May_monthly_mean.asc", "glUV_May_mean.asc") end
 
 
 desc "Get midday (daily) CDS-ERA5 temperature data"
