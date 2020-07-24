@@ -613,11 +613,11 @@ task :r0_models => ["humidity-countries","humidity-states","population-density-c
 end
 
 desc "Fit Rt epidemiological models"
-task :r0_models => ["temp-midday-states","population-density-states"].map!{|x| "clean-data/#{x}.RDS"} + [:raw_imptfmods] do
+task :rt_models => ["temp-midday-states","population-density-states"].map!{|x| "clean-data/#{x}.RDS"} + [:raw_imptfmods] do
     FileUtils.cp ["ms-env/rt-bayes-model.R","ms-env/rt-bayes-model.stan"], "imptf-models/covid19model-6.0/"
   Dir.chdir "imptf-models/covid19model-6.0/" do
     `Rscript rt-bayes-model.R > ../../ms-env/STDOUT-rt-bayes-model.txt`
-    FileUtils.rm ["bayes-env/stan-europe.R","bayes-env/stan-usa.R","bayes-env/stan-usa-pop.R""bayes-env/stan-brazil.R","bayes-env/stan-italy.R", "bayes-env/stan-europe.stan","bayes-env/stan-usa.stan","bayes-env/stan-usa-pop.stan","bayes-env/stan-brazil.stan","bayes-env/stan-italy.stan"]
+    FileUtils.rm ["rt-bayes-model.R", "rt-bayes-model.stan"]
   end
   `Rscript ms-env/rt-bayes-downstream.R > ms-env/rt-bayes-downstream.txt`
 end

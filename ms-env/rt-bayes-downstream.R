@@ -18,7 +18,7 @@ sd.pop <- sd(pop, na.rm=TRUE)
 rm(env,pop,env_time,meta,processed_data)
 
 # Get raw coefficients and then back-transform, thne neaten and merge data
-load("imptf-models/covid19model-6.0/results/env-pop-usa-stanfit.Rdata")
+load("imptf-models/covid19model-6.0/results/rt-bayes.Rdata")
 env <- unlist(rstan::extract(fit, "env_time_slp"))
 pop <- unlist(rstan::extract(fit, "pop_slp"))
 average <- unlist(rstan::extract(fit, "alpha[1]"))
@@ -36,7 +36,7 @@ data$r.env <- data$env/sd.env; data$r.pop <- data$pop/sd.pop
 #       using logits
 inv.logit <- function(x) exp(x) / (exp(x)+1)
 logit <- function(x) log(x / (1-x))
-optim.func <- function(x, target, mob.coef, new.r0) return(abs(target - (2*new.r0*inv.logit(-(1-x)*mob.coef))))
+optim.func <- function(x, target, mob.coef, new.r0) return(abs(target - (new.r0*inv.logit(-(1-x)*mob.coef))))
 optim.wrap <- function(target, mob.coef, new.r0){
     output <- optim(0, optim.func, method="Brent", lower=-10, upper=10, target=target, mob.coef=mob.coef, new.r0=new.r0)
     if(output$convergence != 0)

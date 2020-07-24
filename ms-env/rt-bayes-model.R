@@ -103,8 +103,11 @@ reported_deaths <- processed_data$reported_deaths
 reported_cases <- processed_data$reported_cases
 options(mc.cores = parallel::detectCores())
 rstan_options(auto_write = TRUE)
-m <- stan_model('stan-models/rt-bayes.stan')
-fit = sampling(m,data=stan_data,iter=1800,warmup=1000,chains=5,thin=1,control = list(adapt_delta = 0.8, max_treedepth = 15))
+m <- stan_model('rt-bayes-model.stan')
+
+Sys.time()
+fit = sampling(m,data=stan_data,iter=10000,warmup=8000,chains=5,thin=1,control = list(adapt_delta = 0.98, max_treedepth = 15))
+Sys.time()
 
 covariate_data = list(interventions, mobility)
 
