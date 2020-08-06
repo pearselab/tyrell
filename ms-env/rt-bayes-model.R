@@ -91,10 +91,12 @@ meta <- meta[meta$NAME_0=="United States",]
 meta$code <- sapply(strsplit(meta$HASC_1, ".", fixed=TRUE), function(x) x[2])
 env <- env[match(names(processed_data$reported_deaths), meta$code),]
 pop <- log10(pop[match(names(processed_data$reported_deaths), meta$code)])
-env_time <- env[,34:148]
-env_time[is.na(env_time)] <- mean(env_time, na.rm=TRUE)
+.pad <- function(x, pad.length)
+    return(c(x, rep(x[length(x)], pad.length-length(x))))
+env_time <- matrix(NA, nrow=nrow(env), ncol=115)
+for(i in seq_len(nrow(env_time)))
+    env_time[i,] <- .pad(env[i,as.character(processed_data$dates[[i]])], 115)
 env_time <- (env_time-mean(env_time)) / sd(env_time)
-pop[is.na(pop)] <- median(pop, na.rm=TRUE)
 pop <- as.numeric(scale(pop))
 stan_data$env_time <- t(env_time); stan_data$pop_dat <- pop
 
