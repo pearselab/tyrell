@@ -1,4 +1,4 @@
-# --- Get average humidity for countries/states --- #
+# --- Get average daily midday temperature/humidity/uv for countries/states --- #
 #
 
 source("src/packages.R")
@@ -12,12 +12,14 @@ states <- shapefile("clean-data/gadm-states.shp")
 days <- as.character(as.Date("2020-01-01") + 0:151)
 temp <- rgdal::readGDAL("raw-data/cds-era5-temp-midday.grib")
 humid <- rgdal::readGDAL("raw-data/cds-era5-humid-midday.grib")
+uv <- rgdal::readGDAL("raw-data/cds-era5-uv-midday.grib")
 .drop.col <- function(i, sp.df){
     sp.df@data <- sp.df@data[,i,drop=FALSE]
     return(sp.df)
 }
 temp <- lapply(seq_along(days), function(i, sp.df) velox(raster::rotate(raster(.drop.col(i, sp.df)))), sp.df=temp)
 humid <- lapply(seq_along(days), function(i, sp.df) velox(raster::rotate(raster(.drop.col(i, sp.df)))), sp.df=humid)
+uv <- lapply(seq_along(days), function(i, sp.df) velox(raster::rotate(raster(.drop.col(i, sp.df)))), sp.df=uv)
 
 # Do work; format and save
 .avg.wrapper <- function(climate, region)
@@ -46,4 +48,12 @@ saveRDS(
 saveRDS(
     .give.names(.avg.wrapper(humid, states), states$GID_1, days),
     "clean-data/humid-midday-states.RDS"
+)
+saveRDS(
+    .give.names(.avg.wrapper(uv, countries), countries$NAME_0, days, TRUE),
+    "clean-data/uv-midday-countries.RDS"
+)
+saveRDS(
+    .give.names(.avg.wrapper(uv, states), states$GID_1, days),
+    "clean-data/uv-midday-states.RDS"
 )
