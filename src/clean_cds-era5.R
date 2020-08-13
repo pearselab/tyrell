@@ -51,7 +51,7 @@ saveRDS(
 )
 saveRDS(
     .give.names(.avg.wrapper(uv, countries), countries$NAME_0, days, TRUE),
-    "clean-data/humid-uv-countries.RDS"
+    "clean-data/uv-midday-countries.RDS"
 )
 saveRDS(
     .give.names(.avg.wrapper(uv, states), states$GID_1, days),
