@@ -56,6 +56,13 @@ cor(USA_clim_vars)
 
 vif(USA_regression_model_full)
 
+# which is the best fitting when pop density is accounted for?
+summary(lm(R0 ~ February_20_TC + log10(Pop_density), data = USA_R0_data))
+summary(lm(R0 ~ February_20_AH + log10(Pop_density), data = USA_R0_data))
+summary(lm(R0 ~ Feb_UV + log10(Pop_density), data = USA_R0_data))
+# temperature model has the highest r2
+
+
 # 3. temperature + pop density only
 
 USA_regression_model <- lm(R0 ~ February_20_TC + log10(Pop_density), data = USA_R0_data)
@@ -98,7 +105,7 @@ vals <- predict(USA_regression_model, newdata = d)
 R0 <- matrix(vals, nrow = length(unique(d$February_20_TC)), ncol = length(unique(d$Pop_density)))
 
 R0_3d <- plot_ly() %>% 
-  add_surface(x = ~log10(pops), y = ~temps, z = ~R0, opacity = 0.9, cmin = 0, cmax = 4) %>%
+  add_surface(x = ~log10(pops), y = ~temps, z = ~R0, opacity = 0.9, cmin = 0, cmax = 4.5) %>%
   add_trace(x = log10(USA_R0_data$Pop_density), 
             y = USA_R0_data$February_20_TC,
             z = USA_R0_data$R0, 
@@ -107,23 +114,25 @@ R0_3d <- plot_ly() %>%
             marker = list(color = "grey", size = 3,
                           line = list(color = "black",width = 1)),
             opacity = 1) %>% 
-  layout(scene = list(xaxis = list(title = "log10(Population Density)", autorange = "reversed"),
-                      yaxis = list(title = "Temperature (°C)", autotick = F, tickmode = "array", tickvals = c(-5, 0, 5, 10, 15, 20)),
-                      zaxis = list(title = "R0", range = c(0, 4.2), autotick = F, tickmode = "array", tickvals = c(1, 2, 3, 4))))
+  layout(scene = list(xaxis = list(title = "", autorange = "reversed", tickfont = list(size = 15)),
+                      yaxis = list(title = "", autotick = F, tickmode = "array", tickvals = c(-5, 0, 5, 10, 15, 20), 
+                                   tickfont = list(size = 15)),
+                      zaxis = list(title = "", range = c(0, 4.5), autotick = F, tickmode = "array", tickvals = c(1, 2, 3, 4, 5),
+                                   tickfont = list(size = 15))))
 R0_3d
 
 # repeat for Rt data
-# predict model over sensible grid of values
-temps <- seq(7, 25, by = 0.1)
-pops <- 10^(seq(0.8, 3.5, by = 0.1))
-grid <- with(USA_Rt_data[USA_Rt_data$Location %in% USA_R0_data$Location,], expand.grid(temps, pops))
-d <- setNames(data.frame(grid), c("May_20_TC", "Pop_density"))
-vals <- predict(USA_regression_model_lockdown, newdata = d)
+# predict model over sensible grid of values (ld for lockdown)
+temps_ld <- seq(7, 25, by = 0.1)
+pops_ld <- 10^(seq(0.8, 3.5, by = 0.1))
+grid_ld <- with(USA_Rt_data[USA_Rt_data$Location %in% USA_R0_data$Location,], expand.grid(temps_ld, pops_ld))
+d_ld <- setNames(data.frame(grid_ld), c("May_20_TC", "Pop_density"))
+vals_ld <- predict(USA_regression_model_lockdown, newdata = d_ld)
 
-Rt <- matrix(vals, nrow = length(unique(d$May_20_TC)), ncol = length(unique(d$Pop_density)))
+Rt <- matrix(vals_ld, nrow = length(unique(d_ld$May_20_TC)), ncol = length(unique(d_ld$Pop_density)))
 
 Rt_3d <- plot_ly() %>% 
-  add_surface(x = ~log10(pops), y = ~temps, z = ~Rt, opacity = 0.9, cmin = 0, cmax = 4) %>%
+  add_surface(x = ~log10(pops_ld), y = ~temps_ld, z = ~Rt, opacity = 0.9, cmin = 0, cmax = 4.5) %>%
   add_trace(x = log10(USA_Rt_data[USA_Rt_data$Location %in% USA_R0_data$Location,]$Pop_density), 
             y = USA_Rt_data[USA_Rt_data$Location %in% USA_R0_data$Location,]$May_20_TC,
             z = USA_Rt_data[USA_Rt_data$Location %in% USA_R0_data$Location,]$Rt, 
@@ -132,9 +141,10 @@ Rt_3d <- plot_ly() %>%
             marker = list(color = "grey", size = 3,
                           line = list(color = "black",width = 1)),
             opacity = 1) %>% 
-  layout(scene = list(xaxis = list(title = "log10(Population Density)", autorange = "reversed"),
-                      yaxis = list(title = "Temperature (°C)"),
-                      zaxis = list(title = "Rt", range = c(0, 4.2), autotick = F, tickmode = "array", tickvals = c(1, 2, 3, 4))),
+  layout(scene = list(xaxis = list(title = "", autorange = "reversed", tickfont = list(size = 15)),
+                      yaxis = list(title = "", tickfont = list(size = 15)),
+                      zaxis = list(title = "", range = c(0, 4.5), autotick = F, tickmode = "array", tickvals = c(1, 2, 3, 4, 5),
+                                   tickfont = list(size = 15))),
                                    showlegend = FALSE) %>%
   hide_colorbar() 
 Rt_3d
@@ -264,6 +274,63 @@ xtable(summary(lm(R0 ~ January_20_TC + log(Pop_density), data = USA_R0_data)))
 # March
 xtable(summary(lm(R0 ~ March_20_TC + log(Pop_density), data = USA_R0_data)))
 
+
+# ---- Does the date when state-wide emergency decrees were implemented matter? ---- #
+
+summary(lm(R0 ~ as.Date(emergency_decree), data = USA_R0_data))
+
+emergdec_plot <- ggplot(USA_R0_data, aes(x = as.Date(emergency_decree), y = R0)) + 
+  geom_point(size = 2) +
+  geom_smooth(method = lm, col = "black") +
+  geom_text(aes(label = Location), hjust = 0, vjust = 0, position = position_nudge(y = 0.02)) +
+  labs(x = "Date of Emergency Decree",
+       y = expression(R[0])) +
+  main_theme +
+  theme(aspect.ratio = 1)
+emergdec_plot
+
+ggsave("figures/emergdec_plot.png", emergdec_plot)
+
+emergdec_lm <- lm(R0 ~ as.Date(emergency_decree) + February_20_TC + log10(Pop_density), data = USA_R0_data)
+summary(emergdec_lm)
+vif(emergdec_lm)
+
+# date of first 10 deaths?
+
+summary(lm(R0 ~ as.Date(date_first_ten), data = USA_R0_data))
+
+firstten_plot <- ggplot(USA_R0_data, aes(x = as.Date(date_first_ten), y = R0)) + 
+  geom_point(size = 2) +
+  geom_smooth(method = lm, col = "black") +
+  geom_text(aes(label = Location), hjust = 0, vjust = 0, position = position_nudge(y = 0.02)) +
+  labs(x = "Date of First 10 Deaths",
+       y = expression(R[0])) +
+  main_theme +
+  theme(aspect.ratio = 1)
+firstten_plot
+
+# new metric of "preparedness" of state 
+# - how early did they put out emergency decree
+# compared to their number of deaths
+
+USA_R0_data$preparedness <- as.Date(USA_R0_data$date_first_ten) - as.Date(USA_R0_data$emergency_decree)
+
+summary(lm(R0 ~ preparedness, data = USA_R0_data))
+
+preparedness_plot <- ggplot(USA_R0_data, aes(x =preparedness, y = R0)) + 
+  geom_point(size = 2) +
+  geom_smooth(method = lm, col = "black") +
+  geom_text(aes(label = Location), hjust = 0, vjust = 0, position = position_nudge(y = 0.02)) +
+  labs(x = "Preparedness",
+       y = expression(R[0])) +
+  main_theme +
+  theme(aspect.ratio = 1)
+preparedness_plot
+
+preparedness_lm <- lm(R0 ~ preparedness + February_20_TC + log10(Pop_density), data = USA_R0_data)
+summary(preparedness_lm)
+vif(preparedness_lm)
+
 #
 #
 #
@@ -271,35 +338,7 @@ xtable(summary(lm(R0 ~ March_20_TC + log(Pop_density), data = USA_R0_data)))
 
 # -- Old stuff -- #
 
-# # test corellations between all environmental parameters
-# names(full_climate_df_R0)
-# clim_vars <- full_climate_df_R0[,c("February_20_TC", "February_20_AH", "Feb_UV")]
-# head(clim_vars)
-# 
-# clim_vars <- clim_vars[!is.na(clim_vars$February_20_TC) &
-#             !is.na(clim_vars$February_20_AH) &
-#             !is.na(clim_vars$Feb_UV),]
-# 
-# cor(clim_vars)
-# 
-# # now need a paired t-test; R0 against Rt
-# # check our dataframes are comparable (why didn't Rt and R0 go into the same df anyway???)
-# 
-# identical(full_climate_df_R0$Location, full_climate_df_lockdown$Location)
-# # uuh, loop through R0 data and add Rt for the same states
-# 
-# full_climate_df_R0$Rt <- NA
-# locations <- as.character(unique(full_climate_df_R0$Location))
-# for(i in 1:length(locations)){
-#   
-#   R_t <- full_climate_df_lockdown[full_climate_df_lockdown$Location == locations[i],]$Rt
-#   if(length(R_t) > 0){
-#     full_climate_df_R0[full_climate_df_R0$Location == locations[i],]$Rt <- R_t 
-#   }
-# }
-# 
-# t.test(full_climate_df_R0$R0, full_climate_df_R0$Rt, paired = TRUE, alternative = "greater", na.rm = TRUE)
-# 
+
 # 
 # # can we plot the USA model residuals onto the US states map?
 # # i.e. which states have higher R0 than our model predicts, which have lower?

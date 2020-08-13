@@ -582,14 +582,14 @@ file "clean-data/monthly-avg-UV-states.RDS" => shp_fls("clean-data/gadm-states",
 
 
 desc "Combine cleaned environmental data with R0/Rt estimates"
-task :join_R_climate => ["clean-data/climate_and_R0.csv","clean-data/climate_and_lockdown_Rt.csv"]
+task :join_R_climate => ["clean-data/climate_and_R0_USA.csv","clean-data/climate_and_lockdown_Rt_USA.csv"]
 def join_R_climate()
-  `Rscript src/combine-R0-and-monthly-environment.R`
-  date_metadata "clean-data/climate_and_R0.csv"
-  date_metadata "clean-data/climate_and_lockdown_Rt.csv"
+  `Rscript src/combine-R0-and-environment-USA.R`
+  date_metadata "clean-data/climate_and_R0_USA.csv"
+  date_metadata "clean-data/climate_and_lockdown_Rt_USA.csv"
 end
-file "clean-data/climate_and_R0.csv" => ["clean-data/temperature-countries.RDS", "clean-data/temperature-states.RDS", "clean-data/relative-humidity-countries.RDS", "clean-data/relative-humidity-states.RDS", "clean-data/absolute-humidity-countries.RDS", "clean-data/absolute-humidity-states.RDS", "clean-data/population-density-countries.RDS", "clean-data/population-density-states.RDS", "clean-data/monthly-avg-UV-countries.RDS", "clean-data/monthly-avg-UV-states.RDS", "raw-data/imperial-europe-pred.csv", "raw-data/imperial-interventions.csv", "raw-data/imperial-lmic-pred.csv", "raw-data/imperial-usa-pred.csv"] do join_R_climate() end
-file "clean-data/climate_and_lockdown_Rt.csv" do join_R_climate() end
+file "clean-data/climate_and_R0_USA.csv" => ["clean-data/temp-midday-states.RDS", "clean-data/humid-midday-states.RDS", "clean-data/population-density-states.RDS", "raw-data/imperial-usa-pred-2020-05-25.csv", "raw-data/google-mobility.csv", "raw-data/USstatesCov19distancingpolicy.csv", "clean-data/gadm-states.RDS"] do join_R_climate() end
+file "clean-data/climate_and_lockdown_Rt_USA.csv" do join_R_climate() end
 
 
 ################################
@@ -631,7 +631,7 @@ end
 
 desc "Fit R0 environmental models"
 task :r0_models => ["humidity-countries","humidity-states","population-density-countries","population-density-states"].map {|x| "clean-data/#{x}.RDS"} do
-  `Rscript ms-env/r0-models-plots.R`
+  `Rscript ms-env/r0-models-plots-USA.R > ms-env/STDOUT-r0-regression-models.txt`
 end
 
 desc "Fit Rt epidemiological models"

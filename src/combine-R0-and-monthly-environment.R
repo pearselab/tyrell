@@ -175,7 +175,7 @@ europe_climate_df <- merge(europe_R0_df, countries_climate_df, by.x = "Location"
 # LMIC
 LMIC_climate_df <- merge(LMIC_R0_df, countries_climate_df, by.x = "Location", by.y = "Country")
 # need to drop the countries with unreliable R0 estimates
-unique(LMIC_climate_df$Location)
+# unique(LMIC_climate_df$Location)
 dropped_LMIC <- c("Angola", "Burundi", "Benin", "Belize", "Botswana", "Central_African_Republic",
                   "Equatorial_Guinea", "Jordan", "Libya", "Sri_Lanka", "Madagascar", "Maldives",
                   "Myanmar", "Montenegro", "Mozambique", "Mauritius", "Nepal", "Palestina", "Rwanda",
@@ -192,7 +192,7 @@ USA_states_climate <- states_climate_df[with(states_climate_df, grepl("USA", Sta
 c(states, states_data) %<-% readRDS("clean-data/gadm-states.RDS")
 US_data <- states_data[states_data$GID_0 == "USA",]
 # check if the climate data and GADM data are in the same order of states
-identical(as.character(USA_states_climate$State), US_data$GID_1)
+# identical(as.character(USA_states_climate$State), US_data$GID_1)
 # TRUE - so we can take the state codes in the GADM data ($HASC_1) and add them to our climate dataframe
 USA_states_climate$State <- gsub("US.", "", US_data$HASC_1)
 
@@ -317,9 +317,35 @@ if(class(contact_numbers) != "try-error"){
   USA_climate_df$n_contacts <- "NA"
 }
 
+#################################################
+# -- Step 6: add the dates of emergency decrees #
+# --- and dates of first 10 deaths              #
+# -- for USA states                             #
+#################################################
+
+USA_lockdown_dates <- read.csv("ext-data/USstatesCov19distancingpolicy.csv")
+emergency_decrees <- USA_lockdown_dates[USA_lockdown_dates$StatePolicy == "EmergDec",]
+
+# Oklahoma and south dakota both have 2 emergency decrees - take the earliest declared in each case
+emergency_decrees <- emergency_decrees[-c(44, 38),]
+
+USA_climate_df <- merge(USA_climate_df, emergency_decrees[,c("StatePostal", "DateIssued")], by.x = "Location", by.y = "StatePostal")
+names(USA_climate_df)[60] <- "emergency_decree"
+USA_climate_df$emergency_decree <- as.Date(as.character(USA_climate_df$emergency_decree), "%Y%m%d")
+europe_climate_df$emergency_decree <- "NA"
+LMIC_climate_df$emergency_decree <- "NA"
+
+date_first_ten <- readRDS("ext-data/dates_ten.RDS")
+names(date_first_ten)[2] <- "date_first_ten"
+USA_climate_df <- merge(USA_climate_df, date_first_ten, by.x = "Location", by.y = "code")
+USA_climate_df$date_first_ten <- as.Date(USA_climate_df$date_first_ten)
+
+europe_climate_df$date_first_ten <- "NA"
+LMIC_climate_df$date_first_ten <- "NA"
+
 
 ########################################
-# -- Step 6: bind these all together   #
+# -- Step 7: bind these all together   #
 # -- into a single dataset and export  #
 ########################################
 
