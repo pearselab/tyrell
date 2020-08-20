@@ -107,7 +107,7 @@ reported_deaths <- processed_data$reported_deaths
 reported_cases <- processed_data$reported_cases
 options(mc.cores = parallel::detectCores())
 rstan_options(auto_write = TRUE)
-m <- stan_model('rt-bayes-model.stan')
+m <- stan_model('rt-bayes-invmodel.stan')
 
 Sys.time()
 fit = sampling(m,data=stan_data,iter=10000,warmup=8000,chains=5,thin=1,control = list(adapt_delta = 0.98, max_treedepth = 15))
@@ -123,4 +123,4 @@ estimated_deaths_cf <- out$E_deaths0
 save(fit, dates, reported_cases, reported_deaths, states,
      estimated_cases_raw, estimated_deaths_raw, estimated_deaths_cf,
      formula, formula_partial_regional,formula_partial_state, stan_data,covariate_data, 
-     file=paste0("results/rt-bayes-",file_datestamp,".Rdata"))
+     file=paste0("results/rt-bayes-inv",file_datestamp,".Rdata"))

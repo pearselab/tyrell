@@ -430,7 +430,7 @@ file "raw-data/google-mobility.csv" do dwn_file("raw-data", "https://www.gstatic
 # Tidy things up by copying the intervention data to raw-data
 desc "Copy USA intervention data from imp model 6"
 task :copy_usa_interventions do
-  `cp imptf-models/covid19model-6.0/usa/data/USstatesCov19distancingpolicy.csv raw-data/`
+  FileUtils.cp "imptf-models/covid19model-6.0/usa/data/USstatesCov19distancingpolicy.csv", "raw-data/"
 end
 
 ################################
@@ -636,13 +636,27 @@ end
 
 desc "Fit Rt epidemiological models"
 task :rt_models => ["temp-midday-states","population-density-states"].map!{|x| "clean-data/#{x}.RDS"} + [:raw_imptfmods] do
-    FileUtils.cp ["ms-env/rt-bayes-model.R","ms-env/rt-bayes-model.stan"], "imptf-models/covid19model-6.0/"
+  datestamp = Time.now.strftime("%d%m%Y-%H%M")
+  FileUtils.cp ["ms-env/rt-bayes-model.R","ms-env/rt-bayes-model.stan"], "imptf-models/covid19model-6.0/"
   Dir.chdir "imptf-models/covid19model-6.0/" do
-    `Rscript rt-bayes-model.R > ../../ms-env/STDOUT-rt-bayes-model.txt`
-    FileUtils.rm ["rt-bayes-model.R", "rt-bayes-model.stan"]
+    `Rscript rt-bayes-model.R #{datestamp} > ../../ms-env/STDOUT-rt-bayes-model-#{datestamp}.txt`
+    #FileUtils.rm ["rt-bayes-model.R", "rt-bayes-model.stan"]
   end
   `Rscript ms-env/rt-bayes-downstream.R > ms-env/rt-bayes-downstream.txt`
 end
+
+
+desc "Fit Rt inverse epidemiological models"
+task :rt_inv_models => ["temp-midday-states","population-density-states"].map!{|x| "clean-data/#{x}.RDS"} + [:raw_imptfmods] do
+  datestamp = Time.now.strftime("%d%m%Y-%H%M")
+  FileUtils.cp ["ms-env/rt-bayes-invmodel.R","ms-env/rt-bayes-invmodel.stan"], "imptf-models/covid19model-6.0/"
+  Dir.chdir "imptf-models/covid19model-6.0/" do
+    `Rscript rt-bayes-invmodel.R #{datestamp} > ../../ms-env/STDOUT-rt-bayes-invmodel-#{datestamp}.txt`
+    #FileUtils.rm ["rt-bayes-invmodel.R", "rt-bayes-invmodel.stan"]
+  end
+  #`Rscript ms-env/rt-bayes-downstream.R > ms-env/rt-bayes-downstream.txt`
+end
+
 
 desc "Build MS#1 manuscript"
 task :ms_build do

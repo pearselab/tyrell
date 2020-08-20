@@ -46,28 +46,29 @@ optim.wrap <- function(target, mob.coef, new.r0){
         stop("Something has gone wrong")
     return(output$par)
 }
-data$e.average <- data$p.average <- -999 #data$e.transit <- data$e.residential <- data$p.average <- data$p.transit <- data$p.residential <- -999
-dc <- 2 # Assume 2 Degree Change
-pc <- 1 # Assume 1 log-unit Population Change (i.e., 10x)
+data$e.four <- data$e.two <- data$e.one <- data$p.twenty <- data$p.ten <- data$p.five <- -999
 for(i in seq_len(nrow(data))){
-    data$e.average[i] <- optim.wrap(1, data$average[i], 1+abs(data$r.env[i]*dc))
-    #data$e.transit[i] <- optim.wrap(1, data$transit[i], 1+abs(data$r.env[i]*dc))
-    data$e.residential[i] <- optim.wrap(1, data$residential[i], 1+abs(data$r.env[i]*dc))
-    data$p.average[i] <- optim.wrap(1, data$average[i], 1+abs(data$r.pop[i]*pc))
-    #data$p.transit[i] <- optim.wrap(1, data$transit[i], 1+abs(data$r.pop[i]*pc))
-    data$p.residential[i] <- optim.wrap(1, data$residential[i], 1+abs(data$r.pop[i]*pc))    
+    data$e.four[i] <- optim.wrap(1, data$average[i], 1+abs(data$r.env[i]*4))
+    data$e.two[i] <- optim.wrap(1, data$average[i], 1+abs(data$r.env[i]*2))
+    data$e.one[i] <- optim.wrap(1, data$average[i], 1+abs(data$r.env[i]*1))
+    data$p.twenty[i] <- optim.wrap(1, data$residential[i], 1+abs(data$r.env[i]*log10(20)))
+    data$p.ten[i] <- optim.wrap(1, data$residential[i], 1+abs(data$r.env[i]*log10(10)))
+    data$p.five[i] <- optim.wrap(1, data$residential[i], 1+abs(data$r.env[i]*log10(5)))
 }
-summary <- -apply(data[,c("p.residential","p.average","e.residential","e.average")], 2, quantile, prob=c(.05,.1,.25,.5,.75,.9,.95)) * 100
+
+summary <- -apply(data[,c("p.twenty","p.ten","p.five","e.four","e.two","e.one")], 2, quantile, prob=c(.05,.1,.25,.5,.75,.9,.95)) * 100
+cols <- c("red","red","red","black","black","black")
+labels <- c("20x denser population","10x denser population","5x denser population","4°C cooler","2°C cooler","1°C cooler")
+cols <- cols[order(summary["50%",])]
+labels <- labels[order(summary["50%",])]
+summary <- summary[,order(summary["50%",])]
 
 # Relative reduction plot
-pdf("us-bayes-posterior.pdf")
-cols <- c("black","red","black","red")
-dotchart(summary["50%",], xlim=c(1,600), pch=20, color=cols, pt.cex=4, font=2, frame.plot=FALSE, xlab="Percent reduction needed in                       mobility to mitigate", labels=c("10x denser population","10x denser population","5°C cooler","5°C cooler"), log="x")
-mtext("                                              residential", side=1, line=2.5, font=2, adj=0)
-mtext("                                                 average", side=1, line=3.5, font=2, adj=0, col="red")
-arrows(summary["25%",], 1:4, summary["75%",], length=0, lwd=10, col=cols)
-arrows(summary["10%",], 1:4, summary["90%",], length=0, lwd=5, col=cols)
-arrows(summary["5%",], 1:4, summary["95%",], length=0, lwd=1, col=cols)
+pdf("ms-env/us-bayes-posterior.pdf")
+dotchart(summary["50%",], xlim=c(1,70), pch=20, color=cols, pt.cex=4, font=2, frame.plot=FALSE, xlab="Percent reduction needed in average mobility to mitigate", labels=labels)
+arrows(summary["25%",], 1:6, summary["75%",], length=0, lwd=10, col=cols)
+arrows(summary["10%",], 1:6, summary["90%",], length=0, lwd=5, col=cols)
+arrows(summary["5%",], 1:6, summary["95%",], length=0, lwd=1, col=cols)
 dev.off()
 
 # Generate paper summary statistics
@@ -85,4 +86,7 @@ print("")
 print("Posterior correlations:")
 cor(data)
 print("")
+print("Change estimates:")
+print(paste0("5 degree change: ", mean(data$r.env)*5))
+print(paste0("10x density change: ", mean(data$r.pop)*1))
 sink()
