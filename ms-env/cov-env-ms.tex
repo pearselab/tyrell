@@ -1,0 +1,344 @@
+% TS: things still outstanding
+% WDP: Please ask them why the region-specific mobility terms have two entries per region (this is something I asked Ettie about on the call, if you remember). I think it's probably because there are two sets of mobility data in there (residential and average, I would guess) but the report supplement states it's only one of those two (unless I'm mis-reading it). You can see this issue creeping in to the supplementary table, where the region entries are double-indexed.
+
+%COVID-19 R0 and environment
+
+\documentclass[12pt,english,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{babel}
+% WDP: I commented out the line below...
+%\markright{Pearse et al.\hfill Building up biogeography: pattern to process\hfill}
+\usepackage{geometry}
+\geometry{verbose,a4paper,tmargin=2.54cm,bmargin=2.54cm,lmargin=2.54cm,rmargin=2.54cm}
+%\geometry{verbose,letterpaper,tmargin=.1cm,bmargin=.1cm,lmargin=.1cm,rmargin=.1cm}
+\usepackage{graphicx}
+\DeclareGraphicsExtensions{.pdf,.png,.jpg}
+\usepackage{amssymb,amsmath}
+\usepackage{epstopdf}
+\usepackage{supertabular}
+\DeclareGraphicsRule{.tif}{png}{.png}{`convert #1 `dirname #1`/`basename #1 .tif`.png}
+\usepackage{url}
+\usepackage{subcaption}
+\usepackage[super]{nth}
+\usepackage{lineno} \linenumbers
+\usepackage[doublespacing]{setspace}
+\usepackage[parfill]{parskip}
+\setlength{\parindent}{0pt}
+\usepackage[super,sort&compress,comma]{natbib}
+\usepackage{subcaption} % subfigures
+% breaking urls so they don't run past the margin in bibliography:
+\usepackage{url}
+\def\UrlBreaks{\do\/\do-}
+\usepackage{breakurl}
+
+%%%%%% Keep this block in all manuscripts to allow commenting %%%%%%
+\usepackage{color}
+\usepackage{setspace}
+\usepackage{soul} %to get highlights with todo notes
+\usepackage[backgroundcolor=yellow,textsize=tiny,textwidth=2.17cm]{todonotes}
+\newcounter{todocounter}
+\newcommand{\todonum}[2][]{
+\stepcounter{todocounter}\todo[#1]{\thetodocounter: #2}
+% \setstretch{0.8}% spacing
+}
+\newcommand{\hlfix}[2]{\texthl{#1}\todonum{#2}~} %this needs the soul package
+% Shortcuts
+\usepackage{xspace}
+\newcommand{\virus}{SARS-CoV-2\xspace}
+\newcommand{\disease}{COVID-19\xspace}
+\newcommand{\RO}{$R_0$\xspace}
+
+\usepackage[final]{changes}
+\setdeletedmarkup{\textcolor{red}{\sout{#1}}}
+
+\begin{document}
+\setlength{\parindent}{0pt}
+
+\section*{Title page}
+% \textbf{Article type}: ???
+
+\textbf{Article title}: Measuring the impact of environment on SARS-CoV-2 transmission to inform seasonal forecasting
+
+
+\textbf{Running head}: SARS-CoV-2 and environment
+
+\textbf{Authors:} Thomas P. Smith$^{1,*}$,
+% Contributors alphabetised
+Seth Flaxman$^2$, Amanda S. Gallinat$^3$, Sylvia P. Kinosian$^3$, Michael Stemkovski$^3$,
+H. Juliette T. Unwin$^4$,
+Oliver J. Watson$^4$, Charles Whittaker$^4$,
+% Grant team alphabetised
+Lorenzo Cattarino$^4$, Ilaria Dorigatti$^4$, Michael Tristem$^1$,
+William D.\ Pearse$^{1,3*}$
+
+$^1$ Department of Life Sciences, Imperial College London, Silwood Park, Ascot, Berkshire, \
+ SL5 7PY, UK
+ 
+$^2$ Department of Mathematics, Imperial College London, London SW7 2AZ.
+
+$^3$ Department of Biology \& Ecology Center, Utah State University,
+5305 Old Main Hill, Logan UT, 84322
+
+$^4$ MRC Centre for Global Infectious Disease Analysis, Imperial College London, \ 
+Norfolk Place, London, W2 1PG, UK 
+
+$^*$To whom correspondence should be addressed:
+\texttt{thomas.smith1@imperial.ac.uk} and \\
+\texttt{will.pearse@imperial.ac.uk}
+
+\textbf{Word-count}: XXX (abstract, main text, acknowledgements, and references)
+
+\textbf{We emphasise that this pre-print manuscript has not been peer-reviewed, and thus its findings should be considered, at best, preliminary.}
+
+\clearpage
+\section*{Abstract} %PNAS - max 250 words
+
+As \disease continues to spread across the world, it is increasingly important to understand the factors that influence its transmission. Seasonal variation driven by responses to changing environment has been shown to affect the transmission intensity of several coronaviruses.
+However, the impact of the environment on \virus remains largely unknown, and thus seasonal variation remains a source of uncertainty in forecasts of \virus transmission. Here we address this issue by  assessing the association of temperature, humidity, UV radiation, and population density with estimates of transmission. Using data from the United States of America, we explore correlates of transmission ($R$) across USA states using comparative regression and integrative epidemiological modelling.
+We find that policy intervention (`lockdown') and reductions in individuals' mobility are the major drivers of \virus transmission rates, but in their absence lower temperatures and higher population densities drive increased \virus transmission. Our results show that summer weather cannot be considered a substitute for mitigation policies, but that lower autumn and winter temperatures may lead to an increase in transmission intensity in the absence of mobility restrictions.
+We outline how this information may improve the forecasting of \disease, its future seasonal dynamics, and inform intervention policies.
+
+
+\clearpage
+\section*{Introduction}
+
+
+% What do we know?
+In late 2019 a novel coronavirus originating in 
+Wuhan City (Hubei, China)\cite{Zhou2020} began to rapidly spread through the human population. Since March 2020 this disease, \disease, has been recognised as a global pandemic by the World Health Organisation\cite{WHO2020}. 
+The causative agent, SARS-CoV-2, is a close relative of the 2003 SARS coronavirus\cite{Zhou2020}, although it appears to have several differences including a higher basic reproduction number\cite{Liu2020} (\RO; essentially the average number of people infected by a carrier). Understanding the factors influencing \virus transmission is key for understanding the current patterns of transmission and for refining predictions of the future spread of \virus. Other coronaviruses display seasonal cycles of transmission and up to 30\% of seasonal `colds' are caused by coronaviruses \cite{Mesel-Lemoine2012}.
+Thus, as many Northern-hemisphere countries (currently in summer) relax the non-pharmaceutical interventions initially imposed to control \disease, there is a pressing need to understand whether seasonality will enhance or drive a `second wave' of \disease outbreaks in the autumn or winter\cite{Smit2020}.
+
+\virus is an enveloped RNA virus which is structurally (if not phylogenetically)
+similar to other RNA viruses such as influenza, MERS, and HcoV-NL63\cite{Xie2020}, that are known to display seasonal dynamics due to their physical properties. For example, high temperatures and low humidity can have a negative effect on influenza transmission by reducing the efficiency of respiratory droplet transmission \cite{Lowen2007, Lowen2014}. Similar effects are seen in transmission of coronaviruses\cite{Tan2005, Chan2011, VanDoremalen2013}, where high environmental temperatures break down viral lipid layers to inactivate virus particles that are in the air or deposited on surfaces\cite{Chan2011,Schoeman2019}.
+However, assessing the role of environment during a disease outbreak is challenging\cite{Carlson2020} because human factors such as population density, herd immunity, and behaviour are likely the main drivers of transmission\cite{Korevaar2020, Rocklov2020}. 
+These difficulties have hindered the quantification of the impact of environment on \virus transmission, making it harder to generalise and synthesise observations across regions with their differing climates.
+Despite these caveats, various early studies have already reported effects of environmental variables such as temperature, humidity, UV levels and wind-speed on the transmission of \virus \cite{Araujo2020, Baker2020, Bukhari2020, Chen2020, Luo2020, Ma2020, Merow2020, Sajadi2020}.
+While, in general, most studies appear to support increased transmission rates under cool, dry conditions\cite{Baker2020},
+conflicting results have been observed\cite{Luo2020, Yao2020} and collectively the environmental signal appears to be weak\cite{Smit2020}. 
+Much of the variability in these early results is likely due to the use of inappropriate dependent variables (such as cases or fatalities) which fail to account for the effects of non-pharmacological intervention measures\cite{Smit2020}. Furthermore, \disease has has taken hold in many places with diverse climates and there are obvious examples of high transmission rates under hot, humid conditions, \emph{e.g.} in Brazil\cite{Candido2020}.
+
+
+Accurate assessment of the role environmental factors have played so far in the spread of \virus may provide insight into the future seasonality of the disease. This is because seasonal outbreaks of viruses are often driven by their responses to favourable (seasonal) changes in weather \cite{NationalResearchCouncil2001}.
+Most epidemiological forecasts make use of some variant of the Susceptible--Infected--Recovered (SIR) framework and/or focus on the impacts of government-level mitigation (\emph{e.g.} \citet{Walker2020}).
+Few epidemiological models incorporate environmental impacts and, when they do, they assume \disease responds identically to related coronaviruses because we lack data on \virus's environmental (and thus seasonal) responses (\emph{e.g.} \citet{Baker2020}).
+This is despite theoretical demonstrations of the potential role of environment in driving future seasonality of SARS-CoV-2\cite{Ma2020, Wang2020} and the empirical evidence in structurally-similar viruses outlined above. 
+Efforts to incorporate climate into \disease forecasting have focused on regression-type models of cases and fatalities (\emph{e.g.} \citet{Araujo2020}), which are unreliable when diseases are in the growth/expansion phase \cite{Chipperfield2020}. 
+Furthermore, such models conflate environmental controls on occurrence with other drivers such as public health interventions (\emph{e.g.}, the effects of lockdown measures to contain the pandemic)\cite{Chipperfield2020} as both are changing similarly through time.
+Such models are unlikely to yield useful insights and may be misleading to policymakers \cite{Carlson2020}.
+To address this knowledge gap, there is a need for a true synthesis of environmental modeling with tried-and-tested epidemiological approaches.
+
+% What we've done to address this issue. 
+
+
+Here we investigate the role of environment in the transmission of \virus by incorporating environmental factors into an existing epidemiological framework that has been applied globally\cite{Flaxman2020a,Mellan2020}, and to the USA in particular\cite{Unwin2020a}. The USA is a large country with great variation in climate across which case and policy intervention data are comparable, permitting us to disentangle the role of environmental drivers in \virus transmission.
+We begin by exploring associations between environment (temperature, humidity, UV radiation, and population density) and transmission independently estimated before (\RO) and during ($R_t$) lockdown. After confirming a potential role for environment, we verify and more accurately quantify the relative roles of temperature and population density by integrating them into a semi-mechanistic epidemiological framework \cite{Unwin2020a}.
+While we find strong evidence that temperature and population density are associated with \virus transmission, we emphasise that our findings also re-confirm that the major driver of transmission rates is public policy (lockdown) and individual behaviour (movement). Through our use of existing, trusted sources of forecasts and models, our findings can be easily incorporated into workflows already used by policymakers, as we detail here.
+
+
+\clearpage
+
+\section*{Results}
+
+When analysed jointly, the \RO of all USA states are fairly well predicted by all explanatory variables, with an overall model \textsl{adjusted} $r^2$ of 58\%. However, the climate variables (temperature, UV radiation, and absolute humidity) show sufficiently strong correlations with one-another that we cannot disentangle each variable's contributions to \RO due to high inflation of variances (see supplementary table S1). This is further demonstrated through principle components analysis, where the three climate variables largely cluster into the same principle component (see supplementary information). We therefore focused on temperature as the best fitting climate variable (assessed by $r^2$, supplementary table S2).
+
+When regressed against temperature and $\log_{10}$-transformed population density, we find that \RO significantly increases with population density and decreases with temperature (fig.\ \ref{fig:R0_Rt_plots}; both $p < 0.001$, table \ref{tab:regression}).
+We see a stark difference, however, when analysing $R_t$ (the reproduction number, $R$, at a given time, $t$) during lockdown (figure \ref{fig:R0_Rt_plots}b): much less of the variation in $R_t$ is explained by the regression model (\textsl{adjusted} $r^2$ $= 17$\%), vastly lower model coefficients for explanatory variables (\emph{i.e.}, much lesser correlations; supplementary table S3), and much lower $R_t$ estimates overall (paired $t_{39} = 21.1$; $p < 0.001$). Additionally, if we regress $R$ against environment across the combined \RO and $R_t$ estimates, using lockdown as an interaction term, we find a significant interaction between lockdown and temperature ($p < 0.001$, supplementary table S5), \emph{i.e.} lockdown mediates the effects of climate on \RO.
+
+% UPDATE NUMBERS AFTER RUN WITH NEW TEMPERATURE!
+The strong correlates of population density and temperature on \RO across USA states were echoed in our climate-driven Bayesian modelling of daily variation in $R_t$. Posterior medians of the scaled coefficients of ($\log_{10}$-transformed) population density and daily temperature were $0.74$ and $-0.48$, respectively. These coefficients were strongly supported (both Bayesian probabilities $> 99.9\%$, and suggest that greater population density is over one-and-a-half times a greater driver of higher transmission than colder temperature ($\frac{0.74}{0.48} > \frac{75}{50}$; $\frac{75}{50} = 1.5$). 
+% TS: Need to add an example here:
+% e.g. "the mean monthly temperature in X state varies by Y degrees C between July and December, according to our model, this would require an average mobility reduction of Z% to mitigate".
+% I can update this when numbers are finalised.
+In figure \ref{fig:bayes} we reveal how changes in mobility (such as those induced by lock-down) have the potential to mitigate these impacts of both population density and temperature.
+We highlight that the posterior estimates of environment and average mobility were correlated (Pearson's $r = 0.26$ for temperature and $r = -0.30$ for population density). 
+This likely results from correlated changes in mobility and temperature through time, and makes the estimated mobility reductions in figure \ref{fig:bayes} conservative (\emph{i.e.}, we potentially report larger mobility reductions than would be necessary to mitigate environmental effects).
+
+
+
+\begin{table}[ht]
+\centering
+\caption{\textbf{Population density and temperature are drivers of \RO at state-level in the USA.} Multiple $r^2 = 0.6037$, \textsl{adjusted} $r^2 = 0.5822$, $F_{2,37} = 28.18$, $p < 0.001$. Scaled estimates are coefficients when predictors are scaled to have mean $= 0$ and SD $= 1$. Scaling our explanatory variables means our coefficients are measures of the relative importance of each variable. In contrast to our epidemiological modelling, temperature is a greater driver of pre-lockdown \RO than population density (log$_{10}$-transformed). * = $p < 0.05$}
+\begin{tabular}{rrrrrr}
+  \hline
+ & Scaled Estimate & Std. Error &  $t$ value & $p$-value \\ 
+  \hline
+  (Intercept) & 2.5600 & 0.0494 & 51.80 & $<0.001$* \\ 
+  Temperature & -0.2801 & 0.0516 & -5.43 & $<0.001$* \\ 
+  $\log_{10}$(Pop density) & 0.1921 & 0.0516 & 3.72 & $<0.001$*  \\ 
+   \hline
+\end{tabular}
+\label{tab:regression}
+\end{table}
+
+
+
+\begin{figure}[ht]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  % include first image
+  \includegraphics[width=\linewidth]{../figures/3d_plot_panel_A.png}  
+  \caption{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  % include second image
+  \includegraphics[width=\linewidth]{../figures/3d_plot_panel_B.png}  
+  \caption{}
+\end{subfigure}
+\caption{{\bf \RO is affected by environment, but the impact of lockdown is greater.} {\bf (a.)} \RO plotted against temperature (averaged across the two weeks prior to the \RO estimate) and $\log_{10}$-transformed population density (people per km$^2$) for each USA state (grey points). Surface shows the predicted \RO from the regression model (table \ref{tab:regression}). Temperature has a negative effect on \RO at state-level in the USA, whilst population density has a positive effect (table \ref{tab:regression}). {\bf (b.)} The mean $R_t$ for the two weeks following a state-wide stay-at-home mandate (\emph{i.e.}, during lockdown) plotted against average daily temperature for the same period and $\log_{10}$-transformed population density. The effects of temperature and population density are much weaker in the mobility-restricted data and $R$ is reduced overall. The same colour scale, given in the centre of the figure, is used across both sub-plots.}
+\label{fig:R0_Rt_plots}
+\end{figure}
+
+
+
+\begin{figure}[ht]
+\begin{subfigure}{.5\textwidth}
+  \centering
+  % include first image
+  \includegraphics[width=\linewidth]{../figures/heatmap_R0.png}  
+  \caption{}
+\end{subfigure}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  % include second image
+  \includegraphics[width=\linewidth]{../figures/USA_pop_residuals_vs_temperature.png}  
+  \caption{}
+\end{subfigure}
+  \caption{ {\bf The relative importance of temperature and population density as drivers of pre-lockdown \RO.}
+  {\bf (a.)} Heatmap of the regression model \RO predictions, with USA state-level \RO point estimates overlayed. High population densities and low temperatures drive increases in \virus \RO. This is a 2D representation of the regression plane in fig. \ref{fig:R0_Rt_plots}a, using the same colour-scale.
+  {\bf (b.)} Residuals from a linear regression of \RO against $\log_{10}$-transformed population density (``Corrected \RO''), plotted against temperature. This illustrates that, when considering population density alone, \RO is overestimated in cold states and underestimated in warm states. After accounting for population density, there is a significant
+  effect of temperature upon \RO (see table \ref{tab:regression}). In both figures, points are highlighted with standard two-letter state codes; MN and FL refer to Minnesota and Florida, respectively, and are referred to in the discussion.}
+\label{fig:USA_residuals}
+\end{figure}
+
+
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=\linewidth]{../figures/us-bayes-posterior.pdf}  
+\caption{\textbf{Mobility reductions required from average mobility to mitigate differences in population density and temperature.} Our model predicts that, on average (mean), a 5$^{\circ}$C temperature decrease is correlated with an increase in $R_t$ of $0.29$, and a $10\times$ increase in population density with an increase of $1.15$. This figure shows the percent reduction needed in average mobility (measuring retail, recreation, grocery, pharmacy, and workplace trips) to compensate for a given temperature (red) or population density (black) increase in $R_t$. These calculations assume a `background' \RO of $1$ and a baseline `background' mobility (defined as `0' by Google \cite{Aktay2020}). Each point represents the median mobility reduction required, and the lines 50\%, 80\%, and 90\% posterior credibility intervals (lines of declining thickness). This model suggests that even quite large variation in underlying transmission driven by either variation in temperature through time, or in population density across space, can be mitigated by reductions in mobility. Critically, however, the posterior distribution for the impact of population density is skewed: the impact of population density has a strong possibility to be extremely great and, therefore, difficult to mitigate except through large mobility reductions (as shown in the figure). We emphasise that other transmission mitigation decisions, such as hand-washing, mask-wearing, and physical distancing, were not assessed in our model.}
+\label{fig:bayes}
+\end{figure}
+% TS: Need to make sure that this is calculated properly
+
+
+\clearpage
+\section*{Discussion}
+
+Here, by combining epidemiological models and outputs with spatial climate data, we show that environment (specifically cold, but also the correlated dry and low-UV conditions)
+can enhance \virus transmission across the USA. Critically, however, these environmental impacts are weaker than that of population density which is, itself, a weaker driver than policy intervention (\emph{i.e.}, lockdown). 
+Below, we suggest that the accuracy of forecasts of \virus transmission, in particular across seasons, could be improved by incorporating temperature, as well as population density, in a robust, reproducible manner as we have done here.
+
+\subsection*{The role that environment plays in transmission}
+
+Across these state-level USA data, we found a significant negative effect of temperature on \virus's \RO and a significant positive effect of population density. An important caveat to this, however, is the strong collinearity between temperature, absolute humidity, and UV levels. The strong correlations between these environmental drivers mean that we are unable to discern the effects of each in a single model and therefore we focus on temperature as the most reliable environmental predictor. After accounting for the effect of population density on transmission (table \ref{tab:regression}), temperature's effect is  striking (figure \ref{fig:USA_residuals}). 
+We also tested the effects of our predictor variables on $R_t$ for times where strict lockdown measures were in place. When these mobility restrictions are in place, we observe no significant effects of temperature on $R_t$, \emph{i.e.} the effects of lockdown dampen any environmental effects so as to make them inconsequential (figure \ref{fig:R0_Rt_plots}b; supplementary table S3). Furthermore, under lockdown conditions the overall transmission rates are vastly reduced. 
+Through our epidemiological modelling approach we are able to account for these effects (as mobility changes are explicitly incorporated), and find that higher population densities and lower temperatures drive increased $R_t$.
+
+The precise physiological mechanisms for temperature-dependant inactivation in \virus are still not known, but animal models for influenza have shown that increased viral transmission at lower temperatures can be due to effects on the host\cite{Lowen2007, Lowen2014}. In guinea pigs, this is proposed to be due to the combined effects of higher titres of viral particle shedding and greater viral stability in nasal passages of animals housed in cooler conditions\cite{Lowen2014}. 
+In addition to host effects, the persistence time of the virus outside of the body is expected to be negatively affected by higher environmental temperatures, which cause viral inactivation via breakdown of their lipid layers\citep{Chan2011,Schoeman2019}. 
+We emphasise that both the direct host effects, and the potential effects of environment on viral stability, are likely moderated (if not mitigated) by indoor heating \cite{Shaman2010}, although the same may not always be true of absolute humidity.
+Contact rate is related to population density \cite{Rocklov2020}, and so it is unsurprising that population density was a significant factor in our analysis (figure \ref{fig:R0_Rt_plots}a).
+We stress that temperature was not a driver of transmission under lockdown and the effects of population density were lessened (figure \ref{fig:R0_Rt_plots}b): conditions and density outside matter little if you are indoors.
+
+
+There are important methodological caveats to our findings.
+Dynamics and reporting between USA states are known to be variable \cite{Javan2020}, introducing a level of uncertainty to our findings. 
+Furthermore, lockdown measures were (and continue to be) quite heterogeneous across the USA, with different states displaying different levels of response to \disease \cite{Neofotistos2020}. Through our epidemiological modelling approach we are able to account for these different state-level responses, through use of google mobility data.
+We can also observe other potential confounding factors in these analyses. 
+Across the USA, the north-eastern states in the vicinity of the major transport hub of New York (\emph{e.g.}, NY, NJ, ME, PA, RI, and CT) tend to have generally higher \RO than predicted, whilst west-coast states (WA, CA, and OR) have lower \RO than predicted (fig \ref{fig:USA_residuals}a)
+While this type of effect could due to preemptive protective measures taken by states prior to COVID-19 outbreaks, we likely mitigated this by removing states that initiated non-pharmaceutical interventions before our first time-step (see methods).
+A further confounding factor may be seen if temperature affects human behaviour, thus making it difficult to disentangle the effects of climate from changes to mobility. We do find a link between the average mobility and temperature coefficients in our Bayesian modelling, suggesting a degree of collinearity, however (perhaps surprisingly), we see no direct correlations between daily temperature and recreational mobility trends for parks (see supplementary information). Again, this highlights the importance of human behaviour as a confounding factor in analyses of environmental drivers on \virus transmission. Future work should consider finer-grained population density, as well as the presence of major transport hubs in a given region.
+
+
+\subsection*{Policy relevance of our findings}
+Our results comparing \virus transmission rate before and during lockdown support the idea that the major driver of transmission is public policy \cite{Jarvis2020, Lau2020} (see figure \ref{fig:R0_Rt_plots}). Once lockdown was implemented across the USA, we can find no meaningful signal of environment on transmission. This provides two important, and timely, insights for policy-makers: summer weather is no substitute for mitigation, and policy can prevent transmission in the winter. 
+At the coarse scale of USA states, population density is a greater driver of transmission intensity than temperature in our epidemiological modelling ($\log_{10}$(population density) $> 1.5 \times$ larger scaled coefficient than temperature). 
+We suggest it should be considered whether thresholds for adaptive and/or intermittent lockdown might be more precautionary (\emph{i.e.}, lower) in colder, more densely-populated regions. However, we strongly suggest that this should neither be in order to allow other regions to actively relax restrictions, nor conducted without further examination of finer-scale disease dynamics. When making decisions about the relative importance of climate and population density, it is important to account for the magnitude of variation in the two variables. 
+Temperature varies widely across the US, and that differences in transmission rates between states (contrast, for example, Minnesota and Florida in figure \ref{fig:USA_residuals}) may vary due to climate does not imply that more modest climate differences within a state drive differences through time or across space.
+Regardless, our analysis is too spatially coarse to address such variation. Even quite large variations in climate are more straightforward to mitigate than population density differences (figure \ref{fig:bayes}), and so we suggest that regions with higher population density should continue to be monitored carefully. Finally, we emphasise that population density and temperature are well-known to be strongly correlated across USA states (see also figure \ref{fig:USA_residuals}); this does not affect our model fitting of coefficient estimates, but it does affect their interpretation. A more densely-populated state is also likely to be warmer, and so we suggest that both factors (and others, such as mobility) should be taken into account when trying to \emph{a priori} estimate a region's transmission rate. 
+
+
+These results have strong implications for modellers considering the potential impacts of seasonality on the virus. Such work has already considered the role that seasonality might play by assuming responses of structurally similar and/or related diseases are adequate proxies for \virus \cite{Baker2020}. These assumptions are broadly correct, but here we parameterise and quantify the magnitude of this effect for \virus. Further, our results support a role for daily temperature changes in affecting transmission, but, we emphasise, do not conflict with other studies suggesting that seasonal forecasting plays a secondary role to mitigation and/or number of susceptible individuals. Such studies \cite{Baker2020} assumed \virus responds to climate to broadly similar extents that we find here.
+What our results do suggest, however, is that future forecasting work should consider the use of environment to enhance predictions of disease spread. In countries such as the USA with continental climates that swing between extremes of heat and cold, we suggest policy-makers should assume that transmission will increase in winter (and potentially autumn/fall). The timing of the seasons are broadly predictable, and so this is an area in which policy could be proactive, not reactive.
+
+
+\subsection*{Conclusion} 
+There is no single cause of, or solution to, the current \disease pandemic, and all drivers must be placed in perspective. Here we suggest that both environment, and daily weather, may play a role in the transmission of \virus. The major driver of transmission, and our best method of controlling it, is public policy, as this and many other studies have shown \citep{Jarvis2020, Lau2020}. 
+The role of environment in transmission has become controversial, in part because of the application of models to case prevalence, rather than epidemiological parameters such as $R$
+that we model here. We call for more researchers to work directly with epidemiologists 
+to identify those components of epidemiological modelling that can be informed by outside specialists' areas of expertise. By working together, we can efficiently increase epidemiological research capacity to better combat and control this pandemic.
+
+
+\clearpage
+\section*{Methods}
+
+We explored the association between environmental covariates and \virus transmission intensity using two approaches. First, we took existing state-level estimates of \RO and during-lockdown $R_t$ for the USA, and regressed them against environmental data in order to test for potential pre- and during-lockdown patterns.
+In the second approach, we modified and fitted an existing semi-mechanistic epidemiological model to the observed death time series, incorporating the effects of the most important aspects of environment on the virus. This model makes use of daily weather observations and provides a rigorous framework to quantify the drivers of \virus transmission across the USA. The first approach mitigates potential bias arising from the autocorrelation of the initiation of lockdown and the cessation of winter in the USA in the second approach, since our independent regression focuses on initial transmission (\emph{i.e.}, \RO).
+Below, all software packages given in \emph{italics} are \emph{R} packages (version 3.6.3)\cite{R2020} unless otherwise specified. Code to reproduce our analyses, download source data, and update models with new data as it becomes available, are given in both the supplementary materials and at our team's \emph{GitHub} repository (\url{https://www.github.com/pearselab/tyrell}).
+
+\subsection*{Data collection}
+
+ We collated global population density data from the \citet{GPWv4}, and hourly temperature ($T$),  relative humidity ($RH$) and surface UV radiation (in J m$^{-2}$) estimates for 2020 from the \citet{ECVs}. All the above data were at the same spatial resolution of 0.25x0.25$^{\circ}$. The amount of water vapour air can hold increases with temperature and, since in other viruses the absolute humidity ($AH$) of air can drive transmission more than relative saturation \citep{Shaman2009, Shaman2010}, we calculated absolute humidity from our data using the the Clausius–Clapeyron relation and the ideal gas law\cite{Shaman2009, Ma2020}:
+
+\begin{equation}
+     AH = 1000 \cdot \frac{e_0 \cdot e^{\frac{L}{R_v}(\frac{1}{T_0} - \frac{1}{T})} \cdot RH}{R_v \cdot T}
+\end{equation}
+
+Where $AH$ (g m$^{-3}$) is the absolute humidity, $T$ (K) the temperature in a given cell, $RH$ the relative humidity in a given cell (expressed as a percentage), $e_0$ the saturation vapor pressure ($6.11$mb) at reference temperature $T_0$ (which we set as $273.15$K), $L$ the latent heat of evaporation for water ($2257\ \text{kJ\ kg}^{-1}$), and $R_v$ the gas constant for water vapour ($461.53\ \text{J\ kg}^{-1} \text{K}^{-1}$).
+
+We used the Climate Data Operators program\cite{Schulzweida2019} to compute daily means for each of our climate variables. Finally, we averaged the value of each covariate (median) across the state-level administrative units given by GADM shapefiles\cite{GADM} (the 50 USA states, plus Washington DC).
+
+
+\subsection*{Independent validation of the impact of environment on \RO}
+
+To validate the impact of environment on \RO we used an existing dataset of \virus transmission rate estimates for each of the states of the USA \cite{Unwin2020a}. 
+We used the basic reproduction estimates (\RO, before the implementation of any non-pharmaceutical interventions) as a fundamental measure of virus transmissibility in each state.
+
+In these data, \RO is estimated as $R_{t=0}$ where $t=0$ occurs 30 days prior to the first 10 cumulative deaths recorded for each state\cite{Flaxman2020a, Unwin2020a}. The date upon which \RO is estimated therefore differs between states. To account for these temporal differences, we took the means of our daily climate variables across the 14 days prior to $t=0$ for each state as an approximation for the conditions under which each population first experienced \disease.
+To test the impact of environment on \RO, we performed multiple linear regression on \RO with temperature, humidity, UV, and population density as predictors. 
+To compare environmental effects on $R$ under mobility restriction measures (\emph{i.e.}, lockdown), we took the average (mean) $R_t$ across the 14 days following a state-wide stay-at-home mandate and regressed these against the environmental predictors averaged across the same time period. We used 14 days again here for consistency with our environmental comparison to \RO. Although mobility restrictions may differ in magnitude between states, these effects are incorporated into the estimates for the $R_t$ parameter.
+In 7 states (Arkansas, Iowa, North Dakota, Nebraska, Oklahoma, South Dakota, and Wyoming) no state-wide stay-at-home mandate was declared. In a further 4 states (Alaska, Hawaii, Montana, and Utah), $t=0$ occurred after non-pharmaceutical interventions had already been instated.
+These 11 states were therefore excluded from further analysis. 
+
+
+\subsection*{Integrative modelling of the impact of environment on \virus transmission}
+
+To further assess the potential impact of environment on \virus transmission, we modified the semi-mechanistic Bayesian model \cite{Unwin2020a} that generated the \RO and $R_t$ estimates used above to incorporate both population density and daily temperature, as follows:
+
+\begin{equation}
+    R_{t,m} = (\mu + c_{t,m}C + p_mP) \cdot 2 InvLogit(-\Sum(X_{t,m,k}\alpha_k) -X_{t,m,1}\alpha_{r(m)}^{region} -X_{t,m,2}\alpha_m^{state} - \epsilon)
+    \label{eq:Rt}
+\end{equation}
+
+Where $\mu$ captures overall transmission common to all states, $c$ the coefficient for temperature ($C_{t,m}$; in degrees C) at time ($t$) in state $m$, $p$ the coefficient for  population density ($P_m$) of state $m$ ($\log_{10}$-transformed people per km$^2$). 
+We standardised $c_{t,m}$ and $p_m$ to have a mean of 0 and standard deviation of 1, in order to make their absolute magnitudes measures of the relative importance of each term and thus facilitate their comparison.
+We placed strong, conservative priors on these new model terms, specifically:
+
+\begin{equation}
+    c_{t,m}, p_m \sim Normal(0, 0.5)
+\end{equation}
+\begin{equation}
+    \mu \sim Normal(3.28, 0.5) 
+\end{equation}
+
+
+For $\mu$, this is the same as the prior used in the original (non-climate) model\cite{Unwin2020a} (but see our caveat below about this term). The other terms we describe briefly below, since they are unchanged from their original definitions in \citet{Unwin2020a}. $InvLogit$ is the inverse logit transformation applied to a series of hierarchically-nested terms ($\alpha_k$, $\alpha_{r(m)}^{region}$, and $\alpha_m^{state}$) multiplied by Google mobility data \cite{Aktay2020} ($X_{t,m,k}$) with a weekly $AR(2)$ autocorrelated error term for each state ($\epsilon$; see \citet{Unwin2020a} for more details). $X_{t,m,k}$ are three US-wide measures of the impact of changing mobility across states (a daily proxy for lockdown intensity) on `average' across retail and recreation, grocery and pharmacy, and workplace trips ($X_{t,m,1}$), in `residential' areas ($X_{t,m,2}$), and using public `transit' ($X_{t,m,3}$).
+We focus on the vector $\alpha_k$, whose three entries assess the impact of mobility comparably across the country (and thus are each analogous to $c$ and $p$). The terms $\alpha_{r(m)}^{region}$ and $alpha_m^{state}$ address differences in average mobility across eight broad geographic regions [the Great Lakes, Great Plains, Rocky Mountains, Northeast Corridor, Pacific North-West, South Atlantic, Southern Appalachia, and the South (`TOLA'); indexed by $r(m)$] and for transit across individual states ($m$), respectively.
+While we attempted to address comparable hierarchically-nested temperature responses in this model, we felt the correlation between changes in $X_{t,m,k}$ and $c_{t,m}$ were inducing fitting problems and so opted for a model simpler (and so more conservative) in its novel components.
+
+We emphasise that we differ from the original model by fitting a common $\mu$ across all states, instead of allowing each state to have a different baseline $\mu$ that was hierarchically drawn from a common parameter (itself termed $\mu$ in \citet{Unwin2020a}). This difference ensures identifiability of our model parameters, since the (latent, and hierarchically pooled) state-wise means are so strongly driven by both population density and environment that we now include in the model (see results). Our model, which was directly adapted from the code in \citet{Unwin2020a}, was fit using \emph{rstan} \cite{rstan2020} with 5 independent chains (each with 10000 total iterations and a warm-up of 8000). Full model coefficients and outputs are given in the supplementary materials (supplementary table S6); posterior predictive checks were performed to ensure that the predicted $R_t$ values for each states through time were realistic and sensible and all chains had mixed and converged.
+
+\clearpage
+
+
+
+\bibliographystyle{unsrtnat}
+\bibliography{library_dupfree}
+
+\end{document}
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

@@ -5,36 +5,9 @@
 
 source("src/packages.R")
 
-R0_data <- read.csv("clean-data/climate_and_R0.csv")
 
-## ---------------------- PCA ----------------------- ##
-
-# First we want to do a PCA to look at collinearity between climate variables
-
-R0_data <- R0_data[!is.na(R0_data$Feb_UV),]
-test_data <- R0_data[,c("February_20_TC", "February_20_AH", "Feb_UV", "Pop_density")]
-names(test_data) <- c("Temperature", "Absolute Humidity", "UV-B", "Population density")
-# need to log the pop density as massively skewed
-test_data$`Population density` <- log(test_data$`Population density`)
-
-# do the PCA
-pca_model <- prcomp(test_data, scale. = TRUE, center = TRUE)
-
-png("figures/pca_plot.png", width = 400, height = 400)
-ggbiplot(pca_model, groups = R0_data$dataset, varname.size = 4, varname.adjust = 1) + 
-  #geom_point(aes(colour = R0_data$dataset), size = 3) +
-  theme_bw() + 
-  xlim(c(-2, 3)) + 
-  ylim(c(-3, 3)) + 
-  theme(legend.position = c(0.85, 0.8),
-        legend.text = element_text(size = 12),
-        legend.title = element_blank(),
-        aspect.ratio=1,
-        axis.text = element_text(size = 12),
-        axis.title = element_text(size = 14))
-dev.off()
-
-
+# This is all depreciated now that we aren't combining datasets #
+# TS: removing from rakefile
 
 ## ---------------------- mclust ----------------------- ##
 
