@@ -10,9 +10,9 @@ states <- shapefile("clean-data/gadm-states.shp")
 # Load temperature data and subset into rasters for each day of the year
 # - NOTE: assumes Tom's humidity script applies here too
 days <- as.character(as.Date("2020-01-01") + 0:151)
-temp <- rgdal::readGDAL("raw-data/cds-era5-temp-midday.grib")
-humid <- rgdal::readGDAL("raw-data/cds-era5-humid-midday.grib")
-uv <- rgdal::readGDAL("raw-data/cds-era5-uv-midday.grib")
+temp <- rgdal::readGDAL("raw-data/cds-era5-temp-dailymean.grib")
+humid <- rgdal::readGDAL("raw-data/cds-era5-humid-dailymean.grib")
+uv <- rgdal::readGDAL("raw-data/cds-era5-uv-dailymean.grib")
 .drop.col <- function(i, sp.df){
     sp.df@data <- sp.df@data[,i,drop=FALSE]
     return(sp.df)

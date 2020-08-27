@@ -89,7 +89,7 @@ stay_at_home <- interventions[interventions$StatePolicy == "StayAtHome",]
 stay_at_home <- stay_at_home[stay_at_home$StateWide == 1,]
 
 # take only 1 from each state
-stay_at_home <- stay_at_home[-c(2, 34, 39, 41),]
+stay_at_home <- stay_at_home[-c(2, 34, 39),]
 
 USA_Rt <- merge(USA_Rt, stay_at_home[,c("StatePostal", "DateEnacted")], by.x = "state", by.y = "StatePostal")
 names(USA_Rt)[19] <- "stay_at_home"
@@ -127,28 +127,40 @@ c(states, states_data) %<-% readRDS("clean-data/gadm-states.RDS")
 US_data <- states_data[states_data$GID_0 == "USA",]
 
 # temperature
-states_temperature <- as.data.frame(readRDS("clean-data/temp-midday-states.RDS"))
+states_temperature <- as.data.frame(readRDS("clean-data/temp-USA.RDS"))
 USA_temperature_long <- make_long(df = states_temperature, clim_var = "temperature")
 
 # humidity
-states_humidity <- as.data.frame(readRDS("clean-data/humid-midday-states.RDS"))
+states_humidity <- as.data.frame(readRDS("clean-data/humid-USA.RDS"))
 USA_humidity_long <- make_long(df = states_humidity, clim_var = "relative_humidity")
 
 # UV
-# states_uv <- as.data.frame(readRDS("clean-data/uv-midday-states.RDS"))
-# USA_uv_long <- make_long(df = states_uv, clim_var = "uv")
+states_uv <- as.data.frame(readRDS("clean-data/uv-USA.RDS"))
+USA_uv_long <- make_long(df = states_uv, clim_var = "uv")
 
 # merge together
-climate_data <- cbind(USA_temperature_long, USA_humidity_long[,c("relative_humidity")])
-
+climate_data <- cbind(USA_temperature_long, USA_humidity_long[,c("relative_humidity")], USA_uv_long[,c("uv")])
 
 # calculate absolute humidity
 climate_data$absolute_humidity <- calc_AH(RH = climate_data$relative_humidity, e_0 = 6.11, T_0 = 273.15, 
                                                           temp = climate_data$temperature+273.15)
 
+# 5. merge pop density in
+
+states_popdensity <- as.data.frame(readRDS("clean-data/population-density-states.RDS"))
+states_popdensity$State <- row.names(states_popdensity)
+USA_states_popdensity <- states_popdensity[with(states_popdensity, grepl("USA", State)),]
+USA_states_popdensity$State <- gsub("US.", "", US_data$HASC_1)
+
+climate_data <- merge(climate_data, USA_states_popdensity, by.x = "State", by.y = "State")
 
 
-# 5. Get R0 and Rt data and estimate climate variables according to dates of estimates
+# 6. Merge Rt and climate data
+
+USA_Rt <- merge(USA_Rt, climate_data, by.x = c("state", "date"), by.y = c("State", "date"))
+
+
+# 7. Get R0 and Rt data and estimate climate variables according to dates of estimates
 
 # for each state, take R(t=0) as R0
 USA_R0 <- data.frame(USA_Rt %>% 
@@ -166,7 +178,9 @@ USA_R0 <- USA_R0[USA_R0$date <= USA_R0$emergency_decree,]
 # the average is weighted by the distribution of the serial interval (see Flaxman - gamma(6.5, 0.62))
 states_list <- unique(as.character(USA_R0$state))
 USA_R0$temperature <- NA
+USA_R0$relative_humidity <- NA
 USA_R0$absolute_humidity <- NA
+USA_R0$uv <- NA
 
 if(FALSE){
 for(i in 1:length(states_list)){
@@ -180,6 +194,9 @@ for(i in 1:length(states_list)){
   USA_R0[USA_R0$state == states_list[i],]$absolute_humidity <- weighted.mean(state_temp$absolute_humidity, #
                                                                              w = dgamma(seq(1,15,1), shape =  6.5, scale = 0.62),
                                                                              na.rm = TRUE)
+  USA_R0[USA_R0$state == states_list[i],]$uv <- weighted.mean(state_temp$uv, #
+                                                                             w = dgamma(seq(1,15,1), shape =  6.5, scale = 0.62),
+                                                                             na.rm = TRUE)
 }
 }
 
@@ -190,10 +207,11 @@ for(i in 1:length(states_list)){ # unweighted mean
                                climate_data$date <= t,]
   USA_R0[USA_R0$state == states_list[i],]$temperature <- mean(state_temp$temperature, na.rm = TRUE)
   USA_R0[USA_R0$state == states_list[i],]$absolute_humidity <- mean(state_temp$absolute_humidity, na.rm = TRUE)
+  USA_R0[USA_R0$state == states_list[i],]$uv <- mean(state_temp$uv, na.rm = TRUE)
 }
 
-USA_R0 <- USA_R0[,c("state", "mean_time_varying_reproduction_number_R.t.", "temperature", "absolute_humidity")]
-names(USA_R0) <- c("State", "R0", "Temperature", "Absolute_Humidity")
+USA_R0 <- USA_R0[,c("state", "mean_time_varying_reproduction_number_R.t.", "temperature", "absolute_humidity", "uv", "Pop_density")]
+names(USA_R0) <- c("State", "R0", "Temperature", "Absolute_Humidity", "UV", "Pop_density")
 
 
 
@@ -205,7 +223,9 @@ names(USA_R0) <- c("State", "R0", "Temperature", "Absolute_Humidity")
 Rt <- c()
 temperature <- c()
 humidity <- c()
+uv <- c()
 state <- c()
+pop_density <- c()
 
 for(i in 1:length(states_list)){
   state_subs <- USA_Rt[USA_Rt$state == states_list[i],]
@@ -213,31 +233,21 @@ for(i in 1:length(states_list)){
   t_max <- t_min+14
   Rt_window <- state_subs[state_subs$date >= t_min & 
                             state_subs$date <= t_max,]
-  temp_window <- climate_data[climate_data$State == states_list[i]&
-                                        climate_data$date >= t_min &
-                                        climate_data$date <= t_max,]
   Rt <- c(Rt, mean(Rt_window$mean_time_varying_reproduction_number_R.t.))
-  temperature <- c(temperature, mean(temp_window$temperature))
-  humidity <- c(humidity, mean(temp_window$absolute_humidity))
+  temperature <- c(temperature, mean(Rt_window$temperature))
+  humidity <- c(humidity, mean(Rt_window$absolute_humidity))
+  uv <- c(uv, mean(Rt_window$uv))
+  pop_density <- c(pop_density, unique(Rt_window$Pop_density))
   state <- c(state, states_list[i])
 }
 
-USA_Rt_df <- data.frame(Rt, temperature, humidity, state)
-names(USA_Rt_df) <- c("Rt", "Temperature", "Absolute_Humidity", "State")
+USA_Rt_df <- data.frame(Rt, temperature, humidity, uv, state, pop_density)
+names(USA_Rt_df) <- c("Rt", "Temperature", "Absolute_Humidity", "UV", "State", "Pop_density")
 
-
-# 6. merge pop density in
-
-states_popdensity <- as.data.frame(readRDS("clean-data/population-density-states.RDS"))
-states_popdensity$State <- row.names(states_popdensity)
-USA_states_popdensity <- states_popdensity[with(states_popdensity, grepl("USA", State)),]
-USA_states_popdensity$State <- gsub("US.", "", US_data$HASC_1)
-
-
-USA_R0 <- merge(USA_R0, USA_states_popdensity, by.x = "State", by.y = "State")
-USA_Rt_df <- merge(USA_Rt_df, USA_states_popdensity, by.x = "State", by.y = "State")
-
+names(USA_Rt)[11] <- "Rt"
 
 # write out for later
 write.csv(USA_R0, "clean-data/climate_and_R0_USA.csv", row.names = FALSE)
 write.csv(USA_Rt_df, "clean-data/climate_and_lockdown_Rt_USA.csv", row.names = FALSE)
+
+write.csv(USA_Rt, "clean-data/daily_climate_and_Rt_USA.csv", row.names = FALSE)
