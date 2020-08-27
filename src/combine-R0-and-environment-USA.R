@@ -127,15 +127,15 @@ c(states, states_data) %<-% readRDS("clean-data/gadm-states.RDS")
 US_data <- states_data[states_data$GID_0 == "USA",]
 
 # temperature
-states_temperature <- as.data.frame(readRDS("clean-data/temp-USA.RDS"))
+states_temperature <- as.data.frame(readRDS("clean-data/temp-dailymean-states.RDS"))
 USA_temperature_long <- make_long(df = states_temperature, clim_var = "temperature")
 
 # humidity
-states_humidity <- as.data.frame(readRDS("clean-data/humid-USA.RDS"))
+states_humidity <- as.data.frame(readRDS("clean-data/humid-dailymean-states.RDS"))
 USA_humidity_long <- make_long(df = states_humidity, clim_var = "relative_humidity")
 
 # UV
-states_uv <- as.data.frame(readRDS("clean-data/uv-USA.RDS"))
+states_uv <- as.data.frame(readRDS("clean-data/uv-dailymean-states.RDS"))
 USA_uv_long <- make_long(df = states_uv, clim_var = "uv")
 
 # merge together

@@ -31,9 +31,8 @@ USA_Rt_data <- read.csv("clean-data/climate_and_lockdown_Rt_USA.csv")
 # 1. all variables
 
 USA_regression_model_full <- lm(R0 ~ Temperature + Absolute_Humidity + UV + log10(Pop_density), data = USA_R0_data)
-summary(USA_regression_model_full)
-# print(xtable(summary(USA_regression_model_full)))
 # scaled coefficicents:
+print("Full regression model with scaled coefficients, latex table:")
 xtable(summary(lm(R0 ~ scale(Temperature) + scale(Absolute_Humidity) + scale(UV) + scale(log10(Pop_density)), data = USA_R0_data)))
 
 # 2. check corellation between climate variables
@@ -44,17 +43,25 @@ USA_clim_vars <- USA_clim_vars[!is.na(USA_clim_vars$Temperature) &
                          !is.na(USA_clim_vars$Absolute_Humidity) &
                            !is.na(USA_clim_vars$UV),]
 
+print("")
+print("How correlated are the climate variables?")
 cor(USA_clim_vars)
 
+print("")
+print("Variance inflation factors for the full model:")
 vif(USA_regression_model_full)
 
 # which is the best fitting when pop density is accounted for?
-summary(lm(R0 ~ Temperature + log10(Pop_density), data = USA_R0_data))
-summary(lm(R0 ~ Absolute_Humidity + log10(Pop_density), data = USA_R0_data))
-summary(lm(R0 ~ UV + log10(Pop_density), data = USA_R0_data))
+# summary(lm(R0 ~ Temperature + log10(Pop_density), data = USA_R0_data))
+# summary(lm(R0 ~ Absolute_Humidity + log10(Pop_density), data = USA_R0_data))
+# summary(lm(R0 ~ UV + log10(Pop_density), data = USA_R0_data))
 # temperature model has the highest r2
+print("")
+print("R0 vs temperature correlation coefficient:")
 cor(USA_R0_data$R0, USA_R0_data$Temperature)
+print("R0 vs humidity correlation coefficient:")
 cor(USA_R0_data$R0, USA_R0_data$Absolute_Humidity)
+print("R0 vs UV correlation coefficient:")
 cor(USA_R0_data$R0, USA_R0_data$UV)
 
 
@@ -90,15 +97,17 @@ dev.off()
 # 3. temperature + pop density only
 
 USA_regression_model <- lm(R0 ~ Temperature + log10(Pop_density), data = USA_R0_data)
-summary(USA_regression_model)
-# print(xtable(summary(USA_regression_model)))
 # scaled coefficients?
+print("")
+print("Temperature vs R0 regression model with scaled coefficients, latex table:")
 xtable(summary(lm(R0 ~ scale(Temperature) + scale(log10(Pop_density)), data = USA_R0_data)))
 
 # 4. check effects of lockdown
 USA_regression_model_lockdown <- lm(Rt ~ Temperature + log10(Pop_density), data = USA_Rt_data)
-summary(USA_regression_model_lockdown)
-summary(lm(Rt~ scale(Temperature) +  scale(log10(Pop_density)), data = USA_Rt_data))
+
+print("")
+print("Temperature vs lockdown Rt regression model with scaled coefficients, latex table:")
+xtable(summary(lm(Rt~ scale(Temperature) +  scale(log10(Pop_density)), data = USA_Rt_data)))
 # much lower correlations
 
 # 5. t-test of R0 vs Rt to show importance of lockdown
@@ -113,6 +122,8 @@ for(i in 1:length(locations)){
   }
 }
 
+print("")
+print("t-test R0 vs lockdown Rt:")
 t.test(USA_R0_data$R0, USA_R0_data$Rt, paired = TRUE, alternative = "greater", na.rm = TRUE)
 
 # 6. Combine temperature and population density into one 3d plot with trend surface
@@ -144,7 +155,7 @@ R0_3d <- plot_ly() %>%
                                    tickfont = list(size = 15)),
                       zaxis = list(title = "", range = c(0, 4), autotick = F, tickmode = "array", tickvals = c(1, 2, 3, 4),
                                    tickfont = list(size = 15))))
-R0_3d
+# R0_3d
 
 # repeat for Rt data
 # predict model over sensible grid of values (ld for lockdown)
@@ -173,7 +184,7 @@ Rt_3d <- plot_ly() %>%
                                    tickfont = list(size = 15))),
                                    showlegend = FALSE) %>%
   hide_colorbar() 
-Rt_3d
+# Rt_3d
 
 # 7. plot residuals from pop density regression against temperature
 
@@ -189,7 +200,7 @@ USA_residual_plot <- ggplot(d, aes(x = Temperature, y = pop_residuals)) +
   geom_text(aes(label = State), hjust = 0, vjust = 0, position = position_nudge(y = 0.05)) +
   main_theme +
   theme(aspect.ratio = 1)
-USA_residual_plot
+# USA_residual_plot
 
 ggsave("figures/USA_pop_residuals_vs_temperature.png", USA_residual_plot)
 
@@ -213,7 +224,7 @@ heatmap_plot <- ggplot(predicted_R0, aes(x = Temperature, y = Pop_density)) +
        fill = expression(R[0])) +
   main_theme +
   theme(aspect.ratio = 1)
-heatmap_plot
+# heatmap_plot
 
 ggsave("figures/heatmap_R0.png", heatmap_plot)
 
@@ -236,12 +247,18 @@ Rt_df$Lockdown <- "Yes"
 
 interaction_df <- rbind(R0_df, Rt_df)
 
+additive_lm <- lm(Rt ~ scale(Temperature) + scale(log(Pop_density)) + Lockdown, data = interaction_df)
+print("")
+print("Temperature vs R with lockdown additive regression model with scaled coefficients, latex table:")
+xtable(summary(additive_lm))
 interaction_lm <- lm(Rt ~ (scale(Temperature) + scale(log(Pop_density)))*Lockdown, data = interaction_df)
-summary(interaction_lm)
-addative_lm <- lm(Rt ~ scale(Temperature) + scale(log(Pop_density)) + Lockdown, data = interaction_df)
-summary(addative_lm)
+print("")
+print("Temperature vs R with lockdown interaction regression model with scaled coefficients, latex table:")
+xtable(summary(interaction_lm))
 
-anova(addative_lm, interaction_lm)
+print("")
+print("Anova; is interaction model better than additive model?")
+anova(additive_lm, interaction_lm)
 
 # is this useful?
 
