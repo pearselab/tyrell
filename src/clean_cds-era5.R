@@ -35,25 +35,25 @@ uv <- lapply(seq_along(days), function(i, sp.df) velox(raster::rotate(raster(.dr
 
 saveRDS(
     .give.names(.avg.wrapper(temp, countries), countries$NAME_0, days, TRUE),
-    "clean-data/temp-midday-countries.RDS"
+    "clean-data/temp-dailymean-countries.RDS"
 )
 saveRDS(
     .give.names(.avg.wrapper(temp, states), states$GID_1, days),
-    "clean-data/temp-midday-states.RDS"
+    "clean-data/temp-dailymean-states.RDS"
 )
 saveRDS(
     .give.names(.avg.wrapper(humid, countries), countries$NAME_0, days, TRUE),
-    "clean-data/humid-midday-countries.RDS"
+    "clean-data/humid-dailymean-countries.RDS"
 )
 saveRDS(
     .give.names(.avg.wrapper(humid, states), states$GID_1, days),
-    "clean-data/humid-midday-states.RDS"
+    "clean-data/humid-dailymean-states.RDS"
 )
 saveRDS(
     .give.names(.avg.wrapper(uv, countries), countries$NAME_0, days, TRUE),
-    "clean-data/uv-midday-countries.RDS"
+    "clean-data/uv-dailymean-countries.RDS"
 )
 saveRDS(
     .give.names(.avg.wrapper(uv, states), states$GID_1, days),
-    "clean-data/uv-midday-states.RDS"
+    "clean-data/uv-dailymean-states.RDS"
 )
