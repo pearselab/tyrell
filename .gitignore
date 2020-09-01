@@ -4,6 +4,7 @@
 config.yml
 clean-data/*
 copy_pris.sh
+copy_hpc.sh
 ext-data/*
 imptf-models/*
 ms-env/*.txt
