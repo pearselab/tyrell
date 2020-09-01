@@ -14,3 +14,5 @@ phylo-env/*.txt
 phylo-env/*.RData
 raw-data/*
 timestamp.yml
+ms-env/*.pdf
+ms-env/*.RDS

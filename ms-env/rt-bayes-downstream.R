@@ -1,7 +1,7 @@
 source("src/packages.R")
 
 # Pull back in environmental data (modified from original model script)
-env <- readRDS("clean-data/temp-midday-states.RDS")
+env <- readRDS("clean-data/temp-dailymean-states.RDS")
 pop <- readRDS("clean-data/population-density-states.RDS")
 meta <- shapefile("clean-data/gadm-states.shp")
 processed_data <- readRDS("ms-env/processed_data_usa.RDS")
@@ -15,7 +15,7 @@ env <- env[,34:148]
 sd.env <- sd(env, na.rm=TRUE)
 sd.pop <- sd(pop, na.rm=TRUE)
 # Remove variables with same names (unnecessary, but done for clarity!)
-rm(env,pop,env,meta,processed_data)
+rm(env,pop,meta,processed_data)
 
 # Get raw coefficients and then back-transform, thne neaten and merge data
 load("imptf-models/covid19model-6.0/results/rt-bayes.Rdata")
@@ -64,12 +64,12 @@ labels <- labels[order(summary["50%",])]
 summary <- summary[,order(summary["50%",])]
 
 # Relative reduction plot
-pdf("ms-env/us-bayes-posterior.pdf")
-dotchart(summary["50%",], xlim=c(1,70), pch=20, color=cols, pt.cex=4, font=2, frame.plot=FALSE, xlab="Percent reduction needed in average mobility to mitigate", labels=labels)
-arrows(summary["25%",], 1:6, summary["75%",], length=0, lwd=10, col=cols)
-arrows(summary["10%",], 1:6, summary["90%",], length=0, lwd=5, col=cols)
-arrows(summary["5%",], 1:6, summary["95%",], length=0, lwd=1, col=cols)
-dev.off()
+# pdf("ms-env/us-bayes-posterior.pdf")
+# dotchart(summary["50%",], xlim=c(1,70), pch=20, color=cols, pt.cex=4, font=2, frame.plot=FALSE, xlab="Percent reduction needed in average mobility to mitigate", labels=labels)
+# arrows(summary["25%",], 1:6, summary["75%",], length=0, lwd=10, col=cols)
+# arrows(summary["10%",], 1:6, summary["90%",], length=0, lwd=5, col=cols)
+# arrows(summary["5%",], 1:6, summary["95%",], length=0, lwd=1, col=cols)
+# dev.off()
 
 # Generate paper summary statistics
 summary <- apply(data, 2, quantile, prob=c(.025,.05,.1,.25,.5,.75,.9,.95,.975))
@@ -90,3 +90,87 @@ print("Change estimates:")
 print(paste0("5 degree change: ", mean(data$r.env)*5))
 print(paste0("10x density change: ", mean(data$r.pop)*1))
 sink()
+
+## TS: New figure
+
+# just make 1 new col, then take the distribution, save the quantiles... and overwrite this each new temp/pop
+
+temp_seq <- seq(0.1, 5, 0.1)
+
+# make an empty dataframe to populate with new results
+temp_results <- data.frame(temperature = rep(NA, length(temp_seq)))
+temp_results$mob_5 <- NA
+temp_results$mob_12.5 <- NA
+temp_results$mob_50 <- NA
+temp_results$mob_87.5 <- NA
+temp_results$mob_95 <- NA
+
+for(i in 1:length(temp_seq)){
+    temp <- temp_seq[i]
+    data$e.temp <- -999
+    
+    for(j in seq_len(nrow(data))){
+        data$e.temp[j] <- optim.wrap(1, data$average[j], 1+abs(data$r.env[j]*temp_seq[i]))
+    }
+    
+    temp_results$temperature[i] <- temp
+    temp_results$mob_5[i] <- -quantile(data$e.temp, prob=c(.05))*100
+    temp_results$mob_12.5[i] <- -quantile(data$e.temp, prob=c(.125))*100
+    temp_results$mob_50[i] <- -quantile(data$e.temp, prob=c(.5))*100
+    temp_results$mob_87.5[i] <- -quantile(data$e.temp, prob=c(.875))*100
+    temp_results$mob_95[i] <- -quantile(data$e.temp, prob=c(.95))*100
+}
+
+# now repeat for population density
+
+pop_seq <- seq(1, 10, 0.1)
+
+# make an empty dataframe to populate with new results
+pop_results <- data.frame(pop_density = rep(NA, length(pop_seq)))
+pop_results$mob_5 <- NA
+pop_results$mob_12.5 <- NA
+pop_results$mob_50 <- NA
+pop_results$mob_87.5 <- NA
+pop_results$mob_95 <- NA
+
+for(i in 1:length(pop_seq)){
+    pop <- pop_seq[i]
+    data$e.pop <- -999
+    
+    for(j in seq_len(nrow(data))){
+        data$e.pop[j] <- optim.wrap(1, data$average[j], 1+abs(data$r.pop[j]*log10(pop_seq[i])))
+    }
+    
+    pop_results$pop_density[i] <- pop
+    pop_results$mob_5[i] <- -quantile(data$e.pop, prob=c(.05))*100
+    pop_results$mob_12.5[i] <- -quantile(data$e.pop, prob=c(.125))*100
+    pop_results$mob_50[i] <- -quantile(data$e.pop, prob=c(.5))*100
+    pop_results$mob_87.5[i] <- -quantile(data$e.pop, prob=c(.875))*100
+    pop_results$mob_95[i] <- -quantile(data$e.pop, prob=c(.95))*100
+}
+
+
+fig3 <- ggplot(pop_results) +
+    geom_line(aes(x = pop_density, y = mob_50), col = "#6666FF", lwd = 2) +
+    geom_line(aes(x = pop_density, y = mob_12.5), alpha = 0.8, col = "#6666FF", linetype = "dashed", lwd = 1.5) +
+    geom_line(aes(x = pop_density, y = mob_87.5), alpha = 0.8, col = "#6666FF", linetype = "dashed", lwd = 1.5) +
+    geom_line(aes(x = pop_density, y = mob_95), alpha = 0.8, col = "#6666FF", linetype = "dotted", lwd = 1) +
+    geom_line(aes(x = pop_density, y = mob_5), alpha = 0.8, col = "#6666FF", linetype = "dotted", lwd = 1) +
+    geom_line(data = temp_results, aes(x = temperature*2, y = mob_50), col = "#CC6600", lwd = 2) +
+    geom_line(data = temp_results, aes(x = temperature*2, y = mob_12.5), alpha = 0.8, col = "#CC6600", linetype = "dashed", lwd = 1.5) +
+    geom_line(data = temp_results, aes(x = temperature*2, y = mob_87.5), alpha = 0.8, col = "#CC6600", linetype = "dashed", lwd = 1.5) +
+    geom_line(data = temp_results, aes(x = temperature*2, y = mob_95), alpha = 0.8, col = "#CC6600", linetype = "dotted", lwd = 1) +
+    geom_line(data = temp_results, aes(x = temperature*2, y = mob_5), alpha = 0.8, col = "#CC6600", linetype = "dotted", lwd = 1) +
+    labs(x = "X Greater Population Density", y = "% Reduction in Mobility to Mitigate") +
+    scale_x_continuous(sec.axis = sec_axis(~. *0.5, name = "Temperature Decrease (°C)")) +
+    theme_bw() +
+    theme(axis.title.x.bottom = element_text(colour = "#6666FF", size = 18, face = "bold"),
+          axis.text.x.bottom = element_text(colour = "#6666FF", size = 16, face = "bold"),
+          axis.title.x.top = element_text(colour = "#CC6600", size = 18, face = "bold"),
+          axis.text.x.top = element_text(colour = "#CC6600", size = 16, face = "bold"),
+          axis.text.y = element_text(size = 16, face = "bold"),
+          axis.title.y = element_text(size = 18, face = "bold"),
+          panel.grid.major.x = element_blank(),
+          panel.grid.minor.x = element_blank())
+
+ggsave("figures/US_bayes_plot.pdf", fig3)

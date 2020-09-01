@@ -128,7 +128,7 @@ end
 # Download raw data ############
 ################################
 desc "Download all raw data"
-task :dwn_data => [:before_dwn_data, :raw_jhu, "raw-data/ecdc-cases.csv", "raw-data/ecjrcdc-regions.csv", "raw-data/ecjrcdc-countries.csv", "raw-data/uk-phe-deaths.csv", "raw-data/uk-phe-cases.csv", "raw-data/cvodidh-admin1.csv", "raw-data/cvodidh-admin2.csv", "raw-data/cvodidh-admin3.csv", "raw-data/imperial-europe-pred.csv", "raw-data/imperial-usa-pred.csv", "raw-data/imperial-usa-pred-2020-05-25.csv", "raw-data/imperial-lmic-pred.csv", :raw_ihme, :raw_nxtstr, "raw-data/who-interventions.xlsx", "raw-data/imperial-interventions.csv", "raw-data/oxford-interventions.csv", :raw_imptfmods, "raw-data/rambaut-nomenclature", "raw-data/denvfoimap-raster.RDS", :raw_gadm, :raw_cds_ar5, "raw-data/cds-era5-temp-midday.grib", "raw-data/cds-era5-humid-midday.grib", "raw-data/cds-era5-uv-midday.grib", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif", "raw-data/google-mobility.csv", :copy_usa_interventions]
+task :dwn_data => [:before_dwn_data, :raw_jhu, "raw-data/ecdc-cases.csv", "raw-data/ecjrcdc-regions.csv", "raw-data/ecjrcdc-countries.csv", "raw-data/uk-phe-deaths.csv", "raw-data/uk-phe-cases.csv", "raw-data/cvodidh-admin1.csv", "raw-data/cvodidh-admin2.csv", "raw-data/cvodidh-admin3.csv", "raw-data/imperial-europe-pred.csv", "raw-data/imperial-usa-pred.csv", "raw-data/imperial-usa-pred-2020-05-25.csv", "raw-data/imperial-lmic-pred.csv", :raw_ihme, :raw_nxtstr, "raw-data/who-interventions.xlsx", "raw-data/imperial-interventions.csv", "raw-data/oxford-interventions.csv", :raw_imptfmods, "raw-data/rambaut-nomenclature", "raw-data/denvfoimap-raster.RDS", :raw_gadm, "raw-data/cds-era5-temp-hourly.grib", "raw-data/cds-era5-humid-hourly.grib", "raw-data/cds-era5-uv-hourly.grib", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif", "raw-data/google-mobility.csv", :copy_usa_interventions]
 task :before_dwn_data do
   puts "\t ... Downloading raw data (can take a long time)"
 end
@@ -347,6 +347,7 @@ file "raw-data/denvfoimap-raster.RDS" do
   stream_file("https://mrcdata.dide.ic.ac.uk/resources/DENVfoiMap/all_squares_env_var_0_1667_deg.rds", "raw-data/denvfoimap-raster.RDS")
 end
 
+# we dont need to do this anymore, so rake is no longer calling this task
 desc "Download CDS AR5 climate data"
 cds_ar5_files = ["raw-data/cdsar5-1month_mean_Global_ea_2t_201901_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_2t_201902_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_2t_201903_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_2t_201904_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_2t_201905_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_2t_201906_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_2t_201907_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_2t_201908_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_2t_201909_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_2t_201910_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_2t_201911_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_2t_201912_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_2t_202001_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_2t_202002_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_2t_202003_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_2t_202004_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_2t_202005_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_r2_201901_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_r2_201902_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_r2_201903_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_r2_201904_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_r2_201905_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_r2_201906_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_r2_201907_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_r2_201908_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_r2_201909_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_r2_201910_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_r2_201911_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_r2_201912_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_r2_202001_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_r2_202002_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_r2_202003_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_r2_202004_v02.grib","raw-data/cdsar5-1month_mean_Global_ea_r2_202005_v02.grib"]
 task :raw_cds_ar5 => cds_ar5_files
@@ -366,36 +367,20 @@ end
 cds_ar5_files.each {|x| file x do raw_cds_ar5(cds_ar5_files) end}
 
 
-# this is for the daily UV data from NASA - temporarily removed until we decide what to do with it
-#~ desc "Download February UV data"
-#~ file "raw-data/glUV_february_mean.asc" do
-  #~ `wget --load-cookies ~/.urs_cookies --save-cookies ~/.urs_cookies --keep-session-cookies --content-disposition https://acdisc.gsfc.nasa.gov/data/Aura_OMI_Level2G/OMUVBG.003/2020/OMI-Aura_L2G-OMUVBG_2020m0611_v003-2020m0614t090001.he5 -P ./raw-data/`
-  #~ FileUtils.mv "raw-data/OMI-Aura_L2G-OMUVBG_2020m0611_v003-2020m0614t090001.he5", "raw-data/glUV_february_mean.asc"
-  #~ date_metadata "glUV_february_mean.asc"
-#~ end
-
-# Don't need any of this if we can get it all from cds-era5
-desc "Download February monthly UV data"
-file "raw-data/glUV_february_mean.asc" do dwn_file("raw-data", "https://www.ufz.de/export/data/443/56466_glUV_February_monthly_mean.asc", "glUV_february_mean.asc") end
-
-desc "Download May monthly UV data"
-file "raw-data/glUV_may_mean.asc" do dwn_file("raw-data", "https://www.ufz.de/export/data/443/56469_glUV_May_monthly_mean.asc", "glUV_May_mean.asc") end
-
-
-desc "Get midday (daily) CDS-ERA5 temperature data"
-file "raw-data/cds-era5-temp-midday.grib" do
+desc "Get hourly CDS-ERA5 temperature data"
+file "raw-data/cds-era5-temp-hourly.grib" do
   Dir.chdir("raw-data") do `python3 ../src/cds-era5-temp.py` end
-  date_metadata "raw-data/cds-era5-temp-midday.grib"
+  date_metadata "raw-data/cds-era5-temp-hourly.grib"
 end
-desc "Get midday (daily) CDS-ERA5 humidity data"
-file "raw-data/cds-era5-humid-midday.grib" do
+desc "Get hourly CDS-ERA5 humidity data"
+file "raw-data/cds-era5-humid-hourly.grib" do
   Dir.chdir("raw-data") do `python3 ../src/cds-era5-humid.py` end
-  date_metadata "raw-data/cds-era5-humid-midday.grib"
+  date_metadata "raw-data/cds-era5-humid-hourly.grib"
 end
-desc "Get midday (daily) CDS-ERA5 UV data"
-file "raw-data/cds-era5-uv-midday.grib" do
+desc "Get hourly CDS-ERA5 UV data"
+file "raw-data/cds-era5-hourly.grib" do
   Dir.chdir("raw-data") do `python3 ../src/cds-era5-uv.py` end
-  date_metadata "raw-data/cds-era5-uv-midday.grib"
+  date_metadata "raw-data/cds-era5-uv-hourly.grib"
 end
 
 desc "Get NASA GPW 30s population density data - large file, 300mb"
@@ -484,7 +469,7 @@ end
 # Clean data ###################
 ################################
 desc "Process all raw data"
-task :cln_data => [:before_cln_data, :cln_gadm, :cln_denvfoi_rasters, :cln_worldclim, :cln_cdsar5_monthly, :cln_cdsear5_daily, :cln_gpw_popdens, :cln_uv_monthly, :join_R_climate]
+task :cln_data => [:before_cln_data, :cln_gadm, :cln_denvfoi_rasters, :cln_worldclim, :cln_cdsear5_hourly, :cln_cdsear5_daily, :cln_gpw_popdens, :join_R_climate]
 task :before_cln_data do
   puts "\t ... Processing raw data"
 end
@@ -522,6 +507,7 @@ file "clean-data/denvfoimap-rasters-countries.csv" do denvfoimap_rasters() end
 file "clean-data/denvfoimap-rasters-states.csv" do denvfoimap_rasters() end
 
 
+# no longer need to do this task
 desc "Clean and process CDS-AR5 monthly temperature and humidity data"
 task :cln_cdsar5_monthly => ["clean-data/relative-humidity-countries.RDS","clean-data/relative-humidity-states.RDS", "clean-data/absolute-humidity-countries.RDS","clean-data/absolute-humidity-states.RDS", "clean-data/temperature-countries.RDS","clean-data/temperature-states.RDS"]
 def cln_cdsar5_monthly()
@@ -541,23 +527,37 @@ file "clean-data/temperature-countries.RDS" => shp_fls("clean-data/gadm-countrie
 file "clean-data/temperature-states.RDS" => shp_fls("clean-data/gadm-states",true) do cln_cdsar5_monthly() end
 
 
-desc "Clean and process CDS-EAR5 midday (daily) temperature/humidity/uv data"
-task :cln_cdsear5_daily => ["clean-data/temp-midday-countries.RDS","clean-data/temp-midday-states.RDS","clean-data/humid-midday-countries.RDS","clean-data/humid-midday-states.RDS","clean-data/uv-midday-countries.RDS","clean-data/uv-midday-states.RDS"]
+desc "Pre-process CDS-EAR5 hourly temperature/humidity/uv data, and delete the large downloads after"
+task :cln_cdsear5_hourly => ["raw-data/cds-era5-humid-dailymean.grib", "raw-data/cds-era5-temp-dailymean.grib", "raw-data/cds-era5-uv-dailymean.grib"]
+def cln_cdsear5_hourly()
+  `bash src/calc-daily-means.sh`
+  date_metadata "raw-data/cds-era5-humid-dailymean.grib"
+  date_metadata "raw-data/cds-era5-temp-dailymean.grib"
+  date_metadata "raw-data/cds-era5-uv-dailymean.grib"
+end
+file "raw-data/cds-era5-humid-dailymean.grib" => "raw-data/cds-era5-humid-hourly.grib" do cln_cdsear5_hourly() end
+file "raw-data/cds-era5-temp-dailymean.grib" => "raw-data/cds-era5-temp-hourly.grib" do cln_cdsear5_hourly() end
+file "raw-data/cds-era5-uv-dailymean.grib" => "raw-data/cds-era5-uv-hourly.grib" do cln_cdsear5_hourly() end
+
+
+desc "Clean and process CDS-EAR5 mean daily temperature/humidity/uv data"
+task :cln_cdsear5_daily => ["clean-data/temp-dailymean-countries.RDS","clean-data/temp-dailymean-states.RDS","clean-data/humid-dailymean-countries.RDS","clean-data/humid-dailymean-states.RDS","clean-data/uv-dailymean-countries.RDS","clean-data/uv-dailymean-states.RDS"]
 def cln_cdsear5_daily()
   `Rscript src/clean_cds-era5.R`
-  date_metadata "clean-data/temp-midday-countries.RDS"
-  date_metadata "clean-data/temp-midday-states.RDS"
-  date_metadata "clean-data/humid-midday-countries.RDS"
-  date_metadata "clean-data/humid-midday-states.RDS"
-  date_metadata "clean-data/uv-midday-countries.RDS"
-  date_metadata "clean-data/uv-midday-states.RDS"
+  date_metadata "clean-data/temp-dailymean-countries.RDS"
+  date_metadata "clean-data/temp-dailymean-states.RDS"
+  date_metadata "clean-data/humid-dailymean-countries.RDS"
+  date_metadata "clean-data/humid-dailymean-states.RDS"
+  date_metadata "clean-data/uv-dailymean-countries.RDS"
+  date_metadata "clean-data/uv-dailymean-states.RDS"
 end
-file "clean-data/temp-midday-countries.RDS" => shp_fls("clean-data/gadm-countries",true) do cln_cdsear5_daily() end
-file "clean-data/temp-midday-states.RDS" => shp_fls("clean-data/gadm-states",true) do cln_cdsear5_daily() end
-file "clean-data/humid-midday-countries.RDS" => shp_fls("clean-data/gadm-countries",true) do cln_cdsear5_daily() end
-file "clean-data/humid-midday-states.RDS" => shp_fls("clean-data/gadm-states",true) do cln_cdsear5_daily() end
-file "clean-data/uv-midday-countries.RDS" => shp_fls("clean-data/gadm-countries",true) do cln_cdsear5_daily() end
-file "clean-data/uv-midday-states.RDS" => shp_fls("clean-data/gadm-states",true) do cln_cdsear5_daily() end
+file "clean-data/temp-dailymean-countries.RDS" => shp_fls("clean-data/gadm-countries",true) do cln_cdsear5_daily() end
+file "clean-data/temp-dailymean-states.RDS" => shp_fls("clean-data/gadm-states",true) do cln_cdsear5_daily() end
+file "clean-data/humid-dailymean-countries.RDS" => shp_fls("clean-data/gadm-countries",true) do cln_cdsear5_daily() end
+file "clean-data/humid-dailymean-states.RDS" => shp_fls("clean-data/gadm-states",true) do cln_cdsear5_daily() end
+file "clean-data/uv-dailymean-countries.RDS" => shp_fls("clean-data/gadm-countries",true) do cln_cdsear5_daily() end
+file "clean-data/uv-dailymean-states.RDS" => shp_fls("clean-data/gadm-states",true) do cln_cdsear5_daily() end
+
 
 desc "Clean and process NASA GPW population density data"
 task :cln_gpw_popdens => ["clean-data/population-density-countries.RDS","clean-data/population-density-states.RDS"]
@@ -570,6 +570,7 @@ file "clean-data/population-density-countries.RDS" => "ext-data/gpw_v4_populatio
 file "clean-data/population-density-states.RDS" => "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif" do cln_gpw_popdens() end
 
 
+# this is now unnecessary
 desc "Clean and process monthly glUV data"
 task :cln_uv_monthly => ["clean-data/monthly-avg-UV-countries.RDS","clean-data/monthly-avg-UV-states.RDS"]
 def cln_uv_monthly()
@@ -582,14 +583,16 @@ file "clean-data/monthly-avg-UV-states.RDS" => shp_fls("clean-data/gadm-states",
 
 
 desc "Combine cleaned environmental data with R0/Rt estimates"
-task :join_R_climate => ["clean-data/climate_and_R0_USA.csv","clean-data/climate_and_lockdown_Rt_USA.csv"]
+task :join_R_climate => ["clean-data/climate_and_R0_USA.csv","clean-data/climate_and_lockdown_Rt_USA.csv", "clean-data/daily_climate_and_Rt_USA.csv"]
 def join_R_climate()
   `Rscript src/combine-R0-and-environment-USA.R`
   date_metadata "clean-data/climate_and_R0_USA.csv"
   date_metadata "clean-data/climate_and_lockdown_Rt_USA.csv"
+  date_metadata "clean-data/daily_climate_and_Rt_USA.csv"
 end
 file "clean-data/climate_and_R0_USA.csv" => ["clean-data/temp-midday-states.RDS", "clean-data/humid-midday-states.RDS", "clean-data/population-density-states.RDS", "raw-data/imperial-usa-pred-2020-05-25.csv", "raw-data/google-mobility.csv", "raw-data/USstatesCov19distancingpolicy.csv", "clean-data/gadm-states.RDS"] do join_R_climate() end
 file "clean-data/climate_and_lockdown_Rt_USA.csv" do join_R_climate() end
+file "clean-data/daily_climate_and_Rt_USA.csv" do join_R_climate() end
 
 
 ################################
@@ -630,9 +633,10 @@ task :before_ms1_env do
 end
 
 desc "Fit R0 environmental models"
-task :r0_models => ["humidity-countries","humidity-states","population-density-countries","population-density-states"].map {|x| "clean-data/#{x}.RDS"} do
-  `Rscript ms-env/r0-models-plots-USA.R > ms-env/STDOUT-r0-regression-models.txt`
+task :r0_models => ["clean-data/climate_and_R0_USA.csv","clean-data/climate_and_lockdown_Rt_USA.csv"] do
+  `Rscript ms-env/r0-models-plots.R > ms-env/STDOUT-r0-regression-models.txt`
 end
+
 
 desc "Fit Rt epidemiological models"
 task :rt_models => ["temp-midday-states","population-density-states"].map!{|x| "clean-data/#{x}.RDS"} + [:raw_imptfmods] do
@@ -660,7 +664,7 @@ end
 
 desc "Build MS#1 manuscript"
 task :ms_build do
-  puts "Still on Overleaf right now"
+  `bash ms-env/compile_manuscript.sh`
 end
 
 ################################
