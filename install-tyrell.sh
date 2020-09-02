@@ -14,3 +14,7 @@ gem install rake open-uri rubyzip yaml selenium-webdriver
 
 # Install Python libraries
 pip install cdsapi
+
+# install climate data operators
+# NOTE: Only for Linux; for alternatives see https://code.mpimet.mpg.de/projects/cdo/wiki
+apt install cdo

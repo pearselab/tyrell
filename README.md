@@ -16,13 +16,15 @@ Downloading the CDS AR5 climate data requires you to (1) register for an API key
 
 Downloading the NASA data requires you to (1) register for an earthdata account following the instructions here (https://wiki.earthdata.nasa.gov/display/EL/How+To+Register+For+an+EarthData+Login+Profile), then (2) link GES DISC data to your account following the instructions here (2) https://disc.gsfc.nasa.gov/earthdata-login. Finally, add your username and password to `config.yml` (assuming you have made one following the instructions in the paragraph above).
 
-We're using the Climate Data Operators program to quickly take daily means from the large CDS files. Download it here (https://code.mpimet.mpg.de/projects/cdo/files) and follow instructions given to install. Hints for linux install: (1) download and extract the tarball, (2) navigate to the directory and hit ./configure, (3) do "make", then "make install" to fully install it on your system. Now you can run cdo commands from the terminal.
+We're using the Climate Data Operators program to quickly take daily means from the large CDS files. Either install using install-tyrell.sh script, or download it here (https://code.mpimet.mpg.de/projects/cdo/files) and follow instructions given to install. Hints for linux install: (1) download and extract the tarball, (2) navigate to the directory and hit ./configure, (3) do "make", then "make install" to fully install it on your system. Now you can run cdo commands from the terminal.
 
 ## Usage
 
 Open a terminal window and type `rake`. Wait a while (several gigabytes of data are downloaded and processed). Note that `timestamp.yml` is updated every time new files are downloaded, time-stamping everything with when it was accessed.
 
 To delete processed files, run `rake clean`. To delete all downloaded files, run `rake clobber`. Folders and the `timestamp.yml` file are not affected by these commands. To update your downloaded data (e.g., with the latest infection counts) run `rake update_data`. Note that these folders will be created by this script, and have been added to the `.gitignore` to remind you not to share data, but rather processing code.
+
+To reproduce the first covid-environment analysis and compile the manuscript (working title: "Measuring the impact of environment on SARS-CoV-2 transmission to inform seasonal forecasting"), run `rake ms1_env`.
 
 ## Contributing
 

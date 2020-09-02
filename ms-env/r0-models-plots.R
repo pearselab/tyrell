@@ -238,11 +238,11 @@ ggsave("figures/heatmap_R0.png", heatmap_plot)
 
 # combine R0 and Rt data and add lockdown as an interaction term
 
-R0_df <- USA_R0_data[,c("State", "R0", "Temperature", "Absolute_Humidity", "Pop_density")]
+R0_df <- USA_R0_data[,c("State", "R0", "Temperature", "Absolute_Humidity", "Pop_density", "Avg_mobility_change")]
 R0_df$Lockdown <- "No"
 names(R0_df)[2] <- "Rt"
 
-Rt_df <- USA_Rt_data[,c("State", "Rt", "Temperature", "Absolute_Humidity", "Pop_density")]
+Rt_df <- USA_Rt_data[,c("State", "Rt", "Temperature", "Absolute_Humidity", "Pop_density", "Avg_mobility_change")]
 Rt_df$Lockdown <- "Yes"
 
 interaction_df <- rbind(R0_df, Rt_df)
@@ -260,8 +260,17 @@ print("")
 print("Anova; is interaction model better than additive model?")
 anova(additive_lm, interaction_lm)
 
-# is this useful?
+if(FALSE){
+# alternative, use the actual mobility changes instead of binary yes/no lockdown term
+additive_lm_mobility <- lm(Rt ~ scale(Temperature) + scale(log(Pop_density)) + scale(Avg_mobility_change), data = interaction_df)
+summary(additive_lm_mobility)
 
+interaction_lm_mobility <- lm(Rt ~ (scale(Temperature) + scale(log(Pop_density)))* scale(Avg_mobility_change), data = interaction_df)
+summary(interaction_lm_mobility)
+
+print("Anova; is interaction model better than additive model?")
+anova(additive_lm_mobility, interaction_lm_mobility)
+}
 
 # ---- Does the date when state-wide emergency decrees were implemented matter? ---- #
 
