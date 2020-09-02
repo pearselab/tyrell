@@ -469,7 +469,7 @@ end
 # Clean data ###################
 ################################
 desc "Process all raw data"
-task :cln_data => [:before_cln_data, :cln_gadm, :cln_denvfoi_rasters, :cln_worldclim, :cln_cdsear5_hourly, :cln_cdsear5_daily, :cln_gpw_popdens, :join_R_climate]
+task :cln_data => [:before_cln_data, :cln_gadm, :cln_denvfoi_rasters, :cln_worldclim, :cln_cdsear5_hourly, :delete_cdsear5_hourly, :cln_cdsear5_daily, :cln_gpw_popdens, :join_R_climate]
 task :before_cln_data do
   puts "\t ... Processing raw data"
 end
@@ -527,10 +527,12 @@ file "clean-data/temperature-countries.RDS" => shp_fls("clean-data/gadm-countrie
 file "clean-data/temperature-states.RDS" => shp_fls("clean-data/gadm-states",true) do cln_cdsar5_monthly() end
 
 
-desc "Pre-process CDS-EAR5 hourly temperature/humidity/uv data, and delete the large downloads after"
+desc "Pre-process CDS-EAR5 hourly temperature/humidity/uv data"
 task :cln_cdsear5_hourly => ["raw-data/cds-era5-humid-dailymean.grib", "raw-data/cds-era5-temp-dailymean.grib", "raw-data/cds-era5-uv-dailymean.grib"]
 def cln_cdsear5_hourly()
-  `bash src/calc-daily-means.sh`
+  `cdo daymean raw-data/cds-era5-humid-hourly.grib raw-data/cds-era5-humid-dailymean.grib`
+  `cdo daymean raw-data/cds-era5-temp-hourly.grib raw-data/cds-era5-temp-dailymean.grib`
+  `cdo daymean raw-data/cds-era5-uv-hourly.grib raw-data/cds-era5-uv-dailymean.grib`
   date_metadata "raw-data/cds-era5-humid-dailymean.grib"
   date_metadata "raw-data/cds-era5-temp-dailymean.grib"
   date_metadata "raw-data/cds-era5-uv-dailymean.grib"
@@ -538,6 +540,14 @@ end
 file "raw-data/cds-era5-humid-dailymean.grib" => "raw-data/cds-era5-humid-hourly.grib" do cln_cdsear5_hourly() end
 file "raw-data/cds-era5-temp-dailymean.grib" => "raw-data/cds-era5-temp-hourly.grib" do cln_cdsear5_hourly() end
 file "raw-data/cds-era5-uv-dailymean.grib" => "raw-data/cds-era5-uv-hourly.grib" do cln_cdsear5_hourly() end
+
+
+desc "Delete the hourly climate data in the interests of space saving"
+task :delete_cdsear5_hourly do
+  FileUtils.chdir("raw-data") do
+    FileUtils.rm ["cds-era5-humid-hourly.grib", "cds-era5-temp-hourly.grib", "cds-era5-uv-hourly.grib"]
+  end
+end  
 
 
 desc "Clean and process CDS-EAR5 mean daily temperature/humidity/uv data"
@@ -664,7 +674,17 @@ end
 
 desc "Build MS#1 manuscript"
 task :ms_build do
-  `bash ms-env/compile_manuscript.sh`
+  FileUtils.chdir("ms-env") do
+    `pdflatex -interaction=batchmode cov-env-ms.tex
+    bibtex cov-env-ms
+    pdflatex -interaction=batchmode cov-env-ms.tex
+    pdflatex -interaction=batchmode cov-env-ms.tex
+    pdflatex -interaction=batchmode cov-env-supplement.tex
+    bibtex cov-env-supplement
+    pdflatex -interaction=batchmode cov-env-supplement.tex
+    pdflatex -interaction=batchmode cov-env-supplement.tex`
+    FileUtils.rm Dir["*.aux", "*.blg", "*.bbl", "*.soc", "*.toc", "*.log", "*.out"]
+  end
 end
 
 ################################

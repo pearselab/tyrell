@@ -181,6 +181,7 @@ USA_R0$temperature <- NA
 USA_R0$relative_humidity <- NA
 USA_R0$absolute_humidity <- NA
 USA_R0$uv <- NA
+USA_R0$avg_mobility_change <- NA
 
 if(FALSE){
 for(i in 1:length(states_list)){
@@ -188,6 +189,9 @@ for(i in 1:length(states_list)){
   state_temp <- climate_data[climate_data$State == states_list[i] &
                                        climate_data$date >= t-14 &
                                        climate_data$date <= t,]
+  state_mob <- USA_mobility_states[USA_mobility_states$state_simple == states_list[i] & 
+                                     USA_mobility_states$date >= t-14 & 
+                                     USA_mobility_states$date <= t,]
   USA_R0[USA_R0$state == states_list[i],]$temperature <- weighted.mean(state_temp$temperature, #
                                                                        w = dgamma(seq(1,15,1), shape =  6.5, scale = 0.62),
                                                                        na.rm = TRUE)
@@ -197,6 +201,9 @@ for(i in 1:length(states_list)){
   USA_R0[USA_R0$state == states_list[i],]$uv <- weighted.mean(state_temp$uv, #
                                                                              w = dgamma(seq(1,15,1), shape =  6.5, scale = 0.62),
                                                                              na.rm = TRUE)
+  USA_R0[USA_R0$state == states_list[i],]$avg_mobility_change <- weighted.mean(state_mob$average_mobility_change, #
+                                                              w = dgamma(seq(1,15,1), shape =  6.5, scale = 0.62),
+                                                              na.rm = TRUE)
 }
 }
 
@@ -208,10 +215,12 @@ for(i in 1:length(states_list)){ # unweighted mean
   USA_R0[USA_R0$state == states_list[i],]$temperature <- mean(state_temp$temperature, na.rm = TRUE)
   USA_R0[USA_R0$state == states_list[i],]$absolute_humidity <- mean(state_temp$absolute_humidity, na.rm = TRUE)
   USA_R0[USA_R0$state == states_list[i],]$uv <- mean(state_temp$uv, na.rm = TRUE)
+  USA_R0[USA_R0$state == states_list[i],]$avg_mobility_change <- mean(state_mob$average_mobility_change, na.rm = TRUE)
 }
 
-USA_R0 <- USA_R0[,c("state", "mean_time_varying_reproduction_number_R.t.", "temperature", "absolute_humidity", "uv", "Pop_density")]
-names(USA_R0) <- c("State", "R0", "Temperature", "Absolute_Humidity", "UV", "Pop_density")
+USA_R0 <- USA_R0[,c("state", "mean_time_varying_reproduction_number_R.t.", "temperature", "absolute_humidity", "uv", "Pop_density",
+                    "average_mobility_change")]
+names(USA_R0) <- c("State", "R0", "Temperature", "Absolute_Humidity", "UV", "Pop_density", "Avg_mobility_change")
 
 
 
@@ -226,6 +235,7 @@ humidity <- c()
 uv <- c()
 state <- c()
 pop_density <- c()
+mobility_change <- c()
 
 for(i in 1:length(states_list)){
   state_subs <- USA_Rt[USA_Rt$state == states_list[i],]
@@ -238,11 +248,12 @@ for(i in 1:length(states_list)){
   humidity <- c(humidity, mean(Rt_window$absolute_humidity))
   uv <- c(uv, mean(Rt_window$uv))
   pop_density <- c(pop_density, unique(Rt_window$Pop_density))
+  mobility_change <- c(mobility_change, mean(Rt_window$average_mobility_change))
   state <- c(state, states_list[i])
 }
 
-USA_Rt_df <- data.frame(Rt, temperature, humidity, uv, state, pop_density)
-names(USA_Rt_df) <- c("Rt", "Temperature", "Absolute_Humidity", "UV", "State", "Pop_density")
+USA_Rt_df <- data.frame(Rt, temperature, humidity, uv, state, pop_density, mobility_change)
+names(USA_Rt_df) <- c("Rt", "Temperature", "Absolute_Humidity", "UV", "State", "Pop_density", "Avg_mobility_change")
 
 names(USA_Rt)[11] <- "Rt"
 
