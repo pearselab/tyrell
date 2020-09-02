@@ -1,3 +1,5 @@
+require 'rake'
+require 'rake/clean'
 require 'fileutils'
 require 'yaml'
 require 'zip'
@@ -30,3 +32,10 @@ def dwn_file(folder, url, save_name, opts_yaml="timestamp.yml")
   date_metadata("#{folder}/#{save_name}", opts_yaml)
 end
 
+def shp_fls(stem, drop_cpg=false)
+  if drop_cpg
+    return ["dbf","prj","shp","shx"].map {|x| "#{stem}.#{x}"}
+  else
+    return ["cpg","dbf","prj","shp","shx"].map {|x| "#{stem}.#{x}"}
+  end
+end
