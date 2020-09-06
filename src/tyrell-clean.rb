@@ -44,14 +44,6 @@ file "raw-data/cds-era5-humid-dailymean.grib" => "raw-data/cds-era5-humid-hourly
 file "raw-data/cds-era5-temp-dailymean.grib" => "raw-data/cds-era5-temp-hourly.grib" do cln_cdsear5_hourly() end
 file "raw-data/cds-era5-uv-dailymean.grib" => "raw-data/cds-era5-uv-hourly.grib" do cln_cdsear5_hourly() end
 
-
-desc "Delete the hourly climate data in the interests of space saving"
-task :delete_cdsear5_hourly do
-  FileUtils.chdir("raw-data") do
-    FileUtils.rm ["cds-era5-humid-hourly.grib", "cds-era5-temp-hourly.grib", "cds-era5-uv-hourly.grib"]
-  end
-end  
-
 desc "Clean and process CDS-EAR5 mean daily temperature/humidity/uv data"
 task :cln_cdsear5_daily => ["clean-data/temp-dailymean-countries.RDS","clean-data/temp-dailymean-states.RDS","clean-data/humid-dailymean-countries.RDS","clean-data/humid-dailymean-states.RDS","clean-data/uv-dailymean-countries.RDS","clean-data/uv-dailymean-states.RDS"]
 def cln_cdsear5_daily()
@@ -89,6 +81,6 @@ def join_R_climate()
   date_metadata "clean-data/climate_and_lockdown_Rt_USA.csv"
   date_metadata "clean-data/daily_climate_and_Rt_USA.csv"
 end
-file "clean-data/climate_and_R0_USA.csv" => ["clean-data/temp-midday-states.RDS", "clean-data/humid-midday-states.RDS", "clean-data/population-density-states.RDS", "raw-data/imperial-usa-pred-2020-05-25.csv", "raw-data/google-mobility.csv", "raw-data/USstatesCov19distancingpolicy.csv", "clean-data/gadm-states.RDS"] do join_R_climate() end
+file "clean-data/climate_and_R0_USA.csv" => ["clean-data/temp-dailymean-states.RDS", "clean-data/humid-dailymean-states.RDS", "clean-data/population-density-states.RDS", "raw-data/imperial-usa-pred-2020-05-25.csv", "raw-data/google-mobility.csv", "raw-data/USstatesCov19distancingpolicy.csv", "clean-data/gadm-states.RDS"] do join_R_climate() end
 file "clean-data/climate_and_lockdown_Rt_USA.csv" do join_R_climate() end
 file "clean-data/daily_climate_and_Rt_USA.csv" do join_R_climate() end

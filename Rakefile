@@ -21,7 +21,7 @@ task :help do
   puts "\t\t\t\t\t\t\thttps://github.com/pearselab/tyrell"  
   puts "Useful commands:"
   puts "  rake install         - Setup Tyrell dependencies"
-  puts "  rake ms1_env_US      - Repeat Smith et al. 2020 (DOI)"
+  puts "  rake ms1_env_us      - Repeat Smith et al. 2020 (DOI)"
   puts "  rake dwn_data_cases  - Download all case/mortality data"
   puts "  rake update_cases    - Update all case/mortality data"
   puts "  rake dwn_data        - Download all data (takes a long time)"
@@ -50,7 +50,7 @@ Rake::Task['clobber'].comment = "Delete all data, including large downloads"
 
 # Everything
 desc "Run everything"
-task :everything => [:before_everything, :install, :dwn_data, :cln_data, :ms1_env, :after_everything]
+task :everything => [:before_everything, :install, :dwn_data, :cln_data, :ms1_env_us, :after_everything]
 task :before_everything do
   puts "WARNING: About to run everything Tyrell can do. This takes a VERY long time"
   puts "\t and is likely NOT what you want to do. Run `rake help` for advice."
@@ -127,7 +127,7 @@ end
 
 # MS1 - environmental impacts on US COVID
 desc "Repeating manusript #1 - environmental impacts"
-task :ms1_env => [:before_ms1_env, :r0_models, :rt_models, :ms1_build]
+task :ms1_env_us => [:before_ms1_env, :ms1_r0_models, :ms1_rt_models, :ms1_build]
 task :before_ms1_env do
   puts "\t ... Repeating MS#1 - US environmental impacts"
 end

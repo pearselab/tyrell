@@ -1,11 +1,10 @@
 desc "Fit R0 environmental models"
-task :r0_models => ["clean-data/climate_and_R0_USA.csv","clean-data/climate_and_lockdown_Rt_USA.csv"] do
+task :ms1_r0_models => ["clean-data/climate_and_R0_USA.csv","clean-data/climate_and_lockdown_Rt_USA.csv"] do
   `Rscript ms-env/r0-models-plots.R > ms-env/STDOUT-r0-regression-models.txt`
 end
 
-
 desc "Fit Rt epidemiological models"
-task :rt_models => ["temp-midday-states","population-density-states"].map!{|x| "clean-data/#{x}.RDS"} + [:raw_imptfmods] do
+task :ms1_rt_models => ["temp-midday-states","population-density-states"].map!{|x| "clean-data/#{x}.RDS"} + ["imptf-models/covid19model-6.0"] do
   datestamp = Time.now.strftime("%d%m%Y-%H%M")
   FileUtils.cp ["ms-env/rt-bayes-model.R","ms-env/rt-bayes-model.stan"], "imptf-models/covid19model-6.0/"
   Dir.chdir "imptf-models/covid19model-6.0/" do

@@ -43,15 +43,18 @@ Generally speaking, _Tyrell_ will try and do something and, if it can't because 
    1. Register for an API key at https://cds.climate.copernicus.eu/#!/home
    2. Fill in your `key` information in the `cds` block of `config.yml`.
    3. Select from here (https://cds.climate.copernicus.eu/cdsapp#!/dataset/ecv-for-climate-change?tab=form) 'surface air temp' and 'surface air relative humidity', 'monthly mean', '1 month', '2019 and 2020', all months, 'ERA5', 'zip', and then submit/agree to the download requirements.
-6. **Climate Data Operators** - install this program if you want to download and then process the CDS data (point 4 above). There are two ways to do that:
+5. **Climate Data Operators** - install this program if you want to download and then process the CDS data (point 4 above). There are two ways to do that:
    1. On Ubuntu use `sudo apt install cdo` (likely something similar for other Linux distributions).
    2. Follow the instructions here https://code.mpimet.mpg.de/projects/cdo/wiki#Installation-and-Supported-Platforms to install on other computers.
-6. **Downloading NASA data** - follow these instructions if you want to download these data. 
+6. **RGDAL** - install this if you want to process/clean GIS data. Two options:
+   1. On Ubuntu run `sudo apt install gdal-bin` (something similar for other Linux distributions).
+   2. On other operating systems, go to https://gdal.org/index.html and follow instructions there.
+7. **Downloading NASA data** - follow these instructions if you want to download these data. 
    1. Register for an earthdata account following the instructions here (https://wiki.earthdata.nasa.gov/display/EL/How+To+Register+For+an+EarthData+Login+Profile).
    2. Link GES DISC data to your account following the instructions here https://disc.gsfc.nasa.gov/earthdata-login.
    3. Add your username and password to `config.yml` in the `nasa` block.
-7. **LaTeX**. If you wish to re-build manuscripts from scratch, you will need to install LaTeX (https://www.latex-project.org/get/).
-8. **External data dependencies**. There are three NASA datasets for which it is impossible to automate their download; their installation instructions are below. You will be given these instructions by Tyrell if you need them, but here they are as well for completeness. They should be put in the folder `ext-data`, which _Tyrell_ will create for you when it is first run (see instructions below).
+8. **LaTeX**. If you wish to re-build manuscripts from scratch, you will need to install LaTeX (https://www.latex-project.org/get/).
+9. **External data dependencies**. There are three NASA datasets for which it is impossible to automate their download; their installation instructions are below. You will be given these instructions by Tyrell if you need them, but here they are as well for completeness. They should be put in the folder `ext-data`, which _Tyrell_ will create for you when it is first run (see instructions below).
    1. **NASA GPW 30s population density data**.
      1. Go to https://sedac.ciesin.columbia.edu/data/set/gpw-v4-population-density-rev11
      2. Register and agree to terms
