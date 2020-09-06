@@ -65,11 +65,11 @@ names(states_climate_df)[1] <- "State"
 # --- read the various imperial predictions data --- #
 
 # -- europe -- #
-europe_Rt <- read.csv("raw-data/imperial-europe-pred.csv")
-europe_lockdown <- read.csv("raw-data/imperial-interventions.csv") # when did lockdown start in europe?
+europe_Rt <- read.csv("raw-data/cases/imperial-europe-pred.csv")
+europe_lockdown <- read.csv("raw-data/cases/imperial-interventions.csv") # when did lockdown start in europe?
 
 # -- LMIC -- #
-LMIC_data <- read.csv("raw-data/imperial-lmic-pred.csv")
+LMIC_data <- read.csv("raw-data/cases/imperial-lmic-pred.csv")
 # need to strip this down to only the Rt data
 LMIC_Rt <- LMIC_data[LMIC_data$compartment == "Rt" & LMIC_data$scenario == "Maintain Status Quo",]
 # remove spaces from the country names
@@ -85,7 +85,7 @@ LMIC_Rt$country <- gsub(" ", "_", LMIC_Rt$country)
 
 
 # -- US states -- #
-USA_Rt <- read.csv("raw-data/imperial-usa-pred.csv")
+USA_Rt <- read.csv("raw-data/cases/imperial-usa-pred.csv")
 
 # make date columns for everything
 europe_Rt$date <- as.Date(europe_Rt$time)

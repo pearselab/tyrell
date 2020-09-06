@@ -10,25 +10,12 @@ task :rt_models => ["temp-midday-states","population-density-states"].map!{|x| "
   FileUtils.cp ["ms-env/rt-bayes-model.R","ms-env/rt-bayes-model.stan"], "imptf-models/covid19model-6.0/"
   Dir.chdir "imptf-models/covid19model-6.0/" do
     `Rscript rt-bayes-model.R #{datestamp} > ../../ms-env/STDOUT-rt-bayes-model-#{datestamp}.txt`
-    #FileUtils.rm ["rt-bayes-model.R", "rt-bayes-model.stan"]
+    FileUtils.rm ["rt-bayes-model.R", "rt-bayes-model.stan"]
   end
-  `Rscript ms-env/rt-bayes-downstream.R > ms-env/rt-bayes-downstream.txt`
+  `Rscript ms-env/rt-bayes-downstream.R #{datestamp} > ms-env/rt-bayes-downstream-#{datestamp}.txt`
 end
 
-
-desc "Fit Rt inverse epidemiological models"
-task :rt_inv_models => ["temp-midday-states","population-density-states"].map!{|x| "clean-data/#{x}.RDS"} + [:raw_imptfmods] do
-  datestamp = Time.now.strftime("%d%m%Y-%H%M")
-  FileUtils.cp ["ms-env/rt-bayes-invmodel.R","ms-env/rt-bayes-invmodel.stan"], "imptf-models/covid19model-6.0/"
-  Dir.chdir "imptf-models/covid19model-6.0/" do
-    `Rscript rt-bayes-invmodel.R #{datestamp} > ../../ms-env/STDOUT-rt-bayes-invmodel-#{datestamp}.txt`
-    #FileUtils.rm ["rt-bayes-invmodel.R", "rt-bayes-invmodel.stan"]
-  end
-  #`Rscript ms-env/rt-bayes-downstream.R > ms-env/rt-bayes-downstream.txt`
-end
-
-
-desc "Build MS#1 manuscript"
+desc "Build manuscript #1 - US environment"
 task :ms1_build do
   FileUtils.chdir("ms-env") do
     `pdflatex -interaction=batchmode cov-env-ms.tex

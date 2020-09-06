@@ -18,20 +18,18 @@ task :default => :help
 desc "Tyrell command overview"
 task :help do
   puts "Tyrell - COVID-19 data/analysis management software"
-  puts ""  
+  puts "\t\t\t\t\t\t\thttps://github.com/pearselab/tyrell"  
   puts "Useful commands:"
-  puts "\trake install         - Setup Tyrell dependencies (RECOMMENDED first command)"
-  puts "\trake ms1_env_US      - Repeat US environmental impacts MS (Smith et al. 2020 DOI)"
-  puts "\trake dwn_data_cases  - Download all case/mortality data"
-  puts "\trake cln_data_cases  - Cleans (processes) all case/mortality data"
-  puts "\trake update_data     - Update data with latest releases"
-  puts "\trake dwn_data        - Download all data (including GIS data - takes a long time)"
-  puts "\trake cln_data        - Cleans (processes) all data (including GIS data - takes a long time)"
-  puts "\trake save_space      - Deletes large 'raw' files not needed after cleaning (RECOMMENDED)"
-  puts "\trake reset           - Delete all 'cleaned' data from `rake cln_data`"
-  puts "\trake clobber         - Delete all 'raw' data from `rake raw_data`"
-  puts "\trake --tasks         - Lists all tasks Tyrell can perform (many more than above)"
-  puts "\trake "
+  puts "  rake install         - Setup Tyrell dependencies"
+  puts "  rake ms1_env_US      - Repeat Smith et al. 2020 (DOI)"
+  puts "  rake dwn_data_cases  - Download all case/mortality data"
+  puts "  rake update_cases    - Update all case/mortality data"
+  puts "  rake dwn_data        - Download all data (takes a long time)"
+  puts "  rake cln_data        - Cleans (processes) all data (takes a long time)"
+  puts "  rake save_space      - Delete raw-data unneeded after cleaning (RECOMMENDED)"
+  puts "  rake reset           - Delete all 'cleaned' data in `clean-data`"
+  puts "  rake clobber         - Delete all 'raw' data from `raw-data`"
+  puts "  rake --tasks         - Lists everything Tyrell does (more than above)"
   puts "(Note: any missing/needed data is automatically downloaded;"
   puts " thus running `rake cln_data` will first run `rake dwn_data`)"
 end
@@ -73,40 +71,54 @@ task :before_install do
 end
 
 # Download data
+desc "Download raw case data"
+task :dwn_data_cases => ["raw-data/cases", :raw_jhu, "raw-data/cases/ecdc-cases.csv", "raw-data/cases/ecjrcdc-regions.csv", "raw-data/cases/ecjrcdc-countries.csv", "raw-data/cases/cvodidh-admin1.csv", "raw-data/cases/cvodidh-admin2.csv", "raw-data/cases/cvodidh-admin3.csv", "raw-data/cases/imperial-europe-pred.csv", "raw-data/cases/imperial-usa-pred.csv", "raw-data/cases/imperial-usa-pred-2020-05-25.csv", "raw-data/cases/imperial-lmic-pred.csv", "raw-data/cases/ihme-summary.csv", "raw-data/cases/who-interventions.xlsx", "raw-data/cases/imperial-interventions.csv", "raw-data/cases/oxford-interventions.csv"]
+
 desc "Download all raw data"
-task :dwn_data => [:before_dwn_data, :raw_jhu, "raw-data/ecdc-cases.csv", "raw-data/ecjrcdc-regions.csv", "raw-data/ecjrcdc-countries.csv", "raw-data/uk-phe-deaths.csv", "raw-data/uk-phe-cases.csv", "raw-data/cvodidh-admin1.csv", "raw-data/cvodidh-admin2.csv", "raw-data/cvodidh-admin3.csv", "raw-data/imperial-europe-pred.csv", "raw-data/imperial-usa-pred.csv", "raw-data/imperial-usa-pred-2020-05-25.csv", "raw-data/imperial-lmic-pred.csv", :raw_ihme, :raw_nxtstr, "raw-data/who-interventions.xlsx", "raw-data/imperial-interventions.csv", "raw-data/oxford-interventions.csv", :raw_imptfmods, "raw-data/rambaut-nomenclature", "raw-data/denvfoimap-raster.RDS", :raw_gadm, "raw-data/cds-era5-temp-hourly.grib", "raw-data/cds-era5-humid-hourly.grib", "raw-data/cds-era5-uv-hourly.grib", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif", "raw-data/google-mobility.csv", :copy_usa_interventions]
+task :dwn_data => [:before_dwn_data,
+                   :dwn_data_cases,
+                   "raw-data/gis", "raw-data/gis/denvfoimap-raster.RDS", :raw_gadm, "raw-data/gis/cds-era5-temp-hourly.grib", "raw-data/gis/cds-era5-humid-hourly.grib", "raw-data/gis/cds-era5-uv-hourly.grib",
+                   "ext-data/", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif",
+                   "raw-data/google-mobility.csv", "raw-data/USstatesCov19distancingpolicy.csv",
+                   "raw-data/genetic", :raw_nxtstr, :raw_imptfmods, "raw-data/rambaut-nomenclature"]
 task :before_dwn_data do
   puts "\t ... Downloading raw data (can take a long time)"
 end
 
 # Clean data
-desc "Process all raw data"
+desc "Clean (process) all raw data"
 task :cln_data => [:before_cln_data, :cln_gadm, :cln_denvfoi_rasters, :cln_worldclim, :cln_cdsear5_hourly, :delete_cdsear5_hourly, :cln_cdsear5_daily, :cln_gpw_popdens, :join_R_climate]
 task :before_cln_data do
   puts "\t ... Processing raw data"
 end
 
+# Save space
+desc "Save disk space by deleting large `raw-data` files"
+task :save_space do 
+  puts "\t ... Saving disk space by deleting large, raw GIS files"
+  Dir.chdir("raw-data/gis") do
+    FileUtils.rm Dir["cdsar5-1month_mean_Global_ea_2t_20*.grib"]
+    FileUtils.rm "cds-era5-humid-midday.grib"
+    FileUtils.rm "cds-era5-temp-midday.grib"
+    FileUtils.rm Dir["gadm36*"]
+  end
+end
+
 # Update data
-desc "Update raw-data and purge calculated clean-data"
-task :update_data => [:before_update_data, :update_raw_data, :purge_clean_data]
+desc "Update case/mortality raw-data"
+task :update_cases => [:before_update_cases, :update_cases, :purge_clean_cases]
 task :before_update_data do
   puts "\t ... Updating changable raw data; purging relevant clean data"
 end
 
 desc "Update raw data"
-task :update_raw_data do
-  FileUtils.chdir("raw-data") do
-    FileUtils.rm Dir["ihme-*"]
-    FileUtils.rm Dir["jh-*"]
-    FileUtils.rm Dir["imperial-*"]
-    FileUtils.rm Dir["nxtstr-*"]
-  end
-  FileUtils.rm_r "rambaut-nomenclature/"
-  Rake.application[:dwn_data].invoke
+task :update_cases do
+  FileUtils.rm_r "raw-data/cases"
+  Rake.application[:dwn_data_cases].invoke
 end
 
 desc "Purge clean data"
-task :purge_clean_data do
+task :purge_clean_cases do
   FileUtils.chdir("clean-data") do
     # ... right now, nothing ...
   end

@@ -1,4 +1,5 @@
 source("src/packages.R")
+file_datestamp <- commandArgs(trailingOnly=TRUE)[1]
 
 # Pull back in environmental data (modified from original model script)
 env <- readRDS("clean-data/temp-dailymean-states.RDS")
@@ -18,7 +19,7 @@ sd.pop <- sd(pop, na.rm=TRUE)
 rm(env,pop,meta,processed_data)
 
 # Get raw coefficients and then back-transform, thne neaten and merge data
-load("imptf-models/covid19model-6.0/results/rt-bayes.Rdata")
+load(paste0("imptf-models/covid19model-6.0/results/rt-bayes-",file_datestamp".Rdata")
 env <- unlist(rstan::extract(fit, "env_time_slp"))
 pop <- unlist(rstan::extract(fit, "pop_slp"))
 average <- unlist(rstan::extract(fit, "alpha[1]"))
@@ -63,17 +64,9 @@ cols <- cols[order(summary["50%",])]
 labels <- labels[order(summary["50%",])]
 summary <- summary[,order(summary["50%",])]
 
-# Relative reduction plot
-# pdf("ms-env/us-bayes-posterior.pdf")
-# dotchart(summary["50%",], xlim=c(1,70), pch=20, color=cols, pt.cex=4, font=2, frame.plot=FALSE, xlab="Percent reduction needed in average mobility to mitigate", labels=labels)
-# arrows(summary["25%",], 1:6, summary["75%",], length=0, lwd=10, col=cols)
-# arrows(summary["10%",], 1:6, summary["90%",], length=0, lwd=5, col=cols)
-# arrows(summary["5%",], 1:6, summary["95%",], length=0, lwd=1, col=cols)
-# dev.off()
-
 # Generate paper summary statistics
+print("Begin summary stats for MS")
 summary <- apply(data, 2, quantile, prob=c(.025,.05,.1,.25,.5,.75,.9,.95,.975))
-sink("ms-env/rt-bayes-downstream.txt")
 print("Posterior summaries:")
 summary["50%",]
 print("")
@@ -89,7 +82,9 @@ print("")
 print("Change estimates:")
 print(paste0("5 degree change: ", mean(data$r.env)*5))
 print(paste0("10x density change: ", mean(data$r.pop)*1))
-sink()
+print("")
+print("Model coefficients for supplement:")
+xtable(summary(fit, pars=c("alpha","alpha_state","alpha_region","mu","env_time_slp","pop_slp")))
 
 ## TS: New figure
 
@@ -173,4 +168,4 @@ fig3 <- ggplot(pop_results) +
           panel.grid.major.x = element_blank(),
           panel.grid.minor.x = element_blank())
 
-ggsave("figures/US_bayes_plot.pdf", fig3)
+ggsave("ms-env/US_bayes_plot.pdf", fig3)

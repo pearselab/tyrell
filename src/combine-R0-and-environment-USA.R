@@ -33,7 +33,7 @@ make_long <- function(df, clim_var){
 ### Main code ###
 
 # 1. load Rt data
-USA_Rt <- read.csv("raw-data/imperial-usa-pred-2020-05-25.csv")
+USA_Rt <- read.csv("raw-data/cases/imperial-usa-pred-2020-05-25.csv")
 
 USA_Rt$date <- as.Date(USA_Rt$date)
 

@@ -3,9 +3,11 @@ desc "Install R packages"
 task :r_packages do `Rscript "src/packages.R"` end
 
 desc "Setup tyrell folders"
-task :folders => ["raw-data", "clean-data", "imptf-models", "ext-data"]
+task :folders => ["raw-data", "raw-data/cases", "raw-data/gis", "raw-data/genetic", "clean-data", "imptf-models", "ext-data"]
 directory 'raw-data'
 directory 'raw-data/cases'
+directory 'raw-data/gis'
+directory 'raw-data/genetic'
 directory 'clean-data'
 directory 'imptf-models'
 directory 'ext-data'

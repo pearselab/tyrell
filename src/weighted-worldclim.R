@@ -18,8 +18,8 @@ tmean <- getData("worldclim",var="tmean",res=10)/10
 
 # location of population density data: https://sedac.ciesin.columbia.edu/downloads/data/gpw-v4/gpw-v4-population-density-rev11/gpw-v4-population-density-rev11_2020_2pt5_min_tif.zip
 # ^ may need an account to download this directly
-#pop_data <- raster("raw-data/gpw-v4-population-density-rev11_2020_2pt5_min_tif/gpw_v4_population_density_rev11_2020_2pt5_min.tif")
-pop_data <- raster("raw-data/gpw-v4-population-density-rev11_2020_15_min_tif/gpw_v4_population_density_rev11_2020_15_min.tif")
+#pop_data <- raster("raw-data/gis/gpw-v4-population-density-rev11_2020_2pt5_min_tif/gpw_v4_population_density_rev11_2020_2pt5_min.tif")
+pop_data <- raster("raw-data/gis/gpw-v4-population-density-rev11_2020_15_min_tif/gpw_v4_population_density_rev11_2020_15_min.tif")
 
 states_sf <- st_as_sf(states) # exact_extract needs an sf object
 pop_data_project <- projectRaster(pop_data, tmean$tmean1) # converts to same resolution

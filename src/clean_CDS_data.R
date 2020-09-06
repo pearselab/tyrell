@@ -85,9 +85,9 @@ countries <- shapefile("clean-data/gadm-countries.shp")
 states <- shapefile("clean-data/gadm-states.shp")
 
 # read ALL of the monthly humidity data in 1 go
-humidityFiles <- lapply(Sys.glob("raw-data/cdsar5-1month_mean_Global_ea_r2*.grib"), rgdal::readGDAL)
+humidityFiles <- lapply(Sys.glob("raw-data/gis/cdsar5-1month_mean_Global_ea_r2*.grib"), rgdal::readGDAL)
 # also read all of the monthly temperature data
-temperatureFiles <- lapply(Sys.glob("raw-data/cdsar5-1month_mean_Global_ea_2t*.grib"), rgdal::readGDAL)
+temperatureFiles <- lapply(Sys.glob("raw-data/gis/cdsar5-1month_mean_Global_ea_2t*.grib"), rgdal::readGDAL)
 
 # get the population data for weighted means
 pop_data <- raster("ext-data/gpw_v4_population_density_rev11_2020_15_min.tif")

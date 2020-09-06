@@ -34,7 +34,7 @@ states <- shapefile("clean-data/gadm-states.shp")
 
 # Calculate summaries across DENVfoiMap data and write out
 # - MIR - Middle Infrared Reflectance, EVI - Enhanced Vegetation Index, and RFE - Precipitation
-clim_vars <- readRDS("raw-data/denvfoimap-raster.RDS")
+clim_vars <- readRDS("raw-data/gis/denvfoimap-raster.RDS")
 c.summary <- sapply(c("latitude", "altitude", "DayTemp_const_term", "EVI_const_term", "MIR_const_term", "NightTemp_const_term", "RFE_const_term", "log_pop_den", "birth_rate", "mean_age", "sd_age"),
                     function(x) avg.poly.clim(countries, clim_vars, x, countries_data)
                     )
