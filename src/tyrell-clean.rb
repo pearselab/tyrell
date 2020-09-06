@@ -30,27 +30,6 @@ end
 file "clean-data/denvfoimap-rasters-countries.csv" do denvfoimap_rasters() end
 file "clean-data/denvfoimap-rasters-states.csv" do denvfoimap_rasters() end
 
-
-# no longer need to do this task
-desc "Clean and process CDS-AR5 monthly temperature and humidity data"
-task :cln_cdsar5_monthly => ["clean-data/relative-humidity-countries.RDS","clean-data/relative-humidity-states.RDS", "clean-data/absolute-humidity-countries.RDS","clean-data/absolute-humidity-states.RDS", "clean-data/temperature-countries.RDS","clean-data/temperature-states.RDS"]
-def cln_cdsar5_monthly()
-  `Rscript src/clean_CDS_data.R`
-  date_metadata "clean-data/relative-humidity-countries.RDS"
-  date_metadata "clean-data/relative-humidity-states.RDS"
-  date_metadata "clean-data/absolute-humidity-countries.RDS"
-  date_metadata "clean-data/absolute-humidity-states.RDS"
-  date_metadata "clean-data/temperature-countries.RDS"
-  date_metadata "clean-data/temperature-states.RDS"
-end
-file "clean-data/relative-humidity-countries.RDS" => shp_fls("clean-data/gadm-countries",true) do cln_cdsar5_monthly() end
-file "clean-data/relative-humidity-states.RDS" => shp_fls("clean-data/gadm-states",true) do cln_cdsar5_monthly() end
-file "clean-data/absolute-humidity-countries.RDS" => shp_fls("clean-data/gadm-countries",true) do cln_cdsar5_monthly() end
-file "clean-data/absolute-humidity-states.RDS" => shp_fls("clean-data/gadm-states",true) do cln_cdsar5_monthly() end
-file "clean-data/temperature-countries.RDS" => shp_fls("clean-data/gadm-countries",true) do cln_cdsar5_monthly() end
-file "clean-data/temperature-states.RDS" => shp_fls("clean-data/gadm-states",true) do cln_cdsar5_monthly() end
-
-
 desc "Pre-process CDS-EAR5 hourly temperature/humidity/uv data"
 task :cln_cdsear5_hourly => ["raw-data/cds-era5-humid-dailymean.grib", "raw-data/cds-era5-temp-dailymean.grib", "raw-data/cds-era5-uv-dailymean.grib"]
 def cln_cdsear5_hourly()
@@ -72,7 +51,6 @@ task :delete_cdsear5_hourly do
     FileUtils.rm ["cds-era5-humid-hourly.grib", "cds-era5-temp-hourly.grib", "cds-era5-uv-hourly.grib"]
   end
 end  
-
 
 desc "Clean and process CDS-EAR5 mean daily temperature/humidity/uv data"
 task :cln_cdsear5_daily => ["clean-data/temp-dailymean-countries.RDS","clean-data/temp-dailymean-states.RDS","clean-data/humid-dailymean-countries.RDS","clean-data/humid-dailymean-states.RDS","clean-data/uv-dailymean-countries.RDS","clean-data/uv-dailymean-states.RDS"]
@@ -102,19 +80,6 @@ def cln_gpw_popdens()
 end
 file "clean-data/population-density-countries.RDS" => "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif" do cln_gpw_popdens() end
 file "clean-data/population-density-states.RDS" => "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif" do cln_gpw_popdens() end
-
-
-# this is now unnecessary
-desc "Clean and process monthly glUV data"
-task :cln_uv_monthly => ["clean-data/monthly-avg-UV-countries.RDS","clean-data/monthly-avg-UV-states.RDS"]
-def cln_uv_monthly()
-  `Rscript src/clean-monthly-uv-data.R`
-  date_metadata "clean-data/monthly-avg-UV-countries.RDS"
-  date_metadata "clean-data/monthly-avg-UV-states.RDS"
-end
-file "clean-data/monthly-avg-UV-countries.RDS" => shp_fls("clean-data/gadm-countries",true) do cln_uv_monthly() end
-file "clean-data/monthly-avg-UV-states.RDS" => shp_fls("clean-data/gadm-states",true) do cln_uv_monthly() end
-
 
 desc "Combine cleaned environmental data with R0/Rt estimates"
 task :join_R_climate => ["clean-data/climate_and_R0_USA.csv","clean-data/climate_and_lockdown_Rt_USA.csv", "clean-data/daily_climate_and_Rt_USA.csv"]

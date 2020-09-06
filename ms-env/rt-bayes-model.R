@@ -84,10 +84,10 @@ stan_data <- processed_data$stan_data
 saveRDS(processed_data, "../../ms-env/processed_data_usa.RDS")
 
 # Add envirionmental data
-env <- readRDS("../../clean-data/temp-midday-states.RDS")
+env <- readRDS("../../clean-data/temp-dailymean-states.RDS")
 pop <- readRDS("../../clean-data/population-density-states.RDS")
 meta <- shapefile("../../clean-data/gadm-states.shp")
-#env <- env[meta$NAME_0=="United States",]
+env <- env[meta$NAME_0=="United States",]
 pop <- pop[meta$NAME_0=="United States",]
 meta <- meta[meta$NAME_0=="United States",]
 meta$code <- sapply(strsplit(meta$HASC_1, ".", fixed=TRUE), function(x) x[2])

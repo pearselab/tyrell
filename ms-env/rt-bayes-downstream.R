@@ -19,7 +19,7 @@ sd.pop <- sd(pop, na.rm=TRUE)
 rm(env,pop,meta,processed_data)
 
 # Get raw coefficients and then back-transform, thne neaten and merge data
-load(paste0("imptf-models/covid19model-6.0/results/rt-bayes-",file_datestamp".Rdata")
+load(paste0("ms-env/rt-bayes-",file_datestamp".Rdata")
 env <- unlist(rstan::extract(fit, "env_time_slp"))
 pop <- unlist(rstan::extract(fit, "pop_slp"))
 average <- unlist(rstan::extract(fit, "alpha[1]"))

@@ -1,34 +1,84 @@
-# Tyrell - COVID-19 Seasonal data/modelling/forecasting toolkit
+# Tyrell - COVID-19 data/analysis/forecasting toolkit
 
-Pearse Lab
+[Pearse Lab, Imperial College London](http://pearselab.com/)
 
 ## Overview
 
-A tool to allow us to build, and then track, a common set of data, models, and forecasts to model the impact of environment, and so role of seasonality, in the transmission of SARS-CoV-2.
+We use _Tyrell_ to build and keep track of a common set of data, models, and forecasts as part of our work on COVID-19. It forms a perfect audit trail of how we compile and then analyse data, and you can track its development and changes through exploring its Git(Hub) archive. 
+
+_If you are interested in reproducing the analysis within one of our manuscripts, please read the_ **quickstart - reproducing an analysis** _section below_. Using this software to rebuild and reanalyse everything from scratch can take a very long time, and following these quickstart procedures will likely give you access to everything you need within a few minutes rather than several hours/days.
+
+## Quickstart - reproducing an analysis
+
+### Smith et al. (2020) DOI: XXX
+To work with the data and outputs in our manuscript:
+
+1. Download this zip-file (XXX)
+2. Unzip it on your computer
+3. The folder `ms-env` contains everything you need: 
+   1. Data are in the folder `clean-data`.
+   2. Independent regression scripts are in files starting with `r0-`.
+   3. Semi-mechanistic model scripts and posterior distributions are in files starting with `rt-`.
+
+If you want to re-build everything (data and analyses) from scratch, follow the installation instructions below and then run `rake ms1_env_US`. Note that this will take several days even on a computer with 12 processor cores, and you are responsible for checking your Bayesian model outputs for validity. To run everything from scratch, you will need to carry out installation steps XXX below.
 
 ## Installation
+Strictly, the only requirement of _Tyrell_ is Ruby, and if you only want to download case/mortality data that would be sufficient (step 1). If you want to conduct statistical analyses (e.g., reproduce a manuscript) you will need to install R (step 3), and if you want to process GIS data you will need to install Python (step 2) and (depending on the data you need) setup additional data options (steps 4 onwards).
 
-Ensure you have Ruby (>= 2.5.1) and R (>= 3.6.3) installed on your computer. Then ensure the Ruby gems `rake`, `open-uri`, `rubyzip`, `selenium-webdriver`, and `yaml` are installed (something like `sudo gem install rake` etc. should do the trick), along with Python 3 (accessible through `python3`) and the egg `cdsapi` (something like `sudo pip install cdsapi` should work). All other dependencies are installed by the script; check error logs if something seems not to be working. A rough guide of what you should be typing is in `install-tyrell.sh`; you could even try running that script (perhaps with `sudo`) to see if that does it.
+Generally speaking, _Tyrell_ will try and do something and, if it can't because your machine isn't set up to do it, it will carry on anyway after letting you know. Such warnings are not errors: if you don't want to download phylogenetic data, then don't worry if Tyrell is telling you that you can't, for example! Our advice is to carry out the first three steps, and then see what happens when you try running a command. If _Tyrell_ tells you it can't get a file or run a particular command, come back here and find the installation instructions for that command.
 
-Downloading the NextStrain data involves setting up ChromeDriver, which `install-tyrell.sh` does, but don't worry if it isn't working yet for you.
+`config.yml` is used by _Tyrell_ to keep track of things like the number of processors it can use on your computer, and API keys for data downloads. Below, we assume that you have copied the file `dummy_config.yml` to create a file called `config.yml` in the same directory. _Tyrell_ will look for this file and use the options you store inside it.
 
-Downloading the CDS AR5 climate data requires you to (1) register for an API key at https://cds.climate.copernicus.eu/#!/home, (2) copy `dummy_config.yml` to `config.yml` and then copy-paste your, and finally (3) select from here (https://cds.climate.copernicus.eu/cdsapp#!/dataset/ecv-for-climate-change?tab=form) 'surface air temp' and 'surface air relative humidity', 'monthly mean', '1 month', '2019 and 2020', all months, 'ERA5', 'zip', and then submit/agree to the download requirements. After that, Tom, you need to decide whether (a) we want daily data (probably, and if so then set that up :p) and (b) how we load this into R :D Perhaps rgdal::readGDAL can help?
-
-Downloading the NASA data requires you to (1) register for an earthdata account following the instructions here (https://wiki.earthdata.nasa.gov/display/EL/How+To+Register+For+an+EarthData+Login+Profile), then (2) link GES DISC data to your account following the instructions here (2) https://disc.gsfc.nasa.gov/earthdata-login. Finally, add your username and password to `config.yml` (assuming you have made one following the instructions in the paragraph above).
-
-We're using the Climate Data Operators program to quickly take daily means from the large CDS files. Either install using install-tyrell.sh script, or download it here (https://code.mpimet.mpg.de/projects/cdo/files) and follow instructions given to install. Hints for linux install: (1) download and extract the tarball, (2) navigate to the directory and hit ./configure, (3) do "make", then "make install" to fully install it on your system. Now you can run cdo commands from the terminal.
+1. **Ruby**.
+   1. Ensure you have Ruby (>= 2.5.1) installed (use something like `ruby --version` to check).
+   2. Ensure the Ruby gems `rake`, `open-uri`, `rubyzip`, `selenium-webdriver`, and `yaml` are installed (use something like `sudo gem install rake open-uri rubyzip selenium-webdriver yaml`).
+2. **Python**. 
+   1. Ensure you have Python 3 installed on your computer, and that it runs when you type `python3` into your terminal (use something like `python3 --version` to check).
+   2. Install the egg `cdsapi` (use something like `sudo pip install cdsapi`).
+3. **R**.
+   1. Ensure you have R (>= 3.6.3) installed on your computer, and that it runs when you type `Rscript` into your terminal.
+   2. Change the parameter `mc.cores` in the `r` block within `config.yml` to tell _Tyrell_ how many processor cores it can use for R scripts. 
+   3. _Tyrell_ will try to install all required R packages for you when you need them, but if you like you can run something like `Rscript src/packages.R` now. We recommend doing so and looking at the output: sometimes installing R packages can be hard and, if you're on a Linux system, you make find looking at the package error messages instructive.
+4. **CDS AR5 climate data** - follow these instructions if you want to download these data
+   1. Register for an API key at https://cds.climate.copernicus.eu/#!/home
+   2. Fill in your `key` information in the `cds` block of `config.yml`.
+   3. Select from here (https://cds.climate.copernicus.eu/cdsapp#!/dataset/ecv-for-climate-change?tab=form) 'surface air temp' and 'surface air relative humidity', 'monthly mean', '1 month', '2019 and 2020', all months, 'ERA5', 'zip', and then submit/agree to the download requirements.
+6. **Climate Data Operators** - install this program if you want to download and then process the CDS data (point 4 above). There are two ways to do that:
+   1. On Ubuntu use `sudo apt install cdo` (likely something similar for other Linux distributions).
+   2. Follow the instructions here https://code.mpimet.mpg.de/projects/cdo/wiki#Installation-and-Supported-Platforms to install on other computers.
+6. **Downloading NASA data** - follow these instructions if you want to download these data. 
+   1. Register for an earthdata account following the instructions here (https://wiki.earthdata.nasa.gov/display/EL/How+To+Register+For+an+EarthData+Login+Profile).
+   2. Link GES DISC data to your account following the instructions here https://disc.gsfc.nasa.gov/earthdata-login.
+   3. Add your username and password to `config.yml` in the `nasa` block.
+7. **LaTeX**. If you wish to re-build manuscripts from scratch, you will need to install LaTeX (https://www.latex-project.org/get/).
+8. **External data dependencies**. There are three NASA datasets for which it is impossible to automate their download; their installation instructions are below. You will be given these instructions by Tyrell if you need them, but here they are as well for completeness. They should be put in the folder `ext-data`, which _Tyrell_ will create for you when it is first run (see instructions below).
+   1. **NASA GPW 30s population density data**.
+     1. Go to https://sedac.ciesin.columbia.edu/data/set/gpw-v4-population-density-rev11
+     2. Register and agree to terms
+     3. Go to https://sedac.ciesin.columbia.edu/downloads/data/gpw-v4/gpw-v4-population-density-rev11/gpw-v4-population-density-rev11_2020_30_sec_tif.zip and download the file (should start automatically)
+     4. Extract the `.tif` file and put it in `ext-data`
+   2. **NASA GPW 2pt5 population density data**.
+      1. Go to https://sedac.ciesin.columbia.edu/data/set/gpw-v4-population-density-rev11
+      2. Register and agree to terms
+      3. Go to https://sedac.ciesin.columbia.edu/downloads/data/gpw-v4/gpw-v4-population-density-rev11/gpw-v4-population-density-rev11_2020_2pt5_min_tif.zip and download the file (should start automatically)
+      4. Extract the `.ti`f file and put it in `ext-data`
+   3. **NASA GPW 15min population density data**.
+      1. Go to https://sedac.ciesin.columbia.edu/data/set/gpw-v4-population-density-rev11
+      2. Register and agree to terms
+      3. Go to https://sedac.ciesin.columbia.edu/downloads/data/gpw-v4/gpw-v4-population-density-rev11/gpw-v4-population-density-rev11_2020_15_min_tif.zip and download the file (should start automatically)
+      4. Extract the `.tif` file and put it in `ext-data`
 
 ## Usage
 
-Open a terminal window and type `rake`. Wait a while (several gigabytes of data are downloaded and processed). Note that `timestamp.yml` is updated every time new files are downloaded, time-stamping everything with when it was accessed.
+Open a terminal window and type `rake`. This will list the most commonly-used _Tyrell_ commands. _Tyrell_ is really just a reasonably large `Rakefile` (https://github.com/ruby/rake), meaning it is a series of nested dependencies. So if, for example, you want to reproduce Smith et al. (2020; DOI: XXX) by typing `rake ms1_env_US`, it will check what data are needed to run the analysis, what data you have already downloaded and processed, and then grab whatever new data you need. This makes it easy to use as a shared workflow: different people can work on different projects, each with shared data dependencies, and _Tyrell_ will keep track of everything for you.
 
-To delete processed files, run `rake clean`. To delete all downloaded files, run `rake clobber`. Folders and the `timestamp.yml` file are not affected by these commands. To update your downloaded data (e.g., with the latest infection counts) run `rake update_data`. Note that these folders will be created by this script, and have been added to the `.gitignore` to remind you not to share data, but rather processing code.
+A good first command is probably `rake dwn_data_cases`. This will download lots of case/mortality data for you, and put it in `raw-data`. As part of its setup process, _Tyrell_ will create new folders within itself to store data for you. It will also create a file called that `timestamp.yml` is updated every time new files are downloaded, time-stamping everything so you know what you're working with. If you come back to _Tyrell_ tomorrow and want to update everything on your computer, consider running `rake update_cases` to download the latest versions of all the case data. If you wanted to update one particular file, you could simply delete it from your computer and then run `rake dwn_data_cases` again - _Tyrell_ will notice that file is missing and will replace it with the latest version.
 
-To reproduce the first covid-environment analysis and compile the manuscript (working title: "Measuring the impact of environment on SARS-CoV-2 transmission to inform seasonal forecasting"), run `rake ms1_env`.
+To remove all processed ('clean') data, run `rake reset`. To delete all downloaded files, run `rake clobber`. Folders and the `timestamp.yml` file are not affected by these commands, but `timestamp.yml` will be updated if you re-process or re-download a file. If you are doing some GIS processing, you may find the command `rake save_space` useful; it deletes some very large GIS files that _Tyrell_ downloads and that are only used once to generate much smaller clean data.
 
-## Contributing
+## Contributing / support
 
-If it 'ain't in the `Rakefile`, it 'ain't being accepted.
+You're more than welcome to make a pull request with code suggestions, or to ask questions over email (will.pearse@imperial.ac.uk) or in the issues above. Please remember, however, that we are under no obligation to accept pull requests or to help you with your own analyses. Providing all of our underlying code in a widely-used reproducible framework (Rake) was an extremely time-consuming and taxing process; we likely do not have the time to help you install dependencies.
 
 ## Why the name?
 

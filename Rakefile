@@ -97,10 +97,11 @@ desc "Save disk space by deleting large `raw-data` files"
 task :save_space do 
   puts "\t ... Saving disk space by deleting large, raw GIS files"
   Dir.chdir("raw-data/gis") do
-    FileUtils.rm Dir["cdsar5-1month_mean_Global_ea_2t_20*.grib"]
-    FileUtils.rm "cds-era5-humid-midday.grib"
-    FileUtils.rm "cds-era5-temp-midday.grib"
-    FileUtils.rm Dir["gadm36*"]
+    (FileUtils.rm Dir["cdsar5-1month_mean_Global_ea_2t_20*.grib"]) rescue {}
+    (FileUtils.rm "cds-era5-temp-hourly.grib") rescue {}
+    (FileUtils.rm "cds-era5-humid-hourly.grib") rescue {}
+    (FileUtils.rm "cds-era5-uv-hourly.grib") rescue {}
+    (FileUtils.rm Dir["gadm36*"]) rescue {}
   end
 end
 

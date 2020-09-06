@@ -105,26 +105,6 @@ file "raw-data/gis/denvfoimap-raster.RDS" do
   stream_file("https://mrcdata.dide.ic.ac.uk/resources/DENVfoiMap/all_squares_env_var_0_1667_deg.rds", "raw-data/gis/denvfoimap-raster.RDS")
 end
 
-# we dont need to do this anymore, so rake is no longer calling this task
-desc "Download CDS AR5 climate data"
-cds_ar5_files = ["cdsar5-1month_mean_Global_ea_2t_201901_v02.grib","cdsar5-1month_mean_Global_ea_2t_201902_v02.grib","cdsar5-1month_mean_Global_ea_2t_201903_v02.grib","cdsar5-1month_mean_Global_ea_2t_201904_v02.grib","cdsar5-1month_mean_Global_ea_2t_201905_v02.grib","cdsar5-1month_mean_Global_ea_2t_201906_v02.grib","cdsar5-1month_mean_Global_ea_2t_201907_v02.grib","cdsar5-1month_mean_Global_ea_2t_201908_v02.grib","cdsar5-1month_mean_Global_ea_2t_201909_v02.grib","cdsar5-1month_mean_Global_ea_2t_201910_v02.grib","cdsar5-1month_mean_Global_ea_2t_201911_v02.grib","cdsar5-1month_mean_Global_ea_2t_201912_v02.grib","cdsar5-1month_mean_Global_ea_2t_202001_v02.grib","cdsar5-1month_mean_Global_ea_2t_202002_v02.grib","cdsar5-1month_mean_Global_ea_2t_202003_v02.grib","cdsar5-1month_mean_Global_ea_2t_202004_v02.grib","cdsar5-1month_mean_Global_ea_2t_202005_v02.grib","cdsar5-1month_mean_Global_ea_r2_201901_v02.grib","cdsar5-1month_mean_Global_ea_r2_201902_v02.grib","cdsar5-1month_mean_Global_ea_r2_201903_v02.grib","cdsar5-1month_mean_Global_ea_r2_201904_v02.grib","cdsar5-1month_mean_Global_ea_r2_201905_v02.grib","cdsar5-1month_mean_Global_ea_r2_201906_v02.grib","cdsar5-1month_mean_Global_ea_r2_201907_v02.grib","cdsar5-1month_mean_Global_ea_r2_201908_v02.grib","cdsar5-1month_mean_Global_ea_r2_201909_v02.grib","cdsar5-1month_mean_Global_ea_r2_201910_v02.grib","cdsar5-1month_mean_Global_ea_r2_201911_v02.grib","cdsar5-1month_mean_Global_ea_r2_201912_v02.grib","cdsar5-1month_mean_Global_ea_r2_202001_v02.grib","cdsar5-1month_mean_Global_ea_r2_202002_v02.grib","cdsar5-1month_mean_Global_ea_r2_202003_v02.grib","cdsar5-1month_mean_Global_ea_r2_202004_v02.grib","cdsar5-1month_mean_Global_ea_r2_202005_v02.grib"].map! {|x| "raw-data/gis/#{x}"}
-task :raw_cds_ar5 => cds_ar5_files
-def raw_cds_ar5(files)
-  unless File.exists? File.expand_path("~/.cdsapirc") then return false end
-  Dir.chdir("raw-data/gis") do
-    `python3 ../../src/cds-ar5.py`
-    unzip("cds-ar5.zip")
-    Dir["1month_mean_Global_ea*"].each do |filename|
-      FileUtils.mv filename, "cdsar5-#{filename}"
-    end
-    FileUtils.rm "cds-ar5.zip"
-  end
-  files.map {|x| date_metadata(x)}
-  # ... t is temperature, r is relative humidity
-end
-cds_ar5_files.each {|x| file x do raw_cds_ar5(cds_ar5_files) end}
-
-
 desc "Get hourly CDS-ERA5 temperature data"
 file "raw-data/gis/cds-era5-temp-hourly.grib" do
   Dir.chdir("raw-data/gis") do `python3 ../../src/cds-era5-temp.py` end

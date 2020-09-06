@@ -10,6 +10,7 @@ task :rt_models => ["temp-midday-states","population-density-states"].map!{|x| "
   FileUtils.cp ["ms-env/rt-bayes-model.R","ms-env/rt-bayes-model.stan"], "imptf-models/covid19model-6.0/"
   Dir.chdir "imptf-models/covid19model-6.0/" do
     `Rscript rt-bayes-model.R #{datestamp} > ../../ms-env/STDOUT-rt-bayes-model-#{datestamp}.txt`
+    FileUtils.mv "results/rt-bayes-#{datestamp}.Rdata", "../../ms-env/"
     FileUtils.rm ["rt-bayes-model.R", "rt-bayes-model.stan"]
   end
   `Rscript ms-env/rt-bayes-downstream.R #{datestamp} > ms-env/rt-bayes-downstream-#{datestamp}.txt`
