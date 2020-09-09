@@ -145,27 +145,28 @@ for(i in 1:length(pop_seq)){
 }
 
 
-fig3 <- ggplot(pop_results) +
-    geom_line(aes(x = pop_density, y = mob_50), col = "#6666FF", lwd = 2) +
-    geom_line(aes(x = pop_density, y = mob_12.5), alpha = 0.8, col = "#6666FF", linetype = "dashed", lwd = 1.5) +
-    geom_line(aes(x = pop_density, y = mob_87.5), alpha = 0.8, col = "#6666FF", linetype = "dashed", lwd = 1.5) +
-    geom_line(aes(x = pop_density, y = mob_95), alpha = 0.8, col = "#6666FF", linetype = "dotted", lwd = 1) +
-    geom_line(aes(x = pop_density, y = mob_5), alpha = 0.8, col = "#6666FF", linetype = "dotted", lwd = 1) +
-    geom_line(data = temp_results, aes(x = temperature*2, y = mob_50), col = "#CC6600", lwd = 2) +
-    geom_line(data = temp_results, aes(x = temperature*2, y = mob_12.5), alpha = 0.8, col = "#CC6600", linetype = "dashed", lwd = 1.5) +
-    geom_line(data = temp_results, aes(x = temperature*2, y = mob_87.5), alpha = 0.8, col = "#CC6600", linetype = "dashed", lwd = 1.5) +
-    geom_line(data = temp_results, aes(x = temperature*2, y = mob_95), alpha = 0.8, col = "#CC6600", linetype = "dotted", lwd = 1) +
-    geom_line(data = temp_results, aes(x = temperature*2, y = mob_5), alpha = 0.8, col = "#CC6600", linetype = "dotted", lwd = 1) +
-    labs(x = "X Greater Population Density", y = "% Reduction in Mobility to Mitigate") +
-    scale_x_continuous(sec.axis = sec_axis(~. *0.5, name = "Temperature Decrease (°C)")) +
+fig3 <- ggplot(temp_results) +
+    geom_line(aes(x = temperature, y = mob_50), col = "#CC6600", lwd = 2) +
+    geom_line(aes(x = temperature, y = mob_12.5), alpha = 0.8, col = "#CC6600", linetype = "dashed", lwd = 1.5) +
+    geom_line(aes(x = temperature, y = mob_87.5), alpha = 0.8, col = "#CC6600", linetype = "dashed", lwd = 1.5) +
+    geom_line(aes(x = temperature, y = mob_95), alpha = 0.8, col = "#CC6600", linetype = "dotted", lwd = 1) +
+    geom_line(aes(x = temperature, y = mob_5), alpha = 0.8, col = "#CC6600", linetype = "dotted", lwd = 1) +
+    geom_line(data = pop_results, aes(x = pop_density/2, y = mob_50), col = "#6666FF", lwd = 2) +
+    geom_line(data = pop_results, aes(x = pop_density/2, y = mob_12.5), alpha = 0.8, col = "#6666FF", linetype = "dashed", lwd = 1.5) +
+    geom_line(data = pop_results, aes(x = pop_density/2, y = mob_87.5), alpha = 0.8, col = "#6666FF", linetype = "dashed", lwd = 1.5) +
+    geom_line(data = pop_results, aes(x = pop_density/2, y = mob_95), alpha = 0.8, col = "#6666FF", linetype = "dotted", lwd = 1) +
+    geom_line(data = pop_results, aes(x = pop_density/2, y = mob_5), alpha = 0.8, col = "#6666FF", linetype = "dotted", lwd = 1) +
+    labs(x = "Temperature Decrease (°C)", y = "% Reduction in Mobility to Mitigate") +
+    scale_x_continuous(sec.axis = sec_axis(~. *2, name = "X Greater Population Density")) +
     theme_bw() +
-    theme(axis.title.x.bottom = element_text(colour = "#6666FF", size = 18, face = "bold"),
-          axis.text.x.bottom = element_text(colour = "#6666FF", size = 16, face = "bold"),
-          axis.title.x.top = element_text(colour = "#CC6600", size = 18, face = "bold"),
-          axis.text.x.top = element_text(colour = "#CC6600", size = 16, face = "bold"),
+    theme(axis.title.x.bottom = element_text(colour = "#CC6600", size = 18, face = "bold"),
+          axis.text.x.bottom = element_text(colour = "#CC6600", size = 16, face = "bold"),
+          axis.title.x.top = element_text(colour = "#6666FF", size = 18, face = "bold"),
+          axis.text.x.top = element_text(colour = "#6666FF", size = 16, face = "bold"),
           axis.text.y = element_text(size = 16, face = "bold"),
           axis.title.y = element_text(size = 18, face = "bold"),
           panel.grid.major.x = element_blank(),
           panel.grid.minor.x = element_blank())
+fig3
 
-ggsave("ms-env/US_bayes_plot.pdf", fig3)
+ggsave("figures/US_bayes_plot.pdf", fig3)
