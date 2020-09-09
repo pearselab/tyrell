@@ -19,7 +19,7 @@ sd.pop <- sd(pop, na.rm=TRUE)
 rm(env,pop,meta,processed_data)
 
 # Get raw coefficients and then back-transform, thne neaten and merge data
-load(paste0("ms-env/rt-bayes-",file_datestamp".Rdata")
+load(paste0("ms-env/rt-bayes-",file_datestamp,".Rdata"))
 env <- unlist(rstan::extract(fit, "env_time_slp"))
 pop <- unlist(rstan::extract(fit, "pop_slp"))
 average <- unlist(rstan::extract(fit, "alpha[1]"))
@@ -84,7 +84,7 @@ print(paste0("5 degree change: ", mean(data$r.env)*5))
 print(paste0("10x density change: ", mean(data$r.pop)*1))
 print("")
 print("Model coefficients for supplement:")
-xtable(summary(fit, pars=c("alpha","alpha_state","alpha_region","mu","env_time_slp","pop_slp")))
+xtable(summary(fit, pars=c("alpha","alpha_state","alpha_region","mu","env_time_slp","pop_slp"))$summary)
 
 ## TS: New figure
 

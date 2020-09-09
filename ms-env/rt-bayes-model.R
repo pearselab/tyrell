@@ -110,7 +110,7 @@ rstan_options(auto_write = TRUE)
 m <- stan_model('rt-bayes-model.stan')
 
 Sys.time()
-fit = sampling(m,data=stan_data,iter=1000,warmup=800,chains=5,thin=1,control = list(adapt_delta = 0.98, max_treedepth = 15))
+fit = sampling(m,data=stan_data,iter=3000,warmup=1000,chains=5,thin=1,control = list(adapt_delta = 0.98, max_treedepth = 15))
 Sys.time()
 
 covariate_data = list(interventions, mobility)
