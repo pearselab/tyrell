@@ -62,7 +62,7 @@ USA_Rt <- merge(USA_Rt, USA_mobility_states[,c("date", "state_simple", "average_
 
 
 if(FALSE){ # visualising mobility through time
-  png("figures/mobility_versus_time.png", width = 1000, height = 1000)
+  png("ms-env/mobility_versus_time.png", width = 1000, height = 1000)
   ggplot(USA_mobility_states, aes(x = as.Date(date), y = average_mobility_change)) +
     geom_line() +
     geom_hline(yintercept = -20) +
@@ -98,7 +98,7 @@ USA_Rt$stay_at_home <- as.Date(as.character(USA_Rt$stay_at_home), "%Y%m%d")
 
 if(FALSE){ # can plot to see which states are already in lockdown when Rt is calculated
   
-  png("figures/mobility_versus_time.png", width = 1000, height = 1000)
+  png("ms-env/mobility_versus_time.png", width = 1000, height = 1000)
   ggplot(USA_Rt, aes(x = as.Date(date), y = average_mobility_change)) +
     geom_line() +
     geom_hline(yintercept = -20, colour = "red", linetype = "dashed") +
@@ -108,7 +108,7 @@ if(FALSE){ # can plot to see which states are already in lockdown when Rt is cal
     facet_wrap(~state)
   dev.off()
   
-  png("figures/Rt_versus_time.png", width = 1000, height = 1000)
+  png("ms-env/Rt_versus_time.png", width = 1000, height = 1000)
   ggplot(USA_Rt, aes(x = as.Date(date), y = mean_time_varying_reproduction_number_R.t.)) +
     geom_line() +
     geom_hline(yintercept = 1, colour = "red", linetype = "dashed") +
@@ -123,7 +123,7 @@ if(FALSE){ # can plot to see which states are already in lockdown when Rt is cal
 # 4. merge the climate data together
 
 # load the original GADM files again...
-c(states, states_data) %<-% readRDS("clean-data/gadm-states.RDS")
+states_data <- shapefile("clean-data/gadm-states.shp")
 US_data <- states_data[states_data$GID_0 == "USA",]
 
 # temperature

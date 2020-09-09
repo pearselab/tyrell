@@ -127,7 +127,7 @@ end
 
 # MS1 - environmental impacts on US COVID
 desc "Repeating manusript #1 - environmental impacts"
-task :ms1_env_us => [:before_ms1_env, :ms1_r0_models, :ms1_rt_models, :ms1_build]
+task :ms1_env_us => [:before_ms1_env, :install, :ms1_r0_models, :ms1_rt_models, :ms1_build]
 task :before_ms1_env do
   puts "\t ... Repeating MS#1 - US environmental impacts"
 end

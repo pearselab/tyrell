@@ -78,7 +78,7 @@ test_data$`Population density` <- log(test_data$`Population density`)
 # do the PCA
 pca_model <- prcomp(test_data, scale. = TRUE, center = TRUE)
 
-png("figures/pca_plot.png", width = 400, height = 400)
+png("ms-env/pca_plot.png", width = 400, height = 400)
 ggbiplot(pca_model, varname.size = 4, varname.adjust = 1) + 
   #geom_point(aes(colour = R0_data$dataset), size = 3) +
   theme_bw() + 
@@ -202,7 +202,7 @@ USA_residual_plot <- ggplot(d, aes(x = Temperature, y = pop_residuals)) +
   theme(aspect.ratio = 1)
 # USA_residual_plot
 
-ggsave("figures/USA_pop_residuals_vs_temperature.png", USA_residual_plot)
+ggsave("ms-env/USA_pop_residuals_vs_temperature.png", USA_residual_plot)
 
 # 8. Plot heatmap of temp vs population density, with
 # cells coloured by R0, with datapoints overlayed
@@ -226,7 +226,7 @@ heatmap_plot <- ggplot(predicted_R0, aes(x = Temperature, y = Pop_density)) +
   theme(aspect.ratio = 1)
 # heatmap_plot
 
-ggsave("figures/heatmap_R0.png", heatmap_plot)
+ggsave("ms-env/heatmap_R0.png", heatmap_plot)
 
 
 
@@ -287,7 +287,7 @@ emergdec_plot <- ggplot(USA_R0_data, aes(x = as.Date(emergency_decree), y = R0))
   theme(aspect.ratio = 1)
 emergdec_plot
 
-ggsave("figures/emergdec_plot.png", emergdec_plot)
+ggsave("ms-env/emergdec_plot.png", emergdec_plot)
 
 emergdec_lm <- lm(R0 ~ as.Date(emergency_decree) + February_20_TC + log10(Pop_density), data = USA_R0_data)
 summary(emergdec_lm)
@@ -358,7 +358,7 @@ us_residuals_data <- d[,c("State", "all_residuals")]
 names(us_residuals_data) <- c("state", "value")
 us_state_data <- merge(x = us_state_list, y = us_residuals_data, by.x = "state", by.y = "state", all.x = TRUE)
 
-png("~/Documents/COVID/figures/USA_residuals_map.png", width = 800, height = 600)
+png("ms-env/USA_residuals_map.png", width = 800, height = 600)
 plot_usmap(data = us_state_data, values = "value") +
   scale_fill_gradient2(low = "blue", mid = "white", high = "red", name = "Model Residuals") +
   theme(legend.text = element_text(size = 12),
