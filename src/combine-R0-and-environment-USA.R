@@ -212,6 +212,9 @@ for(i in 1:length(states_list)){ # unweighted mean
   state_temp <- climate_data[climate_data$State == states_list[i] &
                                climate_data$date >= t-14 &
                                climate_data$date <= t,]
+  state_mob <- USA_mobility_states[USA_mobility_states$state_simple == states_list[i] & 
+                                     USA_mobility_states$date >= t-14 & 
+                                     USA_mobility_states$date <= t,]
   USA_R0[USA_R0$state == states_list[i],]$temperature <- mean(state_temp$temperature, na.rm = TRUE)
   USA_R0[USA_R0$state == states_list[i],]$absolute_humidity <- mean(state_temp$absolute_humidity, na.rm = TRUE)
   USA_R0[USA_R0$state == states_list[i],]$uv <- mean(state_temp$uv, na.rm = TRUE)
