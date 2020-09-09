@@ -123,7 +123,7 @@ if(FALSE){ # can plot to see which states are already in lockdown when Rt is cal
 # 4. merge the climate data together
 
 # load the original GADM files again...
-c(states, states_data) %<-% readRDS("clean-data/gadm-states.RDS")
+states_data <- shapefile("clean-data/gadm-states.shp")
 US_data <- states_data[states_data$GID_0 == "USA",]
 
 # temperature
