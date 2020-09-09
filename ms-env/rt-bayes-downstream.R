@@ -169,4 +169,4 @@ fig3 <- ggplot(temp_results) +
           panel.grid.minor.x = element_blank())
 fig3
 
-ggsave("figures/US_bayes_plot.pdf", fig3)
+ggsave("ms-env/US_bayes_plot.pdf", fig3)
