@@ -54,9 +54,9 @@
 \begin{document}
 \setlength{\parindent}{0pt}
 
-\section*{Title page}
+\section*{}
 
-Supporting Information for: \\ Measuring the impact of environment on SARS-CoV-2 transmission to inform seasonal forecasting
+Supporting Information for: \\ Environment influences SARS-CoV-2 transmission in the absence of non-pharmaceutical interventions
 
 
 \textbf{Authors:} Thomas P. Smith$^{1,*}$,
@@ -89,10 +89,9 @@ $^*$To whom correspondence should be addressed:
 
 \clearpage
 
-
 \section{Collinearity of Climate Variables}
 
-As stated in the main text, correlations between the climate variables (temperature, absolute humidity, UV levels) mean that we could not disentangle each variable's contributions to \RO in multiple regression analysis. This can be seen in the high variance inflation factors for all climate variables when these predictors are regressed together (table \ref{tab:full_regression}).
+As stated in the main text, correlations between the climate variables (temperature, absolute humidity, UV radiation levels) mean that we could not disentangle each variable's contributions to \RO in multiple regression analysis. This can be seen in the high variance inflation factors for all climate variables when these predictors are regressed together (table \ref{tab:full_regression}).
 
 \begin{table}[ht]
 \centering
@@ -104,18 +103,18 @@ As stated in the main text, correlations between the climate variables (temperat
   (Intercept) & 2.5600 & 0.0496 & 51.59 & $<0.001$* & - \\ 
   Temperature & -0.3925 & 0.1292 & -3.04 & 0.0045* & 6.608 \\ 
   Abs. Humidity & 0.0863 & 0.1157 & 0.75 & 0.4604 & 5.299 \\ 
-  UV & 0.0982 & 0.0753 & 1.30 & 0.2006 & 2.242 \\ 
+  UV radiation & 0.0982 & 0.0753 & 1.30 & 0.2006 & 2.242 \\ 
   $\log_{10}$(Pop density) & 0.2229 & 0.0570 & 3.91 & $<0.001$* & 1.285  \\ 
    \hline
 \end{tabular}
 \label{tab:full_regression}
 \end{table}
 
-To further illustrate this, we perform a principle components analysis (PCA) on the three climate variables in our dataset, plus population density. Eigenvalues of the first two components of the combined datasets together accounted for 83\% of the total variance. Temperature and absolute humidity fall mainly along the axis of PC1, which accounts for 55\% of the variation. This close relationship is expected given that absolute humidity is a function of temperature (see main text eq. 1). UV is correlated with temperature and humidity, but less so, and contributes more to PC2 which is also comprised of population density and explains 28\% of the variance (fig. \ref{fig:pca}).
+To further illustrate this, we perform a principal components analysis (PCA) on the three climate variables in our dataset, plus population density. Eigenvalues of the first two components of the combined datasets together accounted for 83\% of the total variance. Temperature and absolute humidity fall mainly along the axis of PC1, which accounts for 55\% of the variation. This close relationship is expected given that absolute humidity is a function of temperature (see main text eq. 1). UV radiation is correlated with temperature and humidity, but less so, and contributes more to PC2 which also comprises population density and explains 28\% of the variance (fig. \ref{fig:pca}).
 
 \begin{figure}[ht]
   \centering
-  \includegraphics[width=.5\linewidth]{../figures/pca_plot_USA.png}  
+  \includegraphics[width=.5\linewidth]{figures/pca_plot_USA.png}  
   \caption{ {\bf Results of PCA (PC1 vs PC2) carried out on climate variables and population density for each state.} Arrows correspond to each of the analysis variables. The proportion of variance explained by each axis is shown on the axis labels. The climate variables condense mainly into PC1, whilst population density explains more of the variance in PC2.}
 \label{fig:pca}
 \end{figure}
@@ -161,7 +160,7 @@ When regressing lockdown $R_t$ (mean $R_t$ across the two weeks following a stat
 
 \section{Lockdown as an interaction term}
 
-Here we combine the pre-lockdown \RO and during-lockdown $R_t$ data for the USA and perform multiple linear regression with lockdown as an additional parameter, to further investigate the impact of mobility restrictions (\emph{i.e.} lockdown) compared to the environment. We restrict the environmental parameters to temperature and population density due to the collinearity between temperature, UV and humidity (see section 1). We first incorporate lockdown as a binary (\emph{i.e.} in lockdown, or not in lockdown) additive effect and test the effects on $R$:
+Here we combine the pre-lockdown \RO and during-lockdown $R_t$ data for the USA and perform multiple linear regression with lockdown as an additional parameter, to further investigate the impact of mobility restrictions (\emph{i.e.} lockdown) compared to the environment. We restrict the environmental parameters to temperature and population density due to the collinearity between temperature, UV radiation and humidity (see section 1). We first incorporate lockdown as a binary (\emph{i.e.} in lockdown, or not in lockdown) additive effect and test the effects on $R$:
 
 \begin{equation*}
     R \sim Temperature + \log_{10}(Population\ density) + Lockdown
@@ -189,7 +188,10 @@ As expected, we find that lockdown has a significant effect on $R$, with an orde
 Subsequently we ask whether lockdown mediates the environmental effects by incorporating this as an interaction term, \emph{i.e.}:
 
 \begin{equation*}
-    R \sim (Temperature + \log_{10}(Population\ density)) * Lockdown
+\begin{aligned}
+    R \sim{} & Temperature + \log_{10}(Population\ density) + Lockdown + \\
+             &  Temperature:Lockdown + \log_{10}(Population\ density):Lockdown 
+\end{aligned}
 \end{equation*}
 
 \begin{table}[ht]
@@ -214,7 +216,6 @@ Here we find that there is a significant interaction between lockdown and temper
 
 
 
-
 \section{Effect of environment on recreational mobility}
 
 Mobility trends for parks were omitted from estimates of $R_t$ both from the datasets that we used our external validation exercise, as well as our own Bayesian modelling (as significant contact events are assumed to be negligible). However, here we further investigate the impacts of environmental temperature on outdoor recreational mobility levels as a potential confounding factor in these types of analysis (\emph{i.e.} ``do people go to the park more when it's warm?''). 
@@ -233,79 +234,79 @@ Here we provide the full Bayesian model coefficients and results of posterior pr
   \hline
  & mean & se\_mean & sd & 2.5\% & 25\% & 50\% & 75\% & 97.5\% & n\_eff & $\hat{r}$ \\ 
   \hline
-  $\alpha_1$ & 2.12 & 0.01 & 0.45 & 1.20 & 1.82 & 2.14 & 2.43 & 2.94 & 990.67 & 1.00 \\ 
-  $\alpha_2$ & 0.01 & 0.01 & 0.26 & -0.48 & -0.17 & 0.01 & 0.19 & 0.54 & 1053.48 & 1.00 \\ 
-  $\alpha_3$ & 0.88 & 0.01 & 0.50 & -0.08 & 0.53 & 0.87 & 1.22 & 1.83 & 2462.50 & 1.00 \\ 
-  $\alpha_{r(1),1}^{region}$ & 0.52 & 0.01 & 0.30 & -0.03 & 0.30 & 0.51 & 0.73 & 1.11 & 446.22 & 1.01 \\ 
-  $\alpha_{r(1),2}^{region}$ & 0.34 & 0.02 & 0.62 & -0.68 & -0.05 & 0.24 & 0.67 & 1.83 & 1616.17 & 1.00 \\ 
-  $\alpha_{r(2),1}^{region}$ & 0.49 & 0.01 & 0.29 & -0.03 & 0.27 & 0.48 & 0.70 & 1.07 & 500.82 & 1.00 \\ 
-  $\alpha_{r(2),2}^{region}$ & 0.44 & 0.02 & 0.54 & -0.38 & 0.05 & 0.35 & 0.75 & 1.73 & 1213.02 & 1.00 \\ 
-  $\alpha_{r(3),1}^{region}$ & 0.43 & 0.01 & 0.34 & -0.13 & 0.17 & 0.41 & 0.66 & 1.14 & 525.91 & 1.00 \\ 
-  $\alpha_{r(3),2}^{region}$ & -0.00 & 0.01 & 0.54 & -1.06 & -0.31 & -0.01 & 0.30 & 1.16 & 5863.65 & 1.00 \\ 
-  $\alpha_{r(4),1}^{region}$ & 0.04 & 0.01 & 0.28 & -0.47 & -0.15 & 0.02 & 0.24 & 0.62 & 852.28 & 1.00 \\ 
-  $\alpha_{r(4),2}^{region}$ & 0.30 & 0.01 & 0.57 & -0.63 & -0.08 & 0.20 & 0.61 & 1.67 & 1542.14 & 1.00 \\ 
-  $\alpha_{r(4),1}^{region}$ & 0.45 & 0.01 & 0.27 & -0.03 & 0.25 & 0.44 & 0.64 & 1.01 & 725.88 & 1.01 \\ 
-  $\alpha_{r(5),2}^{region}$ & 0.82 & 0.03 & 0.66 & -0.14 & 0.31 & 0.73 & 1.22 & 2.35 & 590.83 & 1.00 \\ 
-  $\alpha_{r(6),1}^{region}$ & 0.59 & 0.02 & 0.32 & -0.01 & 0.36 & 0.58 & 0.82 & 1.23 & 451.63 & 1.01 \\ 
-  $\alpha_{r(6),2}^{region}$ & 0.37 & 0.01 & 0.55 & -0.53 & -0.00 & 0.28 & 0.67 & 1.61 & 1703.05 & 1.00 \\ 
-  $\alpha_{r(7),1}^{region}$ & 0.54 & 0.01 & 0.30 & -0.01 & 0.33 & 0.54 & 0.74 & 1.12 & 449.13 & 1.01 \\ 
-  $\alpha_{r(7),2}^{region}$ & 0.32 & 0.01 & 0.50 & -0.51 & -0.01 & 0.23 & 0.59 & 1.48 & 1304.60 & 1.00 \\ 
-  $\alpha_{r(8),1}^{region}$ & 0.35 & 0.01 & 0.28 & -0.14 & 0.14 & 0.34 & 0.55 & 0.93 & 550.57 & 1.00 \\ 
-  $\alpha_{r(8),2}^{region}$ & 0.57 & 0.02 & 0.66 & -0.42 & 0.10 & 0.45 & 0.94 & 2.12 & 1004.61 & 1.00 \\ 
-  $\alpha_1^{state}$ & -0.00 & 0.00 & 0.27 & -0.59 & -0.11 & -0.00 & 0.10 & 0.58 & 6651.24 & 1.00 \\ 
-  $\alpha_2^{state}$ & -0.00 & 0.00 & 0.27 & -0.62 & -0.11 & -0.00 & 0.10 & 0.59 & 6917.23 & 1.00 \\ 
-  $\alpha_3^{state}$ & -0.00 & 0.00 & 0.27 & -0.56 & -0.11 & 0.00 & 0.10 & 0.55 & 6313.19 & 1.00 \\ 
-  $\alpha_4^{state}$ & -0.01 & 0.00 & 0.27 & -0.63 & -0.12 & -0.00 & 0.10 & 0.60 & 7673.82 & 1.00 \\ 
-  $\alpha_5^{state}$ & -0.04 & 0.00 & 0.25 & -0.63 & -0.13 & -0.01 & 0.07 & 0.44 & 3224.39 & 1.00 \\ 
-  $\alpha_6^{state}$ & 0.00 & 0.00 & 0.27 & -0.60 & -0.10 & -0.00 & 0.10 & 0.59 & 6843.50 & 1.00 \\ 
-  $\alpha_7^{state}$ & 0.00 & 0.00 & 0.28 & -0.58 & -0.10 & -0.00 & 0.10 & 0.62 & 7467.44 & 1.00 \\ 
-  $\alpha_8^{state}$ & -0.02 & 0.00 & 0.22 & -0.53 & -0.11 & -0.01 & 0.08 & 0.45 & 3290.72 & 1.00 \\ 
-  $\alpha_9^{state}$ & -0.00 & 0.00 & 0.27 & -0.59 & -0.10 & -0.00 & 0.11 & 0.56 & 5121.17 & 1.00 \\ 
-  $\alpha_{10}^{state}$ & -0.00 & 0.00 & 0.27 & -0.60 & -0.11 & -0.00 & 0.11 & 0.60 & 6028.19 & 1.00 \\ 
-  $\alpha_{11}^{state}$ & -0.00 & 0.00 & 0.28 & -0.58 & -0.12 & -0.00 & 0.11 & 0.61 & 5820.44 & 1.00 \\ 
-  $\alpha_{12}^{state}$ & -0.00 & 0.00 & 0.26 & -0.59 & -0.10 & -0.00 & 0.10 & 0.58 & 6046.41 & 1.00 \\ 
-  $\alpha_{13}^{state}$ & -0.01 & 0.00 & 0.29 & -0.66 & -0.11 & -0.00 & 0.11 & 0.60 & 5270.01 & 1.00 \\ 
-  $\alpha_{14}^{state}$ & -0.00 & 0.00 & 0.26 & -0.59 & -0.11 & -0.00 & 0.10 & 0.55 & 6104.64 & 1.00 \\ 
-  $\alpha_{15}^{state}$ & -0.00 & 0.00 & 0.24 & -0.53 & -0.10 & -0.00 & 0.10 & 0.54 & 3560.70 & 1.00 \\ 
-  $\alpha_{16}^{state}$ & -0.00 & 0.00 & 0.28 & -0.60 & -0.11 & -0.00 & 0.11 & 0.55 & 6541.85 & 1.00 \\ 
-  $\alpha_{17}^{state}$ & -0.00 & 0.00 & 0.28 & -0.64 & -0.10 & 0.00 & 0.10 & 0.59 & 4954.82 & 1.00 \\ 
-  $\alpha_{18}^{state}$ & 0.00 & 0.00 & 0.26 & -0.56 & -0.10 & -0.00 & 0.10 & 0.61 & 5940.95 & 1.00 \\ 
-  $\alpha_{19}^{state}$ & -0.01 & 0.00 & 0.28 & -0.61 & -0.11 & -0.00 & 0.10 & 0.58 & 4572.39 & 1.00 \\ 
-  $\alpha_{20}^{state}$ & -0.03 & 0.00 & 0.23 & -0.57 & -0.13 & -0.02 & 0.07 & 0.43 & 2840.88 & 1.00 \\ 
-  $\alpha_{21}^{state}$ & -0.00 & 0.00 & 0.24 & -0.53 & -0.10 & -0.00 & 0.10 & 0.51 & 4009.30 & 1.00 \\ 
-  $\alpha_{22}^{state}$ & 0.01 & 0.00 & 0.29 & -0.59 & -0.11 & 0.00 & 0.11 & 0.65 & 7371.12 & 1.00 \\ 
-  $\alpha_{23}^{state}$ & 0.00 & 0.00 & 0.27 & -0.61 & -0.10 & 0.00 & 0.11 & 0.60 & 7114.50 & 1.00 \\ 
-  $\alpha_{24}^{state}$ & 0.00 & 0.00 & 0.28 & -0.59 & -0.10 & -0.00 & 0.10 & 0.61 & 6549.59 & 1.00 \\ 
-  $\alpha_{25}^{state}$ & -0.00 & 0.00 & 0.28 & -0.62 & -0.11 & -0.00 & 0.10 & 0.58 & 5410.89 & 1.00 \\ 
-  $\alpha_{26}^{state}$ & 0.01 & 0.00 & 0.27 & -0.56 & -0.10 & 0.00 & 0.12 & 0.63 & 5698.56 & 1.00 \\ 
-  $\alpha_{27}^{state}$ & 0.00 & 0.00 & 0.27 & -0.56 & -0.11 & 0.00 & 0.10 & 0.62 & 4842.59 & 1.00 \\ 
-  $\alpha_{28}^{state}$ & 0.00 & 0.00 & 0.28 & -0.59 & -0.10 & -0.00 & 0.10 & 0.63 & 6911.90 & 1.00 \\ 
-  $\alpha_{29}^{state}$ & 0.00 & 0.00 & 0.28 & -0.59 & -0.10 & 0.00 & 0.11 & 0.63 & 6027.68 & 1.00 \\ 
-  $\alpha_{30}^{state}$ & -0.00 & 0.00 & 0.28 & -0.65 & -0.11 & 0.00 & 0.11 & 0.60 & 6181.28 & 1.00 \\ 
-  $\alpha_{31}^{state}$ & -0.00 & 0.00 & 0.28 & -0.63 & -0.11 & 0.00 & 0.11 & 0.61 & 7178.16 & 1.00 \\ 
-  $\alpha_{32}^{state}$ & -0.00 & 0.00 & 0.24 & -0.51 & -0.10 & -0.00 & 0.10 & 0.52 & 2591.71 & 1.00 \\ 
-  $\alpha_{33}^{state}$ & 0.00 & 0.00 & 0.27 & -0.58 & -0.10 & 0.00 & 0.10 & 0.61 & 6050.35 & 1.00 \\ 
-  $\alpha_{34}^{state}$ & -0.00 & 0.00 & 0.28 & -0.61 & -0.11 & -0.00 & 0.10 & 0.60 & 6814.70 & 1.00 \\ 
-  $\alpha_{35}^{state}$ & 0.00 & 0.00 & 0.27 & -0.61 & -0.11 & 0.00 & 0.11 & 0.59 & 6838.85 & 1.00 \\ 
-  $\alpha_{36}^{state}$ & -0.00 & 0.00 & 0.28 & -0.61 & -0.11 & 0.00 & 0.11 & 0.59 & 5309.79 & 1.00 \\ 
-  $\alpha_{37}^{state}$ & 0.01 & 0.00 & 0.28 & -0.57 & -0.10 & -0.00 & 0.12 & 0.59 & 5307.18 & 1.00 \\ 
-  $\alpha_{38}^{state}$ & 0.00 & 0.00 & 0.27 & -0.57 & -0.10 & 0.00 & 0.11 & 0.58 & 5957.94 & 1.00 \\ 
-  $\alpha_{39}^{state}$ & -0.00 & 0.00 & 0.27 & -0.61 & -0.11 & -0.00 & 0.11 & 0.57 & 6402.79 & 1.00 \\ 
-  $\alpha_{40}^{state}$ & 0.01 & 0.00 & 0.27 & -0.56 & -0.10 & 0.00 & 0.11 & 0.61 & 4308.81 & 1.00 \\ 
-  $\alpha_{41}^{state}$ & -0.00 & 0.00 & 0.28 & -0.61 & -0.11 & -0.00 & 0.10 & 0.58 & 5689.21 & 1.00 \\ 
-  $\alpha_{42}^{state}$ & -0.00 & 0.00 & 0.27 & -0.64 & -0.11 & -0.00 & 0.11 & 0.57 & 7066.43 & 1.00 \\ 
-  $\alpha_{43}^{state}$ & -0.01 & 0.00 & 0.28 & -0.61 & -0.12 & -0.00 & 0.11 & 0.58 & 6493.69 & 1.00 \\ 
-  $\alpha_{44}^{state}$ & -0.00 & 0.00 & 0.28 & -0.61 & -0.12 & -0.00 & 0.10 & 0.60 & 5898.06 & 1.00 \\ 
-  $\alpha_{45}^{state}$ & 0.00 & 0.00 & 0.28 & -0.60 & -0.11 & -0.00 & 0.11 & 0.58 & 5063.85 & 1.00 \\ 
-  $\alpha_{46}^{state}$ & -0.00 & 0.00 & 0.27 & -0.62 & -0.11 & -0.00 & 0.10 & 0.64 & 6479.51 & 1.00 \\ 
-  $\alpha_{47}^{state}$ & 0.02 & 0.00 & 0.24 & -0.47 & -0.09 & 0.01 & 0.12 & 0.57 & 3986.65 & 1.00 \\ 
-  $\alpha_{48}^{state}$ & -0.00 & 0.00 & 0.26 & -0.57 & -0.11 & -0.00 & 0.10 & 0.56 & 6620.95 & 1.00 \\ 
-  $\alpha_{49}^{state}$ & 0.00 & 0.00 & 0.28 & -0.59 & -0.10 & -0.00 & 0.11 & 0.62 & 5606.75 & 1.00 \\ 
-  $\alpha_{50}^{state}$ & 0.00 & 0.00 & 0.27 & -0.58 & -0.11 & -0.00 & 0.11 & 0.62 & 6925.16 & 1.00 \\ 
-  $\alpha_{51}^{state}$ & 0.07 & 0.01 & 0.25 & -0.36 & -0.05 & 0.03 & 0.16 & 0.66 & 1331.37 & 1.00 \\ 
-  $c$ & -0.49 & 0.01 & 0.14 & -0.80 & -0.58 & -0.48 & -0.39 & -0.25 & 675.31 & 1.00 \\ 
-  $p$ & 0.75 & 0.01 & 0.18 & 0.42 & 0.62 & 0.74 & 0.86 & 1.11 & 761.44 & 1.00 \\ 
-  $\mu$ & 2.63 & 0.02 & 0.38 & 2.00 & 2.34 & 2.59 & 2.87 & 3.47 & 384.93 & 1.00 \\ 
+  $\alpha_1$ & 2.14 & 0.01 & 0.45 & 1.21 & 1.85 & 2.16 & 2.46 & 2.98 & 1394.56 & 1.00 \\ 
+  $\alpha_2$ & 0.01 & 0.01 & 0.27 & -0.51 & -0.17 & 0.00 & 0.19 & 0.55 & 2401.50 & 1.00 \\ 
+  $\alpha_3$ & 0.89 & 0.01 & 0.50 & -0.10 & 0.55 & 0.90 & 1.23 & 1.87 & 3778.68 & 1.00 \\ 
+  $\alpha_1^{state}$ & -0.00 & 0.00 & 0.31 & -0.67 & -0.11 & -0.00 & 0.11 & 0.66 & 11062.97 & 1.00 \\ 
+  $\alpha_2^{state}$ & 0.00 & 0.00 & 0.29 & -0.63 & -0.11 & 0.00 & 0.11 & 0.66 & 13676.39 & 1.00 \\ 
+  $\alpha_3^{state}$ & 0.00 & 0.00 & 0.30 & -0.65 & -0.11 & 0.00 & 0.12 & 0.65 & 12106.48 & 1.00 \\ 
+  $\alpha_4^{state}$ & 0.00 & 0.00 & 0.30 & -0.64 & -0.10 & 0.00 & 0.11 & 0.65 & 12138.84 & 1.00 \\ 
+  $\alpha_5^{state}$ & -0.04 & 0.00 & 0.27 & -0.67 & -0.14 & -0.01 & 0.07 & 0.49 & 4508.57 & 1.00 \\ 
+  $\alpha_6^{state}$ & 0.00 & 0.00 & 0.29 & -0.61 & -0.11 & 0.00 & 0.11 & 0.64 & 14340.61 & 1.00 \\ 
+  $\alpha_7^{state}$ & 0.00 & 0.00 & 0.30 & -0.65 & -0.11 & 0.00 & 0.11 & 0.66 & 13683.76 & 1.00 \\ 
+  $\alpha_8^{state}$ & -0.02 & 0.00 & 0.24 & -0.56 & -0.12 & -0.00 & 0.09 & 0.50 & 6369.54 & 1.00 \\ 
+  $\alpha_9^{state}$ & -0.00 & 0.00 & 0.30 & -0.65 & -0.11 & -0.00 & 0.11 & 0.64 & 11822.21 & 1.00 \\ 
+  $\alpha_{10}^{state}$ & -0.00 & 0.00 & 0.30 & -0.67 & -0.11 & -0.00 & 0.10 & 0.64 & 13655.71 & 1.00 \\ 
+  $\alpha_{11}^{state}$ & -0.00 & 0.00 & 0.31 & -0.67 & -0.12 & -0.00 & 0.11 & 0.66 & 12288.08 & 1.00 \\ 
+  $\alpha_{12}^{state}$ & -0.00 & 0.00 & 0.30 & -0.66 & -0.11 & -0.00 & 0.11 & 0.63 & 10459.35 & 1.00 \\ 
+  $\alpha_{13}^{state}$ & 0.00 & 0.00 & 0.29 & -0.65 & -0.11 & -0.00 & 0.11 & 0.63 & 11717.81 & 1.00 \\
+  $\alpha_{14}^{state}$ & 0.00 & 0.00 & 0.30 & -0.65 & -0.11 & -0.00 & 0.11 & 0.65 & 11918.50 & 1.00 \\
+  $\alpha_{15}^{state}$ & -0.00 & 0.00 & 0.26 & -0.56 & -0.11 & 0.00 & 0.10 & 0.57 & 7866.88 & 1.00 \\ 
+  $\alpha_{16}^{state}$ & -0.00 & 0.00 & 0.31 & -0.68 & -0.11 & -0.00 & 0.11 & 0.66 & 12413.47 & 1.00 \\ 
+  $\alpha_{17}^{state}$ & -0.00 & 0.00 & 0.30 & -0.66 & -0.11 & -0.00 & 0.11 & 0.66 & 12689.82 & 1.00 \\ 
+  $\alpha_{18}^{state}$ & -0.00 & 0.00 & 0.30 & -0.68 & -0.11 & 0.00 & 0.11 & 0.66 & 15471.48 & 1.00 \\
+  $\alpha_{19}^{state}$ & 0.00 & 0.00 & 0.29 & -0.64 & -0.10 & 0.00 & 0.11 & 0.65 & 12943.23 & 1.00 \\ 
+  $\alpha_{20}^{state}$ & -0.03 & 0.00 & 0.25 & -0.61 & -0.14 & -0.01 & 0.07 & 0.48 & 4880.30 & 1.01 \\
+  $\alpha_{21}^{state}$ & 0.00 & 0.00 & 0.26 & -0.56 & -0.10 & -0.00 & 0.10 & 0.57 & 6802.89 & 1.00 \\ 
+  $\alpha_{22}^{state}$ & 0.00 & 0.00 & 0.29 & -0.64 & -0.11 & 0.00 & 0.11 & 0.64 & 14606.26 & 1.00 \\ 
+  $\alpha_{23}^{state}$ & -0.00 & 0.00 & 0.30 & -0.66 & -0.11 & -0.00 & 0.11 & 0.66 & 12520.77 & 1.00 \\ 
+  $\alpha_{24}^{state}$ & -0.00 & 0.00 & 0.30 & -0.66 & -0.11 & -0.00 & 0.10 & 0.66 & 11048.15 & 1.00 \\ 
+  $\alpha_{25}^{state}$ & -0.00 & 0.00 & 0.30 & -0.64 & -0.11 & -0.00 & 0.11 & 0.65 & 10151.39 & 1.00 \\ 
+  $\alpha_{26}^{state}$ & -0.00 & 0.00 & 0.30 & -0.66 & -0.12 & -0.00 & 0.11 & 0.64 & 12545.84 & 1.00 \\ 
+  $\alpha_{27}^{state}$ & 0.00 & 0.00 & 0.29 & -0.64 & -0.11 & 0.00 & 0.11 & 0.64 & 14688.05 & 1.00 \\ 
+  $\alpha_{28}^{state}$ & -0.00 & 0.00 & 0.29 & -0.65 & -0.11 & 0.00 & 0.11 & 0.63 & 13422.73 & 1.00 \\
+  $\alpha_{29}^{state}$ & -0.00 & 0.00 & 0.30 & -0.64 & -0.11 & -0.00 & 0.10 & 0.65 & 11528.96 & 1.00 \\ 
+  $\alpha_{30}^{state}$ & -0.00 & 0.00 & 0.30 & -0.67 & -0.11 & -0.00 & 0.11 & 0.65 & 13951.41 & 1.00 \\ 
+  $\alpha_{31}^{state}$ & 0.00 & 0.00 & 0.30 & -0.67 & -0.11 & 0.00 & 0.11 & 0.65 & 12860.85 & 1.00 \\ 
+  $\alpha_{32}^{state}$ & -0.00 & 0.00 & 0.26 & -0.54 & -0.11 & -0.00 & 0.10 & 0.56 & 6629.28 & 1.00 \\
+  $\alpha_{33}^{state}$ & -0.00 & 0.00 & 0.29 & -0.65 & -0.11 & -0.00 & 0.11 & 0.62 & 13174.63 & 1.00 \\ 
+  $\alpha_{34}^{state}$ & 0.00 & 0.00 & 0.29 & -0.64 & -0.11 & -0.00 & 0.11 & 0.64 & 13039.06 & 1.00 \\
+  $\alpha_{35}^{state}$ & 0.00 & 0.00 & 0.30 & -0.67 & -0.11 & -0.00 & 0.11 & 0.65 & 12938.33 & 1.00 \\
+  $\alpha_{36}^{state}$ & 0.00 & 0.00 & 0.29 & -0.63 & -0.11 & 0.00 & 0.11 & 0.62 & 14181.21 & 1.00 \\ 
+  $\alpha_{37}^{state}$ & -0.00 & 0.00 & 0.29 & -0.64 & -0.11 & 0.00 & 0.10 & 0.64 & 11528.17 & 1.00 \\
+  $\alpha_{38}^{state}$ & 0.00 & 0.00 & 0.30 & -0.64 & -0.10 & -0.00 & 0.11 & 0.67 & 13059.82 & 1.00 \\
+  $\alpha_{39}^{state}$ & -0.00 & 0.00 & 0.30 & -0.65 & -0.11 & -0.00 & 0.10 & 0.65 & 13000.12 & 1.00 \\ 
+  $\alpha_{40}^{state}$ & 0.01 & 0.00 & 0.30 & -0.63 & -0.11 & 0.00 & 0.11 & 0.65 & 12361.29 & 1.00 \\ 
+  $\alpha_{41}^{state}$ & 0.00 & 0.00 & 0.29 & -0.63 & -0.10 & 0.00 & 0.11 & 0.67 & 13882.77 & 1.00 \\ 
+  $\alpha_{42}^{state}$ & -0.00 & 0.00 & 0.31 & -0.70 & -0.11 & 0.00 & 0.11 & 0.66 & 11855.58 & 1.00 \\
+  $\alpha_{43}^{state}$ & 0.00 & 0.00 & 0.31 & -0.65 & -0.11 & 0.00 & 0.11 & 0.68 & 13618.33 & 1.00 \\ 
+  $\alpha_{44}^{state}$ & -0.00 & 0.00 & 0.30 & -0.66 & -0.11 & -0.00 & 0.11 & 0.63 & 11607.65 & 1.00 \\ 
+  $\alpha_{45}^{state}$ & 0.00 & 0.00 & 0.31 & -0.66 & -0.11 & 0.00 & 0.11 & 0.69 & 9386.17 & 1.00 \\ 
+  $\alpha_{46}^{state}$ & 0.00 & 0.00 & 0.30 & -0.65 & -0.11 & 0.00 & 0.11 & 0.66 & 12808.94 & 1.00 \\ 
+  $\alpha_{47}^{state}$ & 0.02 & 0.00 & 0.26 & -0.54 & -0.09 & 0.01 & 0.12 & 0.62 & 8309.47 & 1.00 \\ 
+  $\alpha_{48}^{state}$ & 0.00 & 0.00 & 0.30 & -0.64 & -0.11 & 0.00 & 0.11 & 0.66 & 12433.56 & 1.00 \\ 
+  $\alpha_{49}^{state}$ & 0.00 & 0.00 & 0.30 & -0.63 & -0.11 & 0.00 & 0.12 & 0.67 & 13553.05 & 1.00 \\ 
+  $\alpha_{50}^{state}$ & -0.00 & 0.00 & 0.29 & -0.65 & -0.11 & -0.00 & 0.11 & 0.63 & 11518.66 & 1.00 \\ 
+  $\alpha_{51}^{state}$ & 0.08 & 0.01 & 0.27 & -0.39 & -0.04 & 0.03 & 0.18 & 0.76 & 1068.15 & 1.01 \\ 
+  $\alpha_{r(1),1}^{region}$ & 0.48 & 0.01 & 0.32 & -0.06 & 0.23 & 0.47 & 0.71 & 1.09 & 563.06 & 1.01 \\ 
+  $\alpha_{r(1),2}^{region}$ & 0.32 & 0.01 & 0.57 & -0.63 & -0.04 & 0.21 & 0.63 & 1.67 & 2569.76 & 1.00 \\ 
+  $\alpha_{r(2),1}^{region}$ & 0.46 & 0.01 & 0.31 & -0.06 & 0.22 & 0.46 & 0.68 & 1.06 & 644.11 & 1.01 \\ 
+  $\alpha_{r(2),2}^{region}$ & 0.41 & 0.01 & 0.53 & -0.40 & 0.03 & 0.31 & 0.71 & 1.68 & 1578.49 & 1.00 \\ 
+  $\alpha_{r(3),1}^{region}$ & 0.39 & 0.01 & 0.34 & -0.15 & 0.11 & 0.36 & 0.63 & 1.10 & 642.92 & 1.01 \\ 
+  $\alpha_{r(3),2}^{region}$] & -0.02 & 0.01 & 0.54 & -1.14 & -0.30 & -0.01 & 0.25 & 1.13 & 8663.30 & 1.00 \\ 
+  $\alpha_{r(4),1}^{region}$ & 0.05 & 0.01 & 0.28 & -0.44 & -0.14 & 0.01 & 0.23 & 0.67 & 1127.36 & 1.01 \\ 
+  $\alpha_{r(4),2}^{region}$ & 0.27 & 0.01 & 0.56 & -0.63 & -0.08 & 0.15 & 0.56 & 1.63 & 2519.12 & 1.00 \\ 
+  $\alpha_{r(5),1}^{region}$ & 0.42 & 0.01 & 0.28 & -0.04 & 0.21 & 0.41 & 0.61 & 0.98 & 761.66 & 1.01 \\ 
+  $\alpha_{r(5),2}^{region}$ & 0.78 & 0.02 & 0.66 & -0.13 & 0.24 & 0.68 & 1.20 & 2.31 & 740.39 & 1.01 \\ 
+  $\alpha_{r(6),1}^{region}$ & 0.58 & 0.01 & 0.35 & -0.02 & 0.31 & 0.58 & 0.83 & 1.26 & 560.77 & 1.01 \\ 
+  $\alpha_{r(6),2}^{region}$ & 0.33 & 0.01 & 0.53 & -0.53 & -0.02 & 0.23 & 0.62 & 1.58 & 2917.65 & 1.00 \\ 
+  $\alpha_{r(7),1}^{region}$ & 0.49 & 0.01 & 0.31 & -0.04 & 0.25 & 0.49 & 0.71 & 1.09 & 595.74 & 1.01 \\ 
+  $\alpha_{r(7),2}^{region}$ & 0.30 & 0.01 & 0.50 & -0.49 & -0.02 & 0.21 & 0.58 & 1.46 & 2151.45 & 1.00 \\ 
+  $\alpha_{r(8),1}^{region}$ & 0.32 & 0.01 & 0.28 & -0.16 & 0.10 & 0.31 & 0.52 & 0.91 & 718.72 & 1.01 \\ 
+  $\alpha_{r(8),2}^{region}$ & 0.52 & 0.02 & 0.64 & -0.36 & 0.05 & 0.38 & 0.87 & 2.09 & 1158.01 & 1.00 \\ 
+  $\mu$ & 2.59 & 0.02 & 0.40 & 1.98 & 2.28 & 2.55 & 2.85 & 3.44 & 496.29 & 1.01 \\ 
+  $c$ & -0.49 & 0.00 & 0.14 & -0.80 & -0.58 & -0.48 & -0.40 & -0.25 & 1026.26 & 1.01 \\ 
+  $p$ & 0.69 & 0.01 & 0.19 & 0.35 & 0.56 & 0.68 & 0.81 & 1.07 & 1021.97 & 1.00 \\ 
    \hline
 \end{tabular}
 \caption{\textbf{Summary of posterior distribution from model fit}. Each row is a coefficient defined in equation 2 (main text) with terminology as described in the text. Each column is a descriptor of the posterior distribution of that coefficient across all five chains, specifically: its mean, standard error, standard deviation, 2.5$^{th}$, \nth{25}, \nth{50} (median), \nth{75}, 97.5$^{th}$, number of effective samples, and the $\hat{r}$ estimator of chain convergence\cite{Gelman1992}.}
@@ -313,6 +314,20 @@ Here we provide the full Bayesian model coefficients and results of posterior pr
 \end{table}
 
 
+
+\clearpage
+
+\section{Contribution of Bayesian model terms to $R_t$}
+
+Here we provide a visualisation showing the influence of our various model terms on $R_t$ for each state through time (fig \ref{fig:multiplot}). When reductions in mobility are strong, $R_t$ is largely driven by the mobility terms in the model, however when mobility reductions are weak, temperature and population density are much greater drivers of $R_t$. See for example New York: when mobility was close to baseline in February and March, fluctuating temperatures cause large spikes in $R_t$, which is also generally driven upwards by the relatively high population density of the state. However, after stay-at-home measures were implemented, $R_t$ drops and closely tracks changes in mobility, with temperature fluctuations having much lesser an effect. This shows that although we don't explicitly model an interaction between environment and mobility, our model represents this effect. 
+
+
+\begin{figure}[ht]
+  \centering
+  \includegraphics[width=.9\linewidth]{figures/multiplot_figure.pdf}  
+  \caption{ {\bf Relative contribution of model terms driving changes in $R_t$ through time.} The black dotted line shows the ``basic \RO'' term, which is constant through time for all states. The dashed lines represent temperature (blue), population density (red), combined mobility reductions (orange) and the autoregressive term (purple) and show what $R_t$ would be estimated at if the model only considered each of these terms alone. The grey soild line shows the realised $R_t$ estimated by the model. Essentially this shows the relative contribution of the model terms in pulling $R_t$ away from the baseline \RO (black dotted) to the realised $R_t$ (grey soild).}
+\label{fig:multiplot}
+\end{figure}
 
 \clearpage
 \bibliographystyle{unsrtnat}

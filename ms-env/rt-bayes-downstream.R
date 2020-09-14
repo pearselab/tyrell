@@ -86,8 +86,7 @@ print("")
 print("Model coefficients for supplement:")
 xtable(summary(fit, pars=c("alpha","alpha_state","alpha_region","mu","env_time_slp","pop_slp"))$summary)
 
-## TS: New figure
-
+## Figure 3
 # just make 1 new col, then take the distribution, save the quantiles... and overwrite this each new temp/pop
 
 temp_seq <- seq(0.1, 5, 0.1)
@@ -170,3 +169,149 @@ fig3 <- ggplot(temp_results) +
 fig3
 
 ggsave("ms-env/US_bayes_plot.pdf", fig3)
+
+#####################################################
+# Supplementary plots comparing relative influence  #
+# of terms in Bayesian model on Rt                  #
+#####################################################
+
+main_theme <- theme_bw() + theme(axis.title = element_text(size = 14),
+                                 axis.text = element_text(size = 12),
+                                 title = element_text(size = 12))
+
+out <- rstan::extract(fit)
+
+# CHANGE THIS to set an alternative output directory for the plots
+outdir <- "ms-env/"
+
+make_plot <-  function(state, legend = FALSE){
+    
+    state_idx <- which(states == state)
+    region_idx <- stan_data$Region[state_idx]
+    
+    state_name <- read.csv("/imptf-models/covid19model-6.0/usa/data/states.csv")
+    
+    full_name <- state_name$State[which(state_name$Abbreviation == state)]
+    
+    date_state  <-  dates[[state_idx]]
+    
+    R0 <- as.matrix(out$mu)[,1]
+    tempcoef <- as.matrix(out$env_time_slp)[,1]
+    popcoef <- as.matrix(out$pop_slp)[,1]
+    
+    alpha_region <- out$alpha_region[, region_idx, ]
+    alpha_state <- out$alpha_state[, state_idx, ]
+    
+    X <- stan_data$X[state_idx, 1:length(date_state),]
+    X_region <- stan_data$X_partial_regional[state_idx, 1:length(date_state),]
+    X_state <- stan_data$X_partial_state[state_idx, 1:length(date_state),]
+    
+    alpha = data.frame(as.matrix(out$alpha))
+    colnames(alpha) = labels(terms(formula))
+    
+    Y <- stan_data$env_time[1:length(date_state), state_idx]
+    Z <- rep(stan_data$pop_dat[state_idx], length(date_state))
+    
+    temperature <- R0 + tempcoef %*% t(Y)
+    popdensity <- R0 + popcoef %*% t(Z)
+    
+    R0_intercept_temp <- rep(1, length(date_state))
+    R0_intercept <- R0 %*% t(R0_intercept_temp)
+    
+    # essentially calculate Rt based on a single term
+    # i.e. when all other terms are zero
+    
+    av_mob <- R0*(2*inv.logit(-alpha[,1] %*% t(X[,1]))) 
+    trans_mob <- R0*(2*inv.logit(-alpha[,2] %*% t(X[,2]))) 
+    res_mob <- R0*(2*inv.logit(-alpha[,3] %*% t(X[,3]))) 
+    
+    # all_rhs <- R0 * 2 * inv.logit(-alpha[,1]%*% t(X[,1]) -alpha[,2]%*% t(X[,2])
+    #                               -alpha[,3]%*% t(X[,3])
+    #             -alpha_region[,1] %*% t(X_region[,1]) -alpha_region[,2] %*% t(X_region[,2]) 
+    #             -alpha_state %*% t(X_state)
+    #             -week_data)
+    
+    all_mob <- R0 * 2 * inv.logit(-alpha[,1]%*% t(X[,1]) -alpha[,2]%*% t(X[,2])
+                                  -alpha[,3]%*% t(X[,3])
+                                  -alpha_region[,1] %*% t(X_region[,1]) -alpha_region[,2] %*% t(X_region[,2]) 
+                                  -alpha_state %*% t(X_state))
+    
+    intercept <- R0*2*inv.logit(-alpha_region[,1] %*% t(X_region[,1]))
+    av_mob_region <- R0*2*inv.logit(-alpha_region[,2] %*% t(X_region[,2]))
+    
+    av_mob_state <- R0*2*inv.logit(-alpha_state %*% t(X_state))
+    
+    weekly_effect = out$weekly_effect[,,state_idx]
+    week_idxs <- stan_data$week_index[state_idx, 1:length(date_state)]
+    
+    week_data <- NULL
+    for (i in 1:length(week_idxs)){
+        week_data <- cbind(week_data, weekly_effect[,week_idxs[i]])
+    }
+    week_data_trans <- R0*2 * inv.logit(-week_data)
+    
+    # all <- (R0 + tempcoef + popcoef) * 2 * 
+    #     inv.logit(-alpha[,1]%*% t(X[,1]) -alpha[,2]%*% t(X[,2]) 
+    #               -alpha_region[,1] %*% t(X_region[,1]) -alpha_region[,2] %*% t(X_region[,2]) 
+    #               -alpha_state %*% t(X_state)
+    #               -week_data)
+    Rt <-  out$Rt[, 1:length(date_state), state_idx]
+    
+    
+    df <- data.frame("dates" = date_state,
+                     "rt" = colMeans(Rt),
+                     "r0" = colMeans(R0_intercept),
+                     "temperature" = colMeans(temperature),
+                     "popdensity" = colMeans(popdensity),
+                     "allmob" = colMeans(all_mob),
+                     "ar" = colMeans(week_data_trans))
+    
+    
+    df_long <- gather(df, key = "trend" , value = "value", -dates)
+    
+    df_long$trend <- factor(df_long$trend,
+                            labels = c("Combined mobility", "Autoregressive term", "Population density",
+                                       expression(Basic~R[0]), expression(Overall~R[t]), "Temperature"))
+    df_long$trend <- factor(df_long$trend,
+                            levels = c(expression(Overall~R[t]), expression(Basic~R[0]), "Temperature", "Population density",
+                                       "Combined mobility", "Autoregressive term"))
+    
+    
+    p <- ggplot(df_long) + 
+        geom_line(aes(dates, value, group = trend, col = trend, linetype = trend),
+                  lwd = 1) + 
+        scale_color_manual(name = "",
+                           values = c("grey", "black", "blue", "red", "orange", "purple"),
+                           labels = c(expression(Overall~R[t]), expression(Basic~R[0]), "Temperature", "Population density",
+                                      "Combined mobility", "Autoregressive term")) +
+        scale_linetype_manual(name = "",
+                              values = c("solid", "dotted", "dashed", "dashed", "dashed", "dashed"),
+                              labels = c(expression(Overall~R[t]), expression(Basic~R[0]), "Temperature", "Population density",
+                                         "Combined mobility", "Autoregressive term")) +
+        labs(x ="", y = expression(Contribution~to~R[t]), title = full_name) +
+        main_theme
+    if(legend == FALSE){
+        p <- p + theme(legend.position = "none",
+                       aspect.ratio = 1)
+    } else{
+        p <- p + theme(legend.position = c(0.78, 0.82),
+                       legend.text.align = 0,
+                       legend.text = element_text(size = 14),
+                       aspect.ratio = 1)
+    }
+    
+    # return(p)
+    
+    # Save it as an svg file.
+    svg_file <- paste(outdir, gsub("/|#", "", state), ".pdf", sep="")
+    ggsave(filename = svg_file, plot = p, height = 6, width = 6)
+    
+}
+
+# first state with legend
+make_plot(states[1], legend = TRUE)
+
+# all other states without legends
+for (i in 2:length(states)) {
+    make_plot(states[i], legend = FALSE)
+}

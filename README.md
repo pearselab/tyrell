@@ -10,7 +10,7 @@ _If you are interested in reproducing the analysis within one of our manuscripts
 
 ## Quickstart - reproducing an analysis
 
-### Smith et al. (2020) DOI: XXX
+### Smith et al. (2020) DOI: 10.1101/2020.09.12.20193250
 To work with the data and outputs in our manuscript:
 
 1. Download this zip-file (XXX)
@@ -20,7 +20,7 @@ To work with the data and outputs in our manuscript:
    2. Independent regression scripts are in files starting with `r0-`.
    3. Semi-mechanistic model scripts and posterior distributions are in files starting with `rt-`.
 
-If you want to re-build everything (data and analyses) from scratch, follow the installation instructions below and then run `rake ms1_env_US`. Note that this will take several days even on a computer with 12 processor cores, and you are responsible for checking your Bayesian model outputs for validity. To run everything from scratch, you will need to carry out installation steps XXX below.
+If you want to re-build everything (data and analyses) from scratch, follow the installation instructions below and then run `rake ms1_env_US`. Note that this will take several days even on a computer with 12 processor cores, and you are responsible for checking your Bayesian model outputs for validity. To run everything from scratch, you will need to carry out installation steps 1-6 and 8 below.
 
 ## Installation
 Strictly, the only requirement of _Tyrell_ is Ruby, and if you only want to download case/mortality data that would be sufficient (step 1). If you want to conduct statistical analyses (e.g., reproduce a manuscript) you will need to install R (step 3), and if you want to process GIS data you will need to install Python (step 2) and (depending on the data you need) setup additional data options (steps 4 onwards).
@@ -73,7 +73,7 @@ Generally speaking, _Tyrell_ will try and do something and, if it can't because 
 
 ## Usage
 
-Open a terminal window and type `rake`. This will list the most commonly-used _Tyrell_ commands. _Tyrell_ is really just a reasonably large `Rakefile` (https://github.com/ruby/rake), meaning it is a series of nested dependencies. So if, for example, you want to reproduce Smith et al. (2020; DOI: XXX) by typing `rake ms1_env_US`, it will check what data are needed to run the analysis, what data you have already downloaded and processed, and then grab whatever new data you need. This makes it easy to use as a shared workflow: different people can work on different projects, each with shared data dependencies, and _Tyrell_ will keep track of everything for you.
+Open a terminal window and type `rake`. This will list the most commonly-used _Tyrell_ commands. _Tyrell_ is really just a reasonably large `Rakefile` (https://github.com/ruby/rake), meaning it is a series of nested dependencies. So if, for example, you want to reproduce Smith et al. (2020; DOI: [10.1101/2020.09.12.20193250](https://doi.org/10.1101/2020.09.12.20193250)) by typing `rake ms1_env_US`, it will check what data are needed to run the analysis, what data you have already downloaded and processed, and then grab whatever new data you need. This makes it easy to use as a shared workflow: different people can work on different projects, each with shared data dependencies, and _Tyrell_ will keep track of everything for you.
 
 A good first command is probably `rake dwn_data_cases`. This will download lots of case/mortality data for you, and put it in `raw-data`. As part of its setup process, _Tyrell_ will create new folders within itself to store data for you. It will also create a file called that `timestamp.yml` is updated every time new files are downloaded, time-stamping everything so you know what you're working with. If you come back to _Tyrell_ tomorrow and want to update everything on your computer, consider running `rake update_cases` to download the latest versions of all the case data. If you wanted to update one particular file, you could simply delete it from your computer and then run `rake dwn_data_cases` again - _Tyrell_ will notice that file is missing and will replace it with the latest version.
 
