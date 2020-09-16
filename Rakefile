@@ -77,7 +77,7 @@ task :dwn_data_cases => ["raw-data/cases", :raw_jhu, "raw-data/cases/ecdc-cases.
 desc "Download all raw data"
 task :dwn_data => [:before_dwn_data,
                    :dwn_data_cases,
-                   "raw-data/gis", "raw-data/gis/denvfoimap-raster.RDS", :raw_gadm, "raw-data/gis/cds-era5-temp-hourly.grib", "raw-data/gis/cds-era5-humid-hourly.grib", "raw-data/gis/cds-era5-uv-hourly.grib",
+                   "raw-data/gis", "raw-data/gis/denvfoimap-raster.RDS", :raw_gadm, "raw-data/gis/cds-era5-temp-hourly.grib", "raw-data/gis/cds-era5-humid-hourly.grib", "raw-data/gis/cds-era5-uv-hourly.grib", #"raw-data/gis/cds-cams-pm2pt5-hourly.grib",
                    "ext-data/", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif",
                    "raw-data/google-mobility.csv", "raw-data/USstatesCov19distancingpolicy.csv",
                    "raw-data/genetic", :raw_nxtstr, :raw_imptfmods, "raw-data/rambaut-nomenclature"]
@@ -87,7 +87,7 @@ end
 
 # Clean data
 desc "Clean (process) all raw data"
-task :cln_data => [:before_cln_data, :cln_gadm, :cln_denvfoi_rasters, :cln_worldclim, :cln_cdsear5_hourly, :delete_cdsear5_hourly, :cln_cdsear5_daily, :cln_gpw_popdens, :join_R_climate]
+task :cln_data => [:before_cln_data, :cln_gadm, :cln_denvfoi_rasters, :cln_worldclim, :cln_cdsear5_hourly, :delete_cdsear5_hourly, :cln_cdsear5_daily, :cln_cdsear5_daily_weighted, :cln_gpw_popdens, :join_R_climate]
 task :before_cln_data do
   puts "\t ... Processing raw data"
 end
@@ -101,6 +101,7 @@ task :save_space do
     (FileUtils.rm "cds-era5-temp-hourly.grib") rescue {}
     (FileUtils.rm "cds-era5-humid-hourly.grib") rescue {}
     (FileUtils.rm "cds-era5-uv-hourly.grib") rescue {}
+    (FileUtils.rm "cds-cams-pm2pt5-hourly.grib") rescue {}
     (FileUtils.rm Dir["gadm36*"]) rescue {}
   end
 end
