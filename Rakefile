@@ -18,7 +18,7 @@ task :default => :help
 desc "Tyrell command overview"
 task :help do
   puts "Tyrell - COVID-19 data/analysis management software"
-  puts "\t\t\t\t\t\t\thttps://github.com/pearselab/tyrell"  
+  puts "\t\t\t\t\thttps://github.com/pearselab/tyrell"  
   puts "Useful commands:"
   puts "  rake install         - Setup Tyrell dependencies"
   puts "  rake ms1_env_us      - Repeat Smith et al. 2020 (DOI)"

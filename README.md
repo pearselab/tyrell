@@ -13,12 +13,13 @@ _If you are interested in reproducing the analysis within one of our manuscripts
 ### Smith et al. (2020) DOI: 10.1101/2020.09.12.20193250
 To work with the data and outputs in our manuscript:
 
-1. Download this zip-file (XXX)
-2. Unzip it on your computer
+1. Download this zip-file (https://www.dropbox.com/s/pc41n0k3nps86ff/tyrell-ms1envus-Smith2020etal-20200916.zip?dl=0).
+2. Unzip it on your computer.
 3. The folder `ms-env` contains everything you need: 
    1. Data are in the folder `clean-data`.
    2. Independent regression scripts are in files starting with `r0-`.
    3. Semi-mechanistic model scripts and posterior distributions are in files starting with `rt-`.
+4. (Optional) This file (https://www.dropbox.com/s/8kakwt67zi0s2cg/rt-bayes-27082020-0358.Rdata?dl=0) contains the workspace from the Bayesian run used in the manuscript. It is 4.1Gb in size, but is available for download if you wish.
 
 If you want to re-build everything (data and analyses) from scratch, follow the installation instructions below and then run `rake ms1_env_US`. Note that this will take several days even on a computer with 12 processor cores, and you are responsible for checking your Bayesian model outputs for validity. To run everything from scratch, you will need to carry out installation steps 1-6 and 8 below.
 
