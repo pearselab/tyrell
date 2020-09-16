@@ -36,7 +36,7 @@ end
 file "clean-data/denvfoimap-rasters-countries.csv" do denvfoimap_rasters() end
 file "clean-data/denvfoimap-rasters-states.csv" do denvfoimap_rasters() end
 
-desc "Pre-process CDS-EAR5 hourly temperature/humidity/uv data"
+desc "Pre-process CDS-EAR5 hourly temperature/humidity/uv/pm2.5 data"
 task :cln_cdsear5_hourly => ["raw-data/gis/cds-era5-humid-dailymean.grib", "raw-data/gis/cds-era5-temp-dailymean.grib", "raw-data/gis/cds-era5-uv-dailymean.grib"]
 file "raw-data/gis/cds-era5-humid-dailymean.grib" => "raw-data/gis/cds-era5-humid-hourly.grib" do
   `cdo daymean raw-data/gis/cds-era5-humid-hourly.grib raw-data/gis/cds-era5-humid-dailymean.grib`
@@ -50,6 +50,11 @@ file "raw-data/gis/cds-era5-uv-dailymean.grib" => "raw-data/gis/cds-era5-uv-hour
   `cdo daymean raw-data/gis/cds-era5-uv-hourly.grib raw-data/gis/cds-era5-uv-dailymean.grib`
   date_metadata "raw-data/gis/cds-era5-uv-dailymean.grib"
 end
+# not running until I can get the api download to work
+#~ file "raw-data/gis/cds-cams-pm2pt5-dailymean.grib" => "raw-data/gis/cds-cams-pm2pt5-hourly.grib" do
+  #~ `cdo daymean raw-data/gis/cds-cams-pm2pt5-hourly.grib raw-data/gis/cds-cams-pm2pt5-dailymean.grib`
+  #~ date_metadata "raw-data/gis/cds-cams-pm2pt5-dailymean.grib"
+#~ end
 
 desc "Clean and process CDS-EAR5 mean daily temperature/humidity/uv data"
 task :cln_cdsear5_daily => ["clean-data/temp-dailymean-countries.RDS","clean-data/temp-dailymean-states.RDS","clean-data/humid-dailymean-countries.RDS","clean-data/humid-dailymean-states.RDS","clean-data/uv-dailymean-countries.RDS","clean-data/uv-dailymean-states.RDS"]
@@ -69,6 +74,29 @@ file "clean-data/humid-dailymean-states.RDS" => ["raw-data/gis/cds-era5-humid-da
 file "clean-data/uv-dailymean-countries.RDS" => ["raw-data/gis/cds-era5-uv-dailymean.grib"]+shp_fls("clean-data/gadm-countries",true) do cln_cdsear5_daily() end
 file "clean-data/uv-dailymean-states.RDS" => ["raw-data/gis/cds-era5-uv-dailymean.grib"]+shp_fls("clean-data/gadm-states",true) do cln_cdsear5_daily() end
 
+
+desc "Clean and process CDS daily climate data, using population-weighted means"
+task :cln_cdsear5_daily_weighted => ["clean-data/temp-dailymean-countries-popweighted.RDS","clean-data/temp-dailymean-states-popweighted.RDS","clean-data/humid-dailymean-countries-popweighted.RDS","clean-data/humid-dailymean-states-popweighted.RDS","clean-data/uv-dailymean-countries-popweighted.RDS","clean-data/uv-dailymean-states-popweighted.RDS", "clean-data/pm2pt5-dailymean-countries-popweighted.RDS", "clean-data/pm2pt5-dailymean-states-popweighted.RDS"]
+def cln_cdsear5_daily_weighted()
+  `Rscript src/clean-cds-weighted.R`
+  date_metadata "clean-data/temp-dailymean-countries-popweighted.RDS"
+  date_metadata "clean-data/temp-dailymean-states-popweighted.RDS"
+  date_metadata "clean-data/humid-dailymean-countries-popweighted.RDS"
+  date_metadata "clean-data/humid-dailymean-states-popweighted.RDS"
+  date_metadata "clean-data/uv-dailymean-countries-popweighted.RDS"
+  date_metadata "clean-data/uv-dailymean-states-popweighted.RDS"
+  date_metadata "clean-data/pm2pt5-dailymean-countries-popweighted.RDS"
+  date_metadata "clean-data/pm2pt5-dailymean-states-popweighted.RDS"
+end
+file "clean-data/temp-dailymean-countries-popweighted.RDS" => ["raw-data/gis/cds-era5-temp-dailymean.grib"]+shp_fls("clean-data/gadm-countries",true) do cln_cdsear5_daily() end
+file "clean-data/temp-dailymean-states-popweighted.RDS" => ["raw-data/gis/cds-era5-temp-dailymean.grib"]+shp_fls("clean-data/gadm-states",true) do cln_cdsear5_daily() end
+file "clean-data/humid-dailymean-countries-popweighted.RDS" => ["raw-data/gis/cds-era5-humid-dailymean.grib"]+shp_fls("clean-data/gadm-countries",true) do cln_cdsear5_daily() end
+file "clean-data/humid-dailymean-states-popweighted.RDS" => ["raw-data/gis/cds-era5-humid-dailymean.grib"]+shp_fls("clean-data/gadm-states",true) do cln_cdsear5_daily() end
+file "clean-data/uv-dailymean-countries-popweighted.RDS" => ["raw-data/gis/cds-era5-uv-dailymean.grib"]+shp_fls("clean-data/gadm-countries",true) do cln_cdsear5_daily() end
+file "clean-data/uv-dailymean-states-popweighted.RDS" => ["raw-data/gis/cds-era5-uv-dailymean.grib"]+shp_fls("clean-data/gadm-states",true) do cln_cdsear5_daily() end
+file "clean-data/pm2pt5-dailymean-countries-popweighted.RDS" => ["ext-data/ads-cams-pm2pt5-dailymean.grib"]+shp_fls("clean-data/gadm-countries",true) do cln_cdsear5_daily() end
+file "clean-data/pm2pt5-dailymean-states-popweighted.RDS" => ["ext-data/ads-cams-pm2pt5-dailymean.grib"]+shp_fls("clean-data/gadm-states",true) do cln_cdsear5_daily() end
+# ext-data will be raw-data/gis/ when I fix the api script
 
 desc "Clean and process NASA GPW population density data"
 task :cln_gpw_popdens => ["clean-data/population-density-countries.RDS","clean-data/population-density-states.RDS"]

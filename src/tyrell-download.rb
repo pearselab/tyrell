@@ -121,6 +121,13 @@ file "raw-data/gis/cds-era5-uv-hourly.grib" do
   date_metadata "raw-data/gis/cds-era5-uv-hourly.grib"
 end
 
+# This doesn't work yet (!)
+#~ desc "Get hourly CDS-CAMS PM 2.5 data"
+#~ file "raw-data/gis/cds-cams-pm2pt5-hourly.grib" do
+  #~ Dir.chdir("raw-data/gis") do `python3 ../../src/cds-cams-pm2pt5.py` end
+  #~ date_metadata "raw-data/gis/cds-cams-pm2pt5-hourly.grib"
+#~ end
+
 desc "Get NASA GPW 30s population density data - large file, 300mb"
 file "ext-data/gpw_v4_population_density_rev11_2020_2pt5_min.tif" do
   puts "To get a missing external data dependency:"
