@@ -87,7 +87,7 @@ end
 
 # Clean data
 desc "Clean (process) all raw data"
-task :cln_data => [:before_cln_data, :cln_gadm, :cln_denvfoi_rasters, :cln_worldclim, :cln_cdsear5_hourly, :delete_cdsear5_hourly, :cln_cdsear5_daily, :cln_cdsear5_daily_weighted, :cln_gpw_popdens, :join_R_climate]
+task :cln_data => [:before_cln_data, :cln_gadm, :cln_denvfoi_rasters, :cln_worldclim, :cln_cdsear5_hourly, :cln_cdsear5_daily, :cln_cdsear5_daily_weighted, :cln_gpw_popdens, :join_R_climate]
 task :before_cln_data do
   puts "\t ... Processing raw data"
 end
