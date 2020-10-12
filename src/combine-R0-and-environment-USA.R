@@ -155,12 +155,28 @@ USA_states_popdensity$State <- gsub("US.", "", US_data$HASC_1)
 climate_data <- merge(climate_data, USA_states_popdensity, by.x = "State", by.y = "State")
 
 
-# 6. Merge Rt and climate data
+# 6. add in urban population (2010 census)
+# download is here: https://www.icip.iastate.edu/sites/default/files/uploads/tables/population/pop-urban-pct-historical.xls
+
+# urban_pop_data <- read.xls("~/Documents/COVID/testing/pop-urban-pct-historical.xls", pattern = "FIPS", sheet = 2)
+urban_pop_data <- read.xls("raw-data/pop-urban-pct-historical.xls", pattern = "FIPS", sheet = 2)
+urban_pop_data <- urban_pop_data[,c("Area.Name", "X2010")]
+names(urban_pop_data) <- c("State_name", "Urban_pop")
+# match 2-letter state codes to state names
+urban_pop_data$State <- mapply(function(x) gsub("US.", "", US_data[US_data$NAME_1 == x,]$HASC_1), urban_pop_data$State_name)
+
+climate_data <- merge(climate_data, urban_pop_data[,c("Urban_pop", "State")], by.x = "State", by.y = "State")
+
+# 7. Merge Rt and climate data
 
 USA_Rt <- merge(USA_Rt, climate_data, by.x = c("state", "date"), by.y = c("State", "date"))
 
+# 8. Pull in the airport data for later
 
-# 7. Get R0 and Rt data and estimate climate variables according to dates of estimates
+airport_data <- read.csv("clean-data/airport_data.csv")
+airport_data$Date <- as.Date(as.character(airport_data$Date))
+
+# 9. Get R0 and Rt data and estimate climate variables according to dates of estimates
 
 # for each state, take R(t=0) as R0
 USA_R0 <- data.frame(USA_Rt %>% 
@@ -182,6 +198,7 @@ USA_R0$relative_humidity <- NA
 USA_R0$absolute_humidity <- NA
 USA_R0$uv <- NA
 USA_R0$avg_mobility_change <- NA
+USA_R0$airport_arrivals <- NA
 
 if(FALSE){
 for(i in 1:length(states_list)){
@@ -219,11 +236,23 @@ for(i in 1:length(states_list)){ # unweighted mean
   USA_R0[USA_R0$state == states_list[i],]$absolute_humidity <- mean(state_temp$absolute_humidity, na.rm = TRUE)
   USA_R0[USA_R0$state == states_list[i],]$uv <- mean(state_temp$uv, na.rm = TRUE)
   USA_R0[USA_R0$state == states_list[i],]$avg_mobility_change <- mean(state_mob$average_mobility_change, na.rm = TRUE)
+  # also get airport data in here
+  state_airports <- airport_data[airport_data$State == states_list[i] &
+                                   airport_data$Date >= t-14 &
+                                   airport_data$Date <= t,]
+  # check if the state actually has any airports, else give it zero
+  if(nrow(state_airports) > 0){
+    USA_R0[USA_R0$state == states_list[i],]$airport_arrivals <- sum(state_airports$Scheduled_Arrivals)
+  }
+  else{
+    USA_R0[USA_R0$state == states_list[i],]$airport_arrivals <- 0
+  }
 }
 
-USA_R0 <- USA_R0[,c("state", "mean_time_varying_reproduction_number_R.t.", "temperature", "absolute_humidity", "uv", "Pop_density",
-                    "average_mobility_change")]
-names(USA_R0) <- c("State", "R0", "Temperature", "Absolute_Humidity", "UV", "Pop_density", "Avg_mobility_change")
+USA_R0 <- USA_R0[,c("state", "date", "mean_time_varying_reproduction_number_R.t.", "temperature", "absolute_humidity", "uv", "Pop_density",
+                    "Urban_pop", "average_mobility_change", "airport_arrivals")]
+names(USA_R0) <- c("State", "Date", "R0", "Temperature", "Absolute_Humidity", "UV", "Pop_density", "Urban_pop", "Avg_mobility_change",
+                   "Airport_arrivals")
 
 
 
@@ -238,7 +267,9 @@ humidity <- c()
 uv <- c()
 state <- c()
 pop_density <- c()
+urban_pop <- c()
 mobility_change <- c()
+airport_arrivals <- c()
 
 for(i in 1:length(states_list)){
   state_subs <- USA_Rt[USA_Rt$state == states_list[i],]
@@ -251,12 +282,24 @@ for(i in 1:length(states_list)){
   humidity <- c(humidity, mean(Rt_window$absolute_humidity))
   uv <- c(uv, mean(Rt_window$uv))
   pop_density <- c(pop_density, unique(Rt_window$Pop_density))
+  urban_pop <- c(urban_pop, unique(Rt_window$Urban_pop))
   mobility_change <- c(mobility_change, mean(Rt_window$average_mobility_change))
   state <- c(state, states_list[i])
+  state_airports <- airport_data[airport_data$State == states_list[i] &
+                                   airport_data$Date >= t_min &
+                                   airport_data$Date <= t_max,]
+  # check if the state actually has any airports, else give it zero
+  if(nrow(state_airports) > 0){
+    airport_arrivals <- c(airport_arrivals, sum(state_airports$Scheduled_Arrivals))
+  }
+  else{
+    airport_arrivals <- c(airport_arrivals, 0)
+  }
 }
 
-USA_Rt_df <- data.frame(Rt, temperature, humidity, uv, state, pop_density, mobility_change)
-names(USA_Rt_df) <- c("Rt", "Temperature", "Absolute_Humidity", "UV", "State", "Pop_density", "Avg_mobility_change")
+USA_Rt_df <- data.frame(Rt, temperature, humidity, uv, state, pop_density, urban_pop, mobility_change, airport_arrivals)
+names(USA_Rt_df) <- c("Rt", "Temperature", "Absolute_Humidity", "UV", "State", "Pop_density", "Urban_pop", "Avg_mobility_change",
+                      "Airport_arrivals")
 
 names(USA_Rt)[11] <- "Rt"
 

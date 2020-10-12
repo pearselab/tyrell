@@ -155,6 +155,8 @@ R0_3d <- plot_ly() %>%
                                    tickfont = list(size = 15)),
                       zaxis = list(title = "", range = c(0, 4), autotick = F, tickmode = "array", tickvals = c(1, 2, 3, 4),
                                    tickfont = list(size = 15))))
+# In a really stupid method to get higher quality images from this
+# I'm taking a screenshot with GIMP and saving that as a tif!
 # R0_3d
 
 # repeat for Rt data
@@ -270,7 +272,43 @@ summary(interaction_lm_mobility)
 
 print("Anova; is interaction model better than additive model?")
 anova(additive_lm_mobility, interaction_lm_mobility)
+# this is circular because mobility already goes into the model used to generate Rt in the first place
 }
+
+
+# ---- What if transmission mostly happens in urban populations, ---- #
+# ---- so state-wide pop density is maybe less meaningful?       ---- #
+
+urban_lm <- lm(R0 ~ Temperature + Pop_density + Urban_pop, USA_R0_data)
+summary(urban_lm)
+
+urban_lm <- lm(R0 ~ Temperature + Pop_density*Urban_pop, USA_R0_data)
+summary(urban_lm)
+
+urban_lm <- lm(R0 ~ scale(Temperature) + scale(Urban_pop), USA_R0_data)
+summary(urban_lm)
+# this is a worse predictor than population density at state level
+
+
+# ---- Does the date R0 was estimated on have an effect? i.e. did states ---- #
+# ---- where the pandemic emerged later learn from the earlier states?   ---- #
+
+ggplot(USA_R0_data, aes(x = as.Date(Date), y = R0)) + geom_point() + geom_smooth(method = lm)
+summary(lm(R0 ~ as.Date(Date), USA_R0_data))
+
+# date has no effect on R0, but we can also check whether mobility was reduced already in later onset states
+
+ggplot(USA_R0_data, aes(x = as.Date(Date), y = Avg_mobility_change)) + geom_point() + geom_smooth(method = lm)
+summary(lm(Avg_mobility_change ~ as.Date(Date), USA_R0_data))
+# thats weird - later onset states INCREASED their mobility???!
+# does it relate to the R0?
+
+ggplot(USA_R0_data, aes(x = Avg_mobility_change, y = R0)) + geom_point() + geom_smooth(method = lm)
+summary(lm(R0 ~ Avg_mobility_change, USA_R0_data))
+# not significant
+
+# or should the question be whether date should be another covariate in the model?
+
 
 # ---- Does the date when state-wide emergency decrees were implemented matter? ---- #
 
