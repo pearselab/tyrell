@@ -78,9 +78,12 @@ desc "Download all raw data"
 task :dwn_data => [:before_dwn_data,
                    :dwn_data_cases,
                    "raw-data/gis", "raw-data/gis/denvfoimap-raster.RDS", :raw_gadm, "raw-data/gis/cds-era5-temp-hourly.grib", "raw-data/gis/cds-era5-humid-hourly.grib", "raw-data/gis/cds-era5-uv-hourly.grib", #"raw-data/gis/cds-cams-pm2pt5-hourly.grib",
+                   "raw-data/gis/NUTS_Level_1__January_2018__Boundaries", "raw-data/gis/Local_Authority_Districts__December_2019__Boundaries_UK_BFC",
+                   "raw-data/UK-population.xls",
                    "ext-data/", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif",
                    "raw-data/google-mobility.csv", "raw-data/USstatesCov19distancingpolicy.csv",
                    "raw-data/genetic", :raw_nxtstr, :raw_imptfmods, "raw-data/rambaut-nomenclature"]
+                   
 task :before_dwn_data do
   puts "\t ... Downloading raw data (can take a long time)"
 end

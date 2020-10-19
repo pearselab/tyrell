@@ -1,14 +1,19 @@
-# test out averaging climate over UK regions
-setwd("~/Documents/Tyrell/")
+# average climate across UK regions
 
 source("src/packages.R")
 
-# alternative dataset of the UK boundaries at:
+# dataset of the UK regional boundaries at:
 # https://geoportal.statistics.gov.uk/datasets/nuts-level-1-january-2018-boundaries?geometry=-85.320%2C45.849%2C76.486%2C63.326&layer=0
 # direct download link here:
 # https://opendata.arcgis.com/datasets/01fd6b2d7600446d8af768005992f76a_0.zip?outSR=27700
 
-UK <- shapefile("~/Documents/COVID/testing/NUTS_Level_1__January_2018__Boundaries.shp")
+# dataset of local authority boundaries here:
+# https://geoportal.statistics.gov.uk/datasets/1d78d47c87df4212b79fe2323aae8e08_0
+# direct dl link:
+# https://opendata.arcgis.com/datasets/1d78d47c87df4212b79fe2323aae8e08_0.zip?outSR=%7B%22latestWkid%22%3A27700%2C%22wkid%22%3A27700%7D
+
+
+UK <- shapefile("raw-data/gis/NUTS_Level_1__January_2018__Boundaries.shp")
 
 # climate data
 days <- as.character(as.Date("2020-01-01") + 0:243)
@@ -35,7 +40,7 @@ UK_reproj <- spTransform(UK, temp[[1]]$crs)
 
 UK.temp <- .avg.wrapper(temp, UK_reproj)
 UK.humid <- .avg.wrapper(humid, UK_reproj)
-UK.uv <- .avg.wrapper(uv, USA)
+UK.uv <- .avg.wrapper(uv, UK_reproj)
 
 dimnames(UK.temp) <- list(
   UK$nuts118nm,
@@ -51,6 +56,6 @@ dimnames(UK.uv) <- list(
 )
 
 
-saveRDS(UK.temp, "clean-data/temp-UK.RDS")
-saveRDS(UK.humid, "clean-data/humid-UK.RDS")
-saveRDS(UK.uv, "clean-data/uv-UK.RDS")
+saveRDS(UK.temp, "clean-data/temp-UK-NUTS.RDS")
+saveRDS(UK.humid, "clean-data/humid-UK-NUTS.RDS")
+saveRDS(UK.uv, "clean-data/uv-UK-NUTS.RDS")

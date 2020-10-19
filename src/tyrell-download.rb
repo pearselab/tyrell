@@ -157,6 +157,23 @@ end
 desc "Get google mobility data"
 file "raw-data/google-mobility.csv" do dwn_file("raw-data", "https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv", "google-mobility.csv") end
 
+# UK NUTs regions shapefile
+desc "Download UK NUTs regions shapefile"
+file "raw-data/gis/NUTS_Level_1__January_2018__Boundaries" do
+  Dir.chdir "raw-data/gis" do
+    unzip(stream_file("https://opendata.arcgis.com/datasets/01fd6b2d7600446d8af768005992f76a_0.zip?outSR=27700", "UK-NUTS.zip"))
+    FileUtils.rm "UK-NUTS.zip"
+  end
+end
+
+# UK local authorities shapefile
+desc "Download UK local authorities shapefile"
+file "raw-data/gis/Local_Authority_Districts__December_2019__Boundaries_UK_BFC" do
+  Dir.chdir "raw-data/gis" do
+    unzip(stream_file("https://opendata.arcgis.com/datasets/1d78d47c87df4212b79fe2323aae8e08_0.zip?outSR=%7B%22latestWkid%22%3A27700%2C%22wkid%22%3A27700%7D", "UK-UTLA.zip"))
+    FileUtils.rm "UK-UTLA.zip"
+  end
+end
 
 ################################
 # Genetic ######################
@@ -269,3 +286,6 @@ directory "raw-data/rambaut-nomenclature" do
   end
   date_metadata("raw-data/rambaut-nomenclature")
 end
+
+desc "Get UK population data"
+file "raw-data/UK-population.xls" do dwn_file("raw-data", "https://www.ons.gov.uk/file?uri=%2fpeoplepopulationandcommunity%2fpopulationandmigration%2fpopulationestimates%2fdatasets%2fpopulationestimatesforukenglandandwalesscotlandandnorthernireland%2fmid2019april2020localauthoritydistrictcodes/ukmidyearestimates20192020ladcodes.xls", "UK-population.xls") end
