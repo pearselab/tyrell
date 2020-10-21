@@ -12,8 +12,8 @@ source("src/packages.R")
 # direct dl link:
 # https://opendata.arcgis.com/datasets/1d78d47c87df4212b79fe2323aae8e08_0.zip?outSR=%7B%22latestWkid%22%3A27700%2C%22wkid%22%3A27700%7D
 
-
-UK <- shapefile("raw-data/gis/NUTS_Level_1__January_2018__Boundaries.shp")
+UK_NUTS <- shapefile("raw-data/gis/NUTS_Level_1__January_2018__Boundaries.shp")
+UK_LTLA <- shapefile("raw-data/gis/Local_Authority_Districts__December_2019__Boundaries_UK_BFC.shp")
 
 # climate data
 days <- as.character(as.Date("2020-01-01") + 0:243)
@@ -36,26 +36,51 @@ uv <- lapply(seq_along(days), function(i, sp.df) velox(raster::rotate(raster(.dr
 }
 
 # get the UK spatial data into the correct projection
-UK_reproj <- spTransform(UK, temp[[1]]$crs)
+UK_NUTS_reproj <- spTransform(UK_NUTS, temp[[1]]$crs)
+UK_LTLA_reproj <- spTransform(UK_LTLA, temp[[1]]$crs)
 
-UK.temp <- .avg.wrapper(temp, UK_reproj)
-UK.humid <- .avg.wrapper(humid, UK_reproj)
-UK.uv <- .avg.wrapper(uv, UK_reproj)
+# do the climate averaging
+UK_NUTS.temp <- .avg.wrapper(temp, UK_NUTS_reproj)
+UK_NUTS.humid <- .avg.wrapper(humid, UK_NUTS_reproj)
+UK_NUTS.uv <- .avg.wrapper(uv, UK_NUTS_reproj)
 
-dimnames(UK.temp) <- list(
-  UK$nuts118nm,
+UK_LTLA.temp <- .avg.wrapper(temp, UK_LTLA_reproj)
+UK_LTLA.humid <- .avg.wrapper(humid, UK_LTLA_reproj)
+UK_LTLA.uv <- .avg.wrapper(uv, UK_LTLA_reproj)
+
+# give names
+dimnames(UK_NUTS.temp) <- list(
+  UK_NUTS$nuts118nm,
   days
 )
-dimnames(UK.humid) <- list(
-  UK$nuts118nm,
+dimnames(UK_NUTS.humid) <- list(
+  U_NUTSK$nuts118nm,
   days
 )
-dimnames(UK.uv) <- list(
-  UK$nuts118nm,
+dimnames(UK_NUTS.uv) <- list(
+  UK_NUTS$nuts118nm,
+  days
+)
+
+dimnames(UK_LTLA.temp) <- list(
+  UK_LTLA$lad19nm,
+  days
+)
+dimnames(UK_LTLA.humid) <- list(
+  UK_LTLA$lad19nm,
+  days
+)
+dimnames(UK_LTLA.uv) <- list(
+  UK_LTLA$lad19nm,
   days
 )
 
 
-saveRDS(UK.temp, "clean-data/temp-UK-NUTS.RDS")
-saveRDS(UK.humid, "clean-data/humid-UK-NUTS.RDS")
-saveRDS(UK.uv, "clean-data/uv-UK-NUTS.RDS")
+
+saveRDS(UK_NUTS.temp, "clean-data/temp-UK-NUTS.RDS")
+saveRDS(UK_NUTS.humid, "clean-data/humid-UK-NUTS.RDS")
+saveRDS(UK_NUTS.uv, "clean-data/uv-UK-NUTS.RDS")
+
+saveRDS(UK_LTLA.temp, "clean-data/temp-UK-LTLA.RDS")
+saveRDS(UK_LTLA.humid, "clean-data/humid-UK-LTLA.RDS")
+saveRDS(UK_LTLA.uv, "clean-data/uv-UK-LTLA.RDS")
