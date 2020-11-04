@@ -249,6 +249,12 @@ file "raw-data/USstatesCov19distancingpolicy.csv" => ["imptf-models/covid19model
   date_metadata("raw-data/USstatesCov19distancingpolicy.csv")
 end
 
+desc "Copy USA population data from imp model 6"
+file "raw-data/usa-regions.csv" => ["imptf-models/covid19model-6.0"] do
+  FileUtils.cp "imptf-models/covid19model-6.0/usa/data/usa-regions.csv", "raw-data/"
+  date_metadata("raw-data/usa-regions.csv")
+end
+
 
 ################################
 # Miscellaneous ################

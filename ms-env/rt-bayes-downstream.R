@@ -20,6 +20,7 @@ rm(env,pop,meta,processed_data)
 
 # Get raw coefficients and then back-transform, thne neaten and merge data
 load(paste0("ms-env/rt-bayes-",file_datestamp,".Rdata"))
+r0 <- unlist(rstan::extract(fit, "mu"))
 env <- unlist(rstan::extract(fit, "env_time_slp"))
 pop <- unlist(rstan::extract(fit, "pop_slp"))
 average <- unlist(rstan::extract(fit, "alpha[1]"))
@@ -169,6 +170,35 @@ fig3 <- ggplot(temp_results) +
 fig3
 
 ggsave("ms-env/US_bayes_plot.pdf", fig3)
+
+
+#####################################################
+# Supplementary figure showing the distributions of #
+# the posterior probabilities of main coefficients  #
+#####################################################
+
+supp_data <- data.frame(
+    r0, env, pop, average, transit, residential
+)
+
+posterior_plot <- mcmc_intervals(supp_data, prob_outer = 0.95) +
+    scale_y_discrete(limits = rev(c("r0", "env", "pop", "average", "transit", "residential")),
+    labels=c(
+        "r0" = expression(paste("Overall transmission (",mu, ")")),
+        "env" = expression(paste("Temperature (",c, ")")), 
+        "pop" =  expression(paste("Population density (",p, ")")),
+        "average" = expression(paste("Average mobility (",alpha[1], ")")), 
+        "transit" = expression(paste("Transit mobility (",alpha[2], ")")),
+        "residential" = expression(paste("Residential mobility (",alpha[3], ")"))
+    )) +
+    theme_bw() +
+    theme(axis.title.x = element_text(size = 18),
+          axis.text.x = element_text(size = 16),
+          axis.text.y = element_text(size = 16),
+          panel.grid.major.x = element_blank(),
+          panel.grid.minor.x = element_blank())
+
+ggsave("ms-env/posterior_plot.pdf", posterior_plot)
 
 #####################################################
 # Supplementary plots comparing relative influence  #

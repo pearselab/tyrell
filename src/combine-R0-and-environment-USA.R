@@ -95,6 +95,13 @@ USA_Rt <- merge(USA_Rt, stay_at_home[,c("StatePostal", "DateEnacted")], by.x = "
 names(USA_Rt)[19] <- "stay_at_home"
 USA_Rt$stay_at_home <- as.Date(as.character(USA_Rt$stay_at_home), "%Y%m%d")
 
+# also get the dates of the first 10 deaths
+
+date_first_ten <- readRDS("ext-data/dates_ten.RDS")
+names(date_first_ten)[2] <- "date_first_ten"
+USA_Rt <- merge(USA_Rt, date_first_ten, by.x = "state", by.y = "code")
+USA_Rt$date_first_ten <- as.Date(USA_Rt$date_first_ten)
+
 
 if(FALSE){ # can plot to see which states are already in lockdown when Rt is calculated
   
@@ -154,6 +161,10 @@ USA_states_popdensity$State <- gsub("US.", "", US_data$HASC_1)
 
 climate_data <- merge(climate_data, USA_states_popdensity, by.x = "State", by.y = "State")
 
+# and also total population
+
+states_population <- read.csv("raw-data/usa-regions.csv")
+climate_data <- merge(climate_data, states_population[,c("code", "pop_count")], by.x = "State", by.y = "code")
 
 # 6. add in urban population (2010 census)
 # download is here: https://www.icip.iastate.edu/sites/default/files/uploads/tables/population/pop-urban-pct-historical.xls
@@ -166,6 +177,7 @@ names(urban_pop_data) <- c("State_name", "Urban_pop")
 urban_pop_data$State <- mapply(function(x) gsub("US.", "", US_data[US_data$NAME_1 == x,]$HASC_1), urban_pop_data$State_name)
 
 climate_data <- merge(climate_data, urban_pop_data[,c("Urban_pop", "State")], by.x = "State", by.y = "State")
+climate_data$Total_urban_pop <- climate_data$pop_count*climate_data$Urban_pop*0.01
 
 # 7. Merge Rt and climate data
 
@@ -250,9 +262,10 @@ for(i in 1:length(states_list)){ # unweighted mean
 }
 
 USA_R0 <- USA_R0[,c("state", "date", "mean_time_varying_reproduction_number_R.t.", "temperature", "absolute_humidity", "uv", "Pop_density",
-                    "Urban_pop", "average_mobility_change", "airport_arrivals")]
-names(USA_R0) <- c("State", "Date", "R0", "Temperature", "Absolute_Humidity", "UV", "Pop_density", "Urban_pop", "Avg_mobility_change",
-                   "Airport_arrivals")
+                    "pop_count", "Urban_pop", "Total_urban_pop", "average_mobility_change", "airport_arrivals", "emergency_decree",
+                    "stay_at_home", "date_first_ten")]
+names(USA_R0) <- c("State", "Date", "R0", "Temperature", "Absolute_Humidity", "UV", "Pop_density", "Pop_count", "Urban_pop",
+                   "Total_urban_pop", "Avg_mobility_change", "Airport_arrivals", "Emergency_decree", "Stay_at_home", "Date_first_ten")
 
 
 
@@ -267,9 +280,14 @@ humidity <- c()
 uv <- c()
 state <- c()
 pop_density <- c()
+total_pop <- c()
 urban_pop <- c()
+urban_pop_total <- c()
 mobility_change <- c()
 airport_arrivals <- c()
+emerg_dec <- c()
+stay_home <- c()
+date_ten <- c()
 
 for(i in 1:length(states_list)){
   state_subs <- USA_Rt[USA_Rt$state == states_list[i],]
@@ -282,9 +300,14 @@ for(i in 1:length(states_list)){
   humidity <- c(humidity, mean(Rt_window$absolute_humidity))
   uv <- c(uv, mean(Rt_window$uv))
   pop_density <- c(pop_density, unique(Rt_window$Pop_density))
+  total_pop <- c(total_pop, unique(Rt_window$pop_count))
   urban_pop <- c(urban_pop, unique(Rt_window$Urban_pop))
+  urban_pop_total <- c(urban_pop_total, unique(Rt_window$Total_urban_pop))
   mobility_change <- c(mobility_change, mean(Rt_window$average_mobility_change))
   state <- c(state, states_list[i])
+  emerg_dec <- c(emerg_dec, unique(Rt_window$emergency_decree))
+  stay_home <- c(stay_home, unique(Rt_window$stay_at_home))
+  date_ten <- c(date_ten, unique(Rt_window$date_first_ten))
   state_airports <- airport_data[airport_data$State == states_list[i] &
                                    airport_data$Date >= t_min &
                                    airport_data$Date <= t_max,]
@@ -297,9 +320,10 @@ for(i in 1:length(states_list)){
   }
 }
 
-USA_Rt_df <- data.frame(Rt, temperature, humidity, uv, state, pop_density, urban_pop, mobility_change, airport_arrivals)
-names(USA_Rt_df) <- c("Rt", "Temperature", "Absolute_Humidity", "UV", "State", "Pop_density", "Urban_pop", "Avg_mobility_change",
-                      "Airport_arrivals")
+USA_Rt_df <- data.frame(Rt, temperature, humidity, uv, state, pop_density, total_pop, urban_pop, urban_pop_total, 
+                        mobility_change, airport_arrivals, emerg_dec, stay_home, date_ten)
+names(USA_Rt_df) <- c("Rt", "Temperature", "Absolute_Humidity", "UV", "State", "Pop_density", "Pop_count", "Urban_pop",
+                      "Total_urban_pop", "Avg_mobility_change", "Airport_arrivals", "Emergency_decree", "Stay_at_home", "Date_first_ten")
 
 names(USA_Rt)[11] <- "Rt"
 

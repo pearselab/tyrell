@@ -146,15 +146,15 @@ R0_3d <- plot_ly() %>%
             z = USA_R0_data$R0, 
             type = "scatter3d", 
             mode = "markers",
-            marker = list(color = "grey", size = 3,
+            marker = list(color = "grey", size = 5,
                           line = list(color = "black",width = 1)),
             opacity = 1) %>% 
-  layout(scene = list(xaxis = list(title = "", autorange = "reversed", tickfont = list(size = 15), type = "log",
+  layout(scene = list(xaxis = list(title = "", autorange = "reversed", tickfont = list(size = 20), type = "log",
                                    tickvals = c(10, 100, 1000)),
                       yaxis = list(title = "", autotick = F, tickmode = "array", tickvals = c(-5, 0, 5, 10, 15, 20), 
-                                   tickfont = list(size = 15)),
+                                   tickfont = list(size = 20)),
                       zaxis = list(title = "", range = c(0, 4), autotick = F, tickmode = "array", tickvals = c(1, 2, 3, 4),
-                                   tickfont = list(size = 15))))
+                                   tickfont = list(size = 20))))
 # In a really stupid method to get higher quality images from this
 # I'm taking a screenshot with GIMP and saving that as a tif!
 # R0_3d
@@ -176,14 +176,14 @@ Rt_3d <- plot_ly() %>%
             z = USA_Rt_data$Rt, 
             type = "scatter3d", 
             mode = "markers",
-            marker = list(color = "grey", size = 3,
+            marker = list(color = "grey", size = 5,
                           line = list(color = "black",width = 1)),
             opacity = 1) %>% 
-  layout(scene = list(xaxis = list(title = "", autorange = "reversed", tickfont = list(size = 15), type = "log",
+  layout(scene = list(xaxis = list(title = "", autorange = "reversed", tickfont = list(size = 20), type = "log",
                                    tickvals = c(10, 100, 1000)),
-                      yaxis = list(title = "", tickfont = list(size = 15)),
+                      yaxis = list(title = "", tickfont = list(size = 20)),
                       zaxis = list(title = "", range = c(0, 4), autotick = F, tickmode = "array", tickvals = c(1, 2, 3, 4),
-                                   tickfont = list(size = 15))),
+                                   tickfont = list(size = 20))),
                                    showlegend = FALSE) %>%
   hide_colorbar() 
 # Rt_3d
@@ -279,22 +279,33 @@ anova(additive_lm_mobility, interaction_lm_mobility)
 # ---- What if transmission mostly happens in urban populations, ---- #
 # ---- so state-wide pop density is maybe less meaningful?       ---- #
 
-urban_lm <- lm(R0 ~ Temperature + Pop_density + Urban_pop, USA_R0_data)
-summary(urban_lm)
-
-urban_lm <- lm(R0 ~ Temperature + Pop_density*Urban_pop, USA_R0_data)
-summary(urban_lm)
-
-urban_lm <- lm(R0 ~ scale(Temperature) + scale(Urban_pop), USA_R0_data)
-summary(urban_lm)
-# this is a worse predictor than population density at state level
-
+# correlation matrix of all
+print("Correlation matrix of population demographic predictors:")
+xtable(cor(data.frame(USA_R0_data$R0, log10(USA_R0_data$Pop_density), USA_R0_data$Urban_pop, log10(USA_R0_data$Pop_count), 
+               log10(USA_R0_data$Total_urban_pop))))
+# pop density is best by far
 
 # ---- Does the date R0 was estimated on have an effect? i.e. did states ---- #
 # ---- where the pandemic emerged later learn from the earlier states?   ---- #
 
-ggplot(USA_R0_data, aes(x = as.Date(Date), y = R0)) + geom_point() + geom_smooth(method = lm)
-summary(lm(R0 ~ as.Date(Date), USA_R0_data))
+date_plot <- ggplot(USA_R0_data, aes(x = as.Date(Date), y = R0)) +
+  geom_point(size = 3, shape = 21, aes(fill = Temperature)) + 
+  scale_fill_gradient2(low = "blue", mid = "white", high = "red", midpoint = 5) +
+  geom_smooth(method = lm, colour = "black") +
+  geom_text(aes(label = State), hjust = 0, vjust = 0, position = position_nudge(y = 0.02)) +
+  labs(x = "Date of estimate (2020)",
+       y = expression(R[0])) +
+  main_theme +
+  theme(aspect.ratio = 1)
+date_plot
+
+ggsave("figures/R0_date_plot.pdf", date_plot)
+
+date_lm <- (lm(R0 ~ as.Date(Date), USA_R0_data))
+summary(date_lm)
+
+date_temp_lm <- (lm(Temperature ~ as.Date(Date), USA_R0_data))
+summary(date_temp_lm)
 
 # date has no effect on R0, but we can also check whether mobility was reduced already in later onset states
 
@@ -307,18 +318,16 @@ ggplot(USA_R0_data, aes(x = Avg_mobility_change, y = R0)) + geom_point() + geom_
 summary(lm(R0 ~ Avg_mobility_change, USA_R0_data))
 # not significant
 
-# or should the question be whether date should be another covariate in the model?
-
 
 # ---- Does the date when state-wide emergency decrees were implemented matter? ---- #
 
 if(FALSE){
-summary(lm(R0 ~ as.Date(emergency_decree), data = USA_R0_data))
+summary(lm(R0 ~ as.Date(Emergency_decree), data = USA_R0_data))
 
-emergdec_plot <- ggplot(USA_R0_data, aes(x = as.Date(emergency_decree), y = R0)) + 
+emergdec_plot <- ggplot(USA_R0_data, aes(x = as.Date(Emergency_decree), y = R0)) + 
   geom_point(size = 2) +
   geom_smooth(method = lm, col = "black") +
-  geom_text(aes(label = Location), hjust = 0, vjust = 0, position = position_nudge(y = 0.02)) +
+  geom_text(aes(label = State), hjust = 0, vjust = 0, position = position_nudge(y = 0.02)) +
   labs(x = "Date of Emergency Decree",
        y = expression(R[0])) +
   main_theme +
@@ -333,12 +342,12 @@ vif(emergdec_lm)
 
 # date of first 10 deaths?
 
-summary(lm(R0 ~ as.Date(date_first_ten), data = USA_R0_data))
+summary(lm(R0 ~ as.Date(Date_first_ten), data = USA_R0_data))
 
-firstten_plot <- ggplot(USA_R0_data, aes(x = as.Date(date_first_ten), y = R0)) + 
+firstten_plot <- ggplot(USA_R0_data, aes(x = as.Date(Date_first_ten), y = R0)) + 
   geom_point(size = 2) +
   geom_smooth(method = lm, col = "black") +
-  geom_text(aes(label = Location), hjust = 0, vjust = 0, position = position_nudge(y = 0.02)) +
+  geom_text(aes(label = State), hjust = 0, vjust = 0, position = position_nudge(y = 0.02)) +
   labs(x = "Date of First 10 Deaths",
        y = expression(R[0])) +
   main_theme +
@@ -349,14 +358,14 @@ firstten_plot
 # - how early did they put out emergency decree
 # compared to their number of deaths
 
-USA_R0_data$preparedness <- as.Date(USA_R0_data$date_first_ten) - as.Date(USA_R0_data$emergency_decree)
+USA_R0_data$preparedness <- (as.Date(USA_R0_data$Date_first_ten) - as.Date(USA_R0_data$Emergency_decree))
 
 summary(lm(R0 ~ preparedness, data = USA_R0_data))
 
-preparedness_plot <- ggplot(USA_R0_data, aes(x =preparedness, y = R0)) + 
+preparedness_plot <- ggplot(USA_R0_data, aes(x = preparedness, y = R0)) + 
   geom_point(size = 2) +
   geom_smooth(method = lm, col = "black") +
-  geom_text(aes(label = Location), hjust = 0, vjust = 0, position = position_nudge(y = 0.02)) +
+  geom_text(aes(label = State), hjust = 0, vjust = 0, position = position_nudge(y = 0.02)) +
   labs(x = "Preparedness",
        y = expression(R[0])) +
   main_theme +
@@ -367,6 +376,24 @@ preparedness_lm <- lm(R0 ~ preparedness + February_20_TC + log10(Pop_density), d
 summary(preparedness_lm)
 vif(preparedness_lm)
 }
+
+
+## -- Airport arrivals -- ##
+
+airport_plot <- ggplot(USA_R0_data[USA_R0_data$Airport_arrivals > 0,], aes(x = log10(Airport_arrivals), y = R0)) +
+  geom_point(size = 2) + 
+  geom_smooth(method = lm, colour = "black") +
+  geom_text(aes(label = State), hjust = 0, vjust = 0, position = position_nudge(y = 0.02)) +
+  labs(x = "log10(Airport arrivals)",
+       y = expression(R[0])) +
+  main_theme +
+  theme(aspect.ratio = 1)
+airport_plot
+
+ggsave("figures/airport_plot.pdf", airport_plot)
+
+airport_lm <- lm(R0 ~ log10(Airport_arrivals), data = USA_R0_data[USA_R0_data$Airport_arrivals > 0,])
+summary(airport_lm)
 
 #
 #
@@ -387,7 +414,7 @@ names(us_state_list) <- c("state")
 
 # get residuals from the temp + pop density US model
 
-d$all_residuals <- residuals(lm(R0 ~ Temperature + log(Pop_density), data = d))
+d$all_residuals <- residuals(lm(R0 ~ Temperature + log10(Pop_density), data = d))
 # d$all_residuals <- residuals(lm(R0 ~ log(Pop_density), data = d))
 # d$all_residuals <- residuals(lm(R0 ~ Temperature, data = d))
 

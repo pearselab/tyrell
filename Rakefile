@@ -79,7 +79,7 @@ task :dwn_data => [:before_dwn_data,
                    :dwn_data_cases,
                    "raw-data/gis", "raw-data/gis/denvfoimap-raster.RDS", :raw_gadm, "raw-data/gis/cds-era5-temp-hourly.grib", "raw-data/gis/cds-era5-humid-hourly.grib", "raw-data/gis/cds-era5-uv-hourly.grib",
                    "ext-data/", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif",
-                   "raw-data/google-mobility.csv", "raw-data/USstatesCov19distancingpolicy.csv",
+                   "raw-data/google-mobility.csv", "raw-data/USstatesCov19distancingpolicy.csv", "raw-data/usa-regions.csv",
                    "raw-data/genetic", :raw_nxtstr, :raw_imptfmods, "raw-data/rambaut-nomenclature"]
 task :before_dwn_data do
   puts "\t ... Downloading raw data (can take a long time)"
