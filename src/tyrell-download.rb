@@ -170,8 +170,8 @@ end
 desc "Download UK local authorities shapefile"
 file "raw-data/gis/Local_Authority_Districts__December_2019__Boundaries_UK_BFC" do
   Dir.chdir "raw-data/gis" do
-    unzip(stream_file("https://opendata.arcgis.com/datasets/1d78d47c87df4212b79fe2323aae8e08_0.zip?outSR=%7B%22latestWkid%22%3A27700%2C%22wkid%22%3A27700%7D", "UK-UTLA.zip"))
-    FileUtils.rm "UK-UTLA.zip"
+    unzip(stream_file("https://opendata.arcgis.com/datasets/1d78d47c87df4212b79fe2323aae8e08_0.zip?outSR=%7B%22latestWkid%22%3A27700%2C%22wkid%22%3A27700%7D", "UK-LTLA.zip"))
+    FileUtils.rm "UK-LTLA.zip"
   end
 end
 

@@ -80,6 +80,16 @@ region_data <- get_paginated_data(filters = "areaType=region",
                                                    DailyDeaths = "newDeaths28DaysByDeathDate",
                                                    CumulativeDeaths = "cumDeaths28DaysByDeathDate"))
 
+# upper tier local authorities
+utla_data <- get_paginated_data(filters = "areaType=utla", 
+                                  structure = list(Date       = "date", 
+                                                   Name       = "areaName", 
+                                                   Code       = "areaCode", 
+                                                   DailyCases      = "newCasesByPublishDate",
+                                                   CumulativeCases = "cumCasesByPublishDate",
+                                                   DailyDeaths = "newDeaths28DaysByDeathDate",
+                                                   CumulativeDeaths = "cumDeaths28DaysByDeathDate"))
+
 # lower tier local authorities
 county_data <- get_paginated_data(filters = "areaType=ltla", 
                                   structure = list(Date       = "date", 
@@ -87,8 +97,8 @@ county_data <- get_paginated_data(filters = "areaType=ltla",
                                                    Code       = "areaCode", 
                                                    DailyCases      = "newCasesByPublishDate",
                                                    CumulativeCases = "cumCasesByPublishDate",
-                                                   DailyDeaths = "newDeaths28DaysByPublishDate",
-                                                   CumulativeDeaths = "cumDeaths28DaysByPublishDate"))
+                                                   DailyDeaths = "newDeaths28DaysByDeathDate",
+                                                   CumulativeDeaths = "cumDeaths28DaysByDeathDate"))
 
 # bind region and nation data together
 region_dataset <- rbind(nation_data, region_data)
@@ -106,8 +116,10 @@ merge_pop_data <- function(dataset){
 }
 
 region_dataset <- merge_pop_data(region_dataset)
+utla_data <- merge_pop_data(utla_data)
 county_data <- merge_pop_data(county_data)
 
 # write out the datasets
 write.csv(region_dataset, "raw-data/cases/uk-regional.csv", row.names = FALSE)
+write.csv(utla_data, "raw-data/cases/uk-utla.csv", row.names = FALSE)
 write.csv(county_data, "raw-data/cases/uk-ltla.csv", row.names = FALSE)
