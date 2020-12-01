@@ -21,7 +21,7 @@ To work with the data and outputs in our manuscript:
    3. Semi-mechanistic model scripts and posterior distributions are in files starting with `rt-`.
 4. (Optional) This file (https://www.dropbox.com/s/8kakwt67zi0s2cg/rt-bayes-27082020-0358.Rdata?dl=0) contains the workspace from the Bayesian run used in the manuscript. It is 4.1Gb in size, but is available for download if you wish.
 
-If you want to re-build everything (data and analyses) from scratch, follow the installation instructions below and then run `rake ms1_env_US`. Note that this will take several days even on a computer with 12 processor cores, and you are responsible for checking your Bayesian model outputs for validity. To run everything from scratch, you will need to carry out installation steps 1-6 and 8 below.
+If you want to re-build everything (data and analyses) from scratch, follow the installation instructions below and then run `rake ms1_env_US`. Note that this will take several days even on a computer with 12 processor cores, and you are responsible for checking your Bayesian model outputs for validity. To run everything from scratch, you will need to carry out installation steps 1-6 and 8-10 below.
 
 ## Installation
 Strictly, the only requirement of _Tyrell_ is Ruby, and if you only want to download case/mortality data that would be sufficient (step 1). If you want to conduct statistical analyses (e.g., reproduce a manuscript) you will need to install R (step 3), and if you want to process GIS data you will need to install Python (step 2) and (depending on the data you need) setup additional data options (steps 4 onwards).
