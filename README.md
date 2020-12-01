@@ -21,7 +21,7 @@ To work with the data and outputs in our manuscript:
    3. Semi-mechanistic model scripts and posterior distributions are in files starting with `rt-`.
 4. (Optional) This file (https://www.dropbox.com/s/8kakwt67zi0s2cg/rt-bayes-27082020-0358.Rdata?dl=0) contains the workspace from the Bayesian run used in the manuscript. It is 4.1Gb in size, but is available for download if you wish.
 
-If you want to re-build everything (data and analyses) from scratch, follow the installation instructions below and then run `rake ms1_env_US`. Note that this will take several days even on a computer with 12 processor cores, and you are responsible for checking your Bayesian model outputs for validity. To run everything from scratch, you will need to carry out installation steps 1-6 and 8 below.
+If you want to re-build everything (data and analyses) from scratch, follow the installation instructions below and then run `rake ms1_env_US`. Note that this will take several days even on a computer with 12 processor cores, and you are responsible for checking your Bayesian model outputs for validity. To run everything from scratch, you will need to carry out installation steps 1-6 and 8-10 below.
 
 ## Installation
 Strictly, the only requirement of _Tyrell_ is Ruby, and if you only want to download case/mortality data that would be sufficient (step 1). If you want to conduct statistical analyses (e.g., reproduce a manuscript) you will need to install R (step 3), and if you want to process GIS data you will need to install Python (step 2) and (depending on the data you need) setup additional data options (steps 4 onwards).
@@ -43,7 +43,8 @@ Generally speaking, _Tyrell_ will try and do something and, if it can't because 
 4. **CDS AR5 climate data** - follow these instructions if you want to download these data
    1. Register for an API key at https://cds.climate.copernicus.eu/#!/home
    2. Fill in your `key` information in the `cds` block of `config.yml`.
-   3. Select from here (https://cds.climate.copernicus.eu/cdsapp#!/dataset/ecv-for-climate-change?tab=form) 'surface air temp' and 'surface air relative humidity', 'monthly mean', '1 month', '2019 and 2020', all months, 'ERA5', 'zip', and then submit/agree to the download requirements.
+   3. Select from here (https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-pressure-levels?tab=form) 'Reanalysis', 'temperature' and 'relative humidity', '1000hPa', '2020', 'January, February, March, April, May', all days, all times, 'Whole available region', 'GRIB', and then submit/agree to the download requirements.
+   4. Select from here (https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-single-levels?tab=form) 'Reanalysis', 'Radiation and heat: Downward UV radiation at the surface', '2020', 'January, February, March, April, May', all days, all times, 'Whole available region', 'GRIB', and then submit/agree to the download requirements.
 5. **Climate Data Operators** - install this program if you want to download and then process the CDS data (point 4 above). There are two ways to do that:
    1. On Ubuntu use `sudo apt install cdo` (likely something similar for other Linux distributions).
    2. Follow the instructions here https://code.mpimet.mpg.de/projects/cdo/wiki#Installation-and-Supported-Platforms to install on other computers.
@@ -55,7 +56,7 @@ Generally speaking, _Tyrell_ will try and do something and, if it can't because 
    2. Link GES DISC data to your account following the instructions here https://disc.gsfc.nasa.gov/earthdata-login.
    3. Add your username and password to `config.yml` in the `nasa` block.
 8. **LaTeX**. If you wish to re-build manuscripts from scratch, you will need to install LaTeX (https://www.latex-project.org/get/).
-9. **External data dependencies**. There are three NASA datasets for which it is impossible to automate their download; their installation instructions are below. You will be given these instructions by Tyrell if you need them, but here they are as well for completeness. They should be put in the folder `ext-data`, which _Tyrell_ will create for you when it is first run (see instructions below).
+9. **External NASA data dependencies**. There are three NASA datasets for which it is impossible to automate their download; their installation instructions are below. You will be given these instructions by Tyrell if you need them, but here they are as well for completeness. They should be put in the folder `ext-data`, which _Tyrell_ will create for you when it is first run (see instructions below).
    1. **NASA GPW 30s population density data**.
      1. Go to https://sedac.ciesin.columbia.edu/data/set/gpw-v4-population-density-rev11
      2. Register and agree to terms
@@ -71,6 +72,15 @@ Generally speaking, _Tyrell_ will try and do something and, if it can't because 
       2. Register and agree to terms
       3. Go to https://sedac.ciesin.columbia.edu/downloads/data/gpw-v4/gpw-v4-population-density-rev11/gpw-v4-population-density-rev11_2020_15_min_tif.zip and download the file (should start automatically)
       4. Extract the `.tif` file and put it in `ext-data`
+10. **External airport data dependency**. Download instructions for an airport arrivals external dataset whose download cannot be automated. You will be given these instructions by Tyrell if you need them, but here they are as well for completeness. They should be put in the folder `ext-data`, which _Tyrell_ will create for you when it is first run (see instructions below).
+   1. Go to https://aspm.faa.gov/apm/sys/AnalysisAP.asp and perform the following commands in the tabs listed
+   2. Output: analysis: - all flights; ms excel, no sub-totals
+   3. Dates: range: 01 Feb --> 01 May
+   4. Airports: click 'ASPM 77' to fill all
+   5. Grouping: select airport, date
+   6. Select filters: use schedule
+   7. click 'Run'
+   8. download the resulting .xls file and save it into `ext-data` as `APM-Report.xls`
 
 ## Usage
 
