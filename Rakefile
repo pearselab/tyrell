@@ -79,7 +79,8 @@ task :dwn_data => [:before_dwn_data,
                    :dwn_data_cases,
                    "raw-data/gis", "raw-data/gis/denvfoimap-raster.RDS", :raw_gadm, "raw-data/gis/cds-era5-temp-hourly.grib", "raw-data/gis/cds-era5-humid-hourly.grib", "raw-data/gis/cds-era5-uv-hourly.grib",
                    "ext-data/", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif",
-                   "raw-data/google-mobility.csv", "raw-data/USstatesCov19distancingpolicy.csv", "raw-data/usa-regions.csv",
+                   "raw-data/google-mobility.csv", "raw-data/USstatesCov19distancingpolicy.csv", "raw-data/usa-regions.csv", 
+                   "raw-data/pop-urban-pct-historical.xls", "ext-data/APM-Report.xls",
                    "raw-data/genetic", :raw_nxtstr, :raw_imptfmods, "raw-data/rambaut-nomenclature"]
 task :before_dwn_data do
   puts "\t ... Downloading raw data (can take a long time)"
@@ -87,7 +88,7 @@ end
 
 # Clean data
 desc "Clean (process) all raw data"
-task :cln_data => [:before_cln_data, :cln_gadm, :cln_denvfoi_rasters, :cln_worldclim, :cln_cdsear5_hourly, :delete_cdsear5_hourly, :cln_cdsear5_daily, :cln_gpw_popdens, :join_R_climate]
+task :cln_data => [:before_cln_data, :cln_gadm, :cln_denvfoi_rasters, :cln_worldclim, :cln_cdsear5_hourly, :delete_cdsear5_hourly, :cln_cdsear5_daily, :cln_gpw_popdens, :cln_airport_data, :join_R_climate]
 task :before_cln_data do
   puts "\t ... Processing raw data"
 end
