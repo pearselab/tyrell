@@ -82,6 +82,7 @@ Generally speaking, _Tyrell_ will try and do something and, if it can't because 
    7. click 'Run'
    8. download the resulting .xls file and save it into `ext-data` as `APM-Report.xls`
 
+
 ## Usage
 
 Open a terminal window and type `rake`. This will list the most commonly-used _Tyrell_ commands. _Tyrell_ is really just a reasonably large `Rakefile` (https://github.com/ruby/rake), meaning it is a series of nested dependencies. So if, for example, you want to reproduce Smith et al. (2020; DOI: [10.1101/2020.09.12.20193250](https://doi.org/10.1101/2020.09.12.20193250)) by typing `rake ms1_env_US`, it will check what data are needed to run the analysis, what data you have already downloaded and processed, and then grab whatever new data you need. This makes it easy to use as a shared workflow: different people can work on different projects, each with shared data dependencies, and _Tyrell_ will keep track of everything for you.
