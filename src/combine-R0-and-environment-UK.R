@@ -18,7 +18,7 @@ calc_AH <- function(RH, e_0, T_0, temp){
   )
 }
 
-# function to add state names to the climate data then make it long long
+# function to add area names to the climate data then make it long
 make_long <- function(df, clim_var){
   df$area <- row.names(df)
   return(pivot_longer(df,
@@ -31,12 +31,9 @@ make_long <- function(df, clim_var){
 ### Main code ###
 
 # load Rt data
-UK_Rt <- read.csv("ext-data/uk-ltla-Rt.csv")
+UK_Rt <- read.csv("raw-data/cases/imperial-uk-pred.csv")
 
-UK_Rt$dates <- as.Date(UK_Rt$dates)
-names(UK_Rt) <- c("area", "Rt", "date")
-
-
+UK_Rt$date <- as.Date(UK_Rt$date)
 
 # merge the climate data together
 
@@ -49,9 +46,11 @@ uk_humidity_long <- make_long(uk_humidity, "relative_humidity")
 uk_uv <- as.data.frame(readRDS("clean-data/uv-UK-LTLA.RDS"))
 uk_uv_long <- make_long(uk_uv, "uv")
 
+uk_pm2pt5 <- as.data.frame(readRDS("clean-data/pm2pt5-UK-LTLA.RDS"))
+uk_pm2pt5_long <- make_long(uk_pm2pt5, "pm2pt5")
 
 # merge together
-climate_data <- cbind(uk_temperature_long, uk_humidity_long[,c("relative_humidity")], uk_uv_long[,c("uv")])
+climate_data <- cbind(uk_temperature_long, uk_humidity_long[,c("relative_humidity")], uk_uv_long[,c("uv")], uk_pm2pt5_long[,c("pm2pt5")])
 
 # calculate absolute humidity
 climate_data$absolute_humidity <- calc_AH(RH = climate_data$relative_humidity, e_0 = 6.11, T_0 = 273.15,
@@ -68,6 +67,15 @@ climate_data <- merge(climate_data, uk_popdensity, by.x = "area", by.y = "area")
 # 6. Merge Rt and climate data
 
 UK_Rt <- merge(UK_Rt, climate_data, by.x = c("area", "date"), by.y = c("area", "date"))
+
+
+# merge mobility in
+mobility_data <- read.csv("raw-data/uk-ltla-mobility.csv")
+
+names(mobility_data)[15] <- "area"
+mobility_data$date <- as.Date(mobility_data$date)
+
+UK_Rt <- join(x = UK_Rt, y = mobility_data[,8:15], by = c("area", "date"), type = "left")
 
 
 # 7. Get R0 and Rt data and estimate climate variables according to dates of estimates
@@ -95,7 +103,6 @@ UK_R0$temperature <- NA
 UK_R0$relative_humidity <- NA
 UK_R0$absolute_humidity <- NA
 UK_R0$uv <- NA
-# UK_R0$avg_mobility_change <- NA
 
 
 for(i in 1:length(area_list)){ # unweighted mean
@@ -103,54 +110,18 @@ for(i in 1:length(area_list)){ # unweighted mean
   area_temp <- climate_data[climate_data$area == area_list[i] &
                                climate_data$date >= t-14 &
                                climate_data$date <= t,]
-  # state_mob <- UK_mobility_states[UK_mobility_states$state_simple == states_list[i] & 
-  #                                    UK_mobility_states$date >= t-14 & 
-  #                                    UK_mobility_states$date <= t,]
+
   UK_R0[UK_R0$area == area_list[i],]$temperature <- mean(area_temp$temperature, na.rm = TRUE)
   UK_R0[UK_R0$area == area_list[i],]$relative_humidity <- mean(area_temp$relative_humidity, na.rm = TRUE)
   UK_R0[UK_R0$area == area_list[i],]$absolute_humidity <- mean(area_temp$absolute_humidity, na.rm = TRUE)
   UK_R0[UK_R0$area == area_list[i],]$uv <- mean(area_temp$uv, na.rm = TRUE)
-  # UK_R0[UK_R0$state == states_list[i],]$avg_mobility_change <- mean(state_mob$average_mobility_change, na.rm = TRUE)
+
 }
 
-names(UK_R0) <- c("Area", "Date", "R0", "Temperature", "Relative_humidity", "UV", "Absolute_humidity", "Pop_density")
-
-
-# Rt 
-# For Rt during lockdown, we're going to try to take a mean
-# Rt for the 2 weeks following a state-wide stay-at-home order
-# as something generally reproducible across states
-
-# Rt <- c()
-# temperature <- c()
-# humidity <- c()
-# uv <- c()
-# state <- c()
-# pop_density <- c()
-# mobility_change <- c()
-# 
-# for(i in 1:length(states_list)){
-#   state_subs <- USA_Rt[USA_Rt$state == states_list[i],]
-#   t_min <- unique(state_subs$stay_at_home)
-#   t_max <- t_min+14
-#   Rt_window <- state_subs[state_subs$date >= t_min & 
-#                             state_subs$date <= t_max,]
-#   Rt <- c(Rt, mean(Rt_window$mean_time_varying_reproduction_number_R.t.))
-#   temperature <- c(temperature, mean(Rt_window$temperature))
-#   humidity <- c(humidity, mean(Rt_window$absolute_humidity))
-#   uv <- c(uv, mean(Rt_window$uv))
-#   pop_density <- c(pop_density, unique(Rt_window$Pop_density))
-#   mobility_change <- c(mobility_change, mean(Rt_window$average_mobility_change))
-#   state <- c(state, states_list[i])
-# }
-# 
-# USA_Rt_df <- data.frame(Rt, temperature, humidity, uv, state, pop_density, mobility_change)
-# names(USA_Rt_df) <- c("Rt", "Temperature", "Absolute_Humidity", "UV", "State", "Pop_density", "Avg_mobility_change")
-
-# names(USA_Rt)[11] <- "Rt"
+names(UK_R0) <- c("Area", "Date", "R0_lower", "R0", "R0_upper", "coverage", "Temperature", "Relative_humidity", "UV", "pm2pt5", "Absolute_humidity", 
+                  "Pop_density", "retail", "grocery", "parks", "transit", "workplace", "residential")
 
 # write out for later
 write.csv(UK_R0, "clean-data/climate_and_R0_UK.csv", row.names = FALSE)
-# write.csv(USA_Rt_df, "clean-data/climate_and_lockdown_Rt_USA.csv", row.names = FALSE)
-# 
+
 write.csv(UK_Rt, "clean-data/daily_climate_and_Rt_UK.csv", row.names = FALSE)

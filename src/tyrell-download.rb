@@ -49,6 +49,11 @@ file "raw-data/cases/imperial-usa-pred.csv" do dwn_file("raw-data/cases", "https
 desc "Download Imperial COVID-19 USA predictions specific to Imperial Report 23 release"
 file "raw-data/cases/imperial-usa-pred-2020-05-25.csv" do dwn_file("raw-data/cases", "https://mrc-ide.github.io/covid19usa/downloads/archive/2020-05-25/data-model-estimates.csv", "imperial-usa-pred-2020-05-25.csv") end
 
+
+desc "Download Imperial COVID-19 UK LTLA predictions"
+file "raw-data/cases/imperial-uk-pred.csv" do dwn_file("raw-data/cases", "https://imperialcollegelondon.github.io/covid19local/downloads/UK_hotspot_Rt_estimates.csv", "imperial-uk-pred.csv") end
+
+
 desc "Download Imperial COVID-19 LMIC predictions"
 file "raw-data/cases/imperial-lmic-pred.csv" do
   Dir.chdir "raw-data/cases" do
