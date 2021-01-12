@@ -9,6 +9,7 @@ require './src/tyrell-download.rb'
 require './src/tyrell-clean.rb'
 require './src/tyrell-setup.rb'
 require './src/tyrell-ms1_env_us.rb'
+require './src/uk-r0-env.rb'
 
 ################################
 # Global task definitions ######
@@ -29,6 +30,7 @@ task :help do
   puts "  rake save_space      - Delete raw-data unneeded after cleaning (RECOMMENDED)"
   puts "  rake reset           - Delete all 'cleaned' data in `clean-data`"
   puts "  rake clobber         - Delete all 'raw' data from `raw-data`"
+  puts "  rake uk_modelling    - Run bayesian models for UK data, seperate from the US work"
   puts "  rake --tasks         - Lists everything Tyrell does (more than above)"
   puts "(Note: any missing/needed data is automatically downloaded;"
   puts " thus running `rake cln_data` will first run `rake dwn_data`)"
@@ -72,7 +74,7 @@ end
 
 # Download data
 desc "Download raw case data"
-task :dwn_data_cases => ["raw-data/cases", :raw_jhu, "raw-data/cases/ecdc-cases.csv", "raw-data/cases/ecjrcdc-regions.csv", "raw-data/cases/ecjrcdc-countries.csv", "raw-data/cases/cvodidh-admin1.csv", "raw-data/cases/cvodidh-admin2.csv", "raw-data/cases/cvodidh-admin3.csv", "raw-data/cases/imperial-europe-pred.csv", "raw-data/cases/imperial-usa-pred.csv", "raw-data/cases/imperial-usa-pred-2020-05-25.csv", "raw-data/cases/imperial-uk-pred.csv", "raw-data/cases/imperial-lmic-pred.csv", "raw-data/cases/ihme-summary.csv", "raw-data/cases/who-interventions.xlsx", "raw-data/cases/imperial-interventions.csv", "raw-data/cases/oxford-interventions.csv"]
+task :dwn_data_cases => ["raw-data/cases", :raw_jhu, "raw-data/cases/ecdc-cases.csv", "raw-data/cases/ecjrcdc-regions.csv", "raw-data/cases/ecjrcdc-countries.csv", "raw-data/cases/cvodidh-admin1.csv", "raw-data/cases/cvodidh-admin2.csv", "raw-data/cases/cvodidh-admin3.csv", "raw-data/cases/imperial-europe-pred.csv", "raw-data/cases/imperial-usa-pred.csv", "raw-data/cases/imperial-usa-pred-2020-05-25.csv", "raw-data/cases/imperial-uk-pred.csv", "raw-data/cases/imperial-lmic-pred.csv", "raw-data/cases/ihme-summary.csv", "raw-data/cases/who-interventions.xlsx", "raw-data/cases/imperial-interventions.csv", "raw-data/cases/oxford-interventions.csv", :dwn_uk_deaths]
 
 desc "Download all raw data"
 task :dwn_data => [:before_dwn_data,
@@ -182,5 +184,9 @@ file "imptf-models/covid19model-6.0/results/usa/results/base-12345-stanfit.Rdata
 end
 
 
-
-
+# UK bayesian modelling in epidemia
+desc "Modelling Rt across UK LTLA regions using epidemia"
+task :uk_modelling => [:before_uk_modelling, :uk_ltla_mobility, :uk_regional_mobility, :cln_cdsear5_uk, :cln_uk_popdens, :join_uk_deaths_climate, :uk_epiedmia_models]
+task :before_uk_modelling do
+  puts "\t ... Cleaning UK data, then running epidemia model"
+end

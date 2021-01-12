@@ -8,7 +8,7 @@ packages <- c("rstan", "parallel", "yaml",
               "devtools", # to install GitHub packages (like Lorenzo's)
               "matrixStats","data.table","gdata","dplyr","tidyr","EnvStats","scales","tidyverse","dplyr","abind","ggplot2","gridExtra","ggpubr","bayesplot","cowplot","optparse", "lubridate", "zoo", "ggstance", "geofacet", "denstrip", "svglite", "forecast", "xtable", "car", "mclust", "lattice", "plot3D", # Imperial models
               "ape", "caper", "phytools", "viridis", "plotrix", # Phylogenetics
-              "httr" # to get the UK data
+              "httr", "COVID19" # to get the UK data
               )
 
 ready <- sapply(packages, silent.require)
@@ -39,6 +39,11 @@ if(!silent.require("ggbiplot")){ # ms-env PCAs
     install_github("vqv/ggbiplot", upgrade=FALSE)
     if(!silent.require("ggbiplot"))
         stop("Cannot install ggbiplot")
+}
+if(!silent.require("epidemia")){ # Bayesian modelling in epidemia
+    install_github("ImperialCollegeLondon/epidemia", upgrade=FALSE)
+    if(!silent.require("epidemia"))
+        stop("Cannot install epidemia")
 }
 
 

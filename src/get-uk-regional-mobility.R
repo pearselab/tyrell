@@ -1,8 +1,6 @@
 # Average mobility data across UK regions
-setwd("~/Documents/Tyrell/")
 
 source("src/packages.R")
-library("COVID19") # use the COVID 19 data hub
 
 # try to grab the mobility data then, using google key
 gmr <- "https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv"

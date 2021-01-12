@@ -87,6 +87,16 @@ file "raw-data/cases/oxford-interventions.csv" do
   end
 end
 
+
+desc "Download UK death/cases data"
+task :dwn_uk_deaths => ["raw-data/cases/uk-regional.csv", "raw-data/cases/uk-utla.csv", "raw-data/cases/uk-ltla.csv"] do
+  `Rscript src/get-uk-case-data.R`
+  date_metadata "raw-data/cases/uk-regional.csv"
+  date_metadata "raw-data/cases/uk-utla.csv"
+  date_metadata "raw-data/cases/uk-ltla.csv"
+end
+
+
 ################################
 # GIS ##########################
 ################################
@@ -294,3 +304,17 @@ end
 
 desc "Get UK population data"
 file "raw-data/UK-population.xls" do dwn_file("raw-data", "https://www.ons.gov.uk/file?uri=%2fpeoplepopulationandcommunity%2fpopulationandmigration%2fpopulationestimates%2fdatasets%2fpopulationestimatesforukenglandandwalesscotlandandnorthernireland%2fmid2019april2020localauthoritydistrictcodes/ukmidyearestimates20192020ladcodes.xls", "UK-population.xls") end
+
+desc "Get mobility data for UK LTLA regions"
+task :uk_ltla_mobility => ["raw-data/uk-ltla-mobility.csv"]
+def uk_ltla_mobility()
+  `Rscript src/get-uk-ltla-mobility.R`
+  date_metadata "raw-data/uk-ltla-mobility.csv"
+end
+file "raw-data/uk-ltla-mobility.csv" => "raw-data/google-mobility.csv" do uk_ltla_mobility() end
+
+desc "Get mobility data for UK NUTS regions"
+task :uk_regional_mobility => ["raw-data/uk-regional-mobility.csv"] do
+  `Rscript src/get-uk-regional-mobility.R`
+  date_metadata "raw-data/uk-regional-mobility.csv"
+end

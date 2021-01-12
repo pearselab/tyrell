@@ -46,11 +46,12 @@ uk_humidity_long <- make_long(uk_humidity, "relative_humidity")
 uk_uv <- as.data.frame(readRDS("clean-data/uv-UK-LTLA.RDS"))
 uk_uv_long <- make_long(uk_uv, "uv")
 
-uk_pm2pt5 <- as.data.frame(readRDS("clean-data/pm2pt5-UK-LTLA.RDS"))
-uk_pm2pt5_long <- make_long(uk_pm2pt5, "pm2pt5")
+# uk_pm2pt5 <- as.data.frame(readRDS("clean-data/pm2pt5-UK-LTLA.RDS"))
+# uk_pm2pt5_long <- make_long(uk_pm2pt5, "pm2pt5")
 
 # merge together
-climate_data <- cbind(uk_temperature_long, uk_humidity_long[,c("relative_humidity")], uk_uv_long[,c("uv")], uk_pm2pt5_long[,c("pm2pt5")])
+# climate_data <- cbind(uk_temperature_long, uk_humidity_long[,c("relative_humidity")], uk_uv_long[,c("uv")], uk_pm2pt5_long[,c("pm2pt5")])
+climate_data <- cbind(uk_temperature_long, uk_humidity_long[,c("relative_humidity")], uk_uv_long[,c("uv")])
 
 # calculate absolute humidity
 climate_data$absolute_humidity <- calc_AH(RH = climate_data$relative_humidity, e_0 = 6.11, T_0 = 273.15,
@@ -118,7 +119,7 @@ for(i in 1:length(area_list)){ # unweighted mean
 
 }
 
-names(UK_R0) <- c("Area", "Date", "R0_lower", "R0", "R0_upper", "coverage", "Temperature", "Relative_humidity", "UV", "pm2pt5", "Absolute_humidity", 
+names(UK_R0) <- c("Area", "Date", "R0_lower", "R0", "R0_upper", "coverage", "Temperature", "Relative_humidity", "UV", "Absolute_humidity", 
                   "Pop_density", "retail", "grocery", "parks", "transit", "workplace", "residential")
 
 # write out for later

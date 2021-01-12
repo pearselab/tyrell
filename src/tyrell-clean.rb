@@ -75,6 +75,25 @@ file "clean-data/uv-dailymean-countries.RDS" => ["raw-data/gis/cds-era5-uv-daily
 file "clean-data/uv-dailymean-states.RDS" => ["raw-data/gis/cds-era5-uv-dailymean.grib"]+shp_fls("clean-data/gadm-states",true) do cln_cdsear5_daily() end
 
 
+desc "Clean and process CDS-EAR5 mean daily temperature/humidity/uv data across UK regions"
+task :cln_cdsear5_uk => ["clean-data/temp-UK-NUTS.RDS","clean-data/humid-UK-NUTS.RDS","clean-data/uv-UK-NUTS.RDS","clean-data/temp-UK-LTLA.RDS","clean-data/humid-UK-LTLA.RDS","clean-data/uv-UK-LTLA.RDS"]
+def cln_cdsear5_uk()
+  `Rscript src/clean-daily-climate-UK.R`
+  date_metadata "clean-data/temp-UK-NUTS.RDS"
+  date_metadata "clean-data/temp-UK-LTLA.RDS"
+  date_metadata "clean-data/humid-UK-NUTS.RDS"
+  date_metadata "clean-data/humid-UK-LTLA.RDS"
+  date_metadata "clean-data/uv-UK-NUTS.RDS"
+  date_metadata "clean-data/uv-UK-LTLA.RDS"
+end
+file "clean-data/temp-UK-NUTS.RDS" => ["raw-data/gis/cds-era5-temp-dailymean.grib"]+shp_fls("raw-data/gis/NUTS_Level_1__January_2018__Boundaries",true) do cln_cdsear5_daily() end
+file "clean-data/temp-UK-LTLA.RDS" => ["raw-data/gis/cds-era5-temp-dailymean.grib"]+shp_fls("raw-data/gis/Local_Authority_Districts__December_2019__Boundaries_UK_BFC",true) do cln_cdsear5_daily() end
+file "clean-data/humid-UK-NUTS.RDS" => ["raw-data/gis/cds-era5-humid-dailymean.grib"]+shp_fls("raw-data/gis/NUTS_Level_1__January_2018__Boundaries",true) do cln_cdsear5_daily() end
+file "clean-data/humid-UK-LTLA.RDS" => ["raw-data/gis/cds-era5-humid-dailymean.grib"]+shp_fls("raw-data/gis/Local_Authority_Districts__December_2019__Boundaries_UK_BFC",true) do cln_cdsear5_daily() end
+file "clean-data/uv-UK-NUTS.RDS" => ["raw-data/gis/cds-era5-uv-dailymean.grib"]+shp_fls("raw-data/gis/NUTS_Level_1__January_2018__Boundaries",true) do cln_cdsear5_daily() end
+file "clean-data/uv-UK-LTLA.RDS" => ["raw-data/gis/cds-era5-uv-dailymean.grib"]+shp_fls("raw-data/gis/Local_Authority_Districts__December_2019__Boundaries_UK_BFC",true) do cln_cdsear5_daily() end
+
+
 desc "Clean and process CDS daily climate data, using population-weighted means"
 task :cln_cdsear5_daily_weighted => ["clean-data/temp-dailymean-countries-popweighted.RDS","clean-data/temp-dailymean-states-popweighted.RDS","clean-data/humid-dailymean-countries-popweighted.RDS","clean-data/humid-dailymean-states-popweighted.RDS","clean-data/uv-dailymean-countries-popweighted.RDS","clean-data/uv-dailymean-states-popweighted.RDS", "clean-data/pm2pt5-dailymean-countries-popweighted.RDS", "clean-data/pm2pt5-dailymean-states-popweighted.RDS"]
 def cln_cdsear5_daily_weighted()
@@ -108,7 +127,19 @@ end
 file "clean-data/population-density-countries.RDS" => "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif" do cln_gpw_popdens() end
 file "clean-data/population-density-states.RDS" => "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif" do cln_gpw_popdens() end
 
-desc "Combine cleaned environmental data with R0/Rt estimates"
+
+desc "Clean and process UK population density data"
+task :cln_uk_popdens => ["clean-data/population-density-UK-NUTS.RDS","clean-data/population-density-UK-LTLA.RDS"]
+def cln_uk_popdens()
+  `Rscript src/clean-popdensity-data-UK.R`
+  date_metadata "clean-data/population-density-UK-NUTS.RDS"
+  date_metadata "clean-data/population-density-UK-LTLA.RDS"
+end
+file "clean-data/population-density-UK-NUTS.RDS" => shp_fls("raw-data/gis/NUTS_Level_1__January_2018__Boundaries") do cln_uk_popdens() end
+file "clean-data/population-density-UK-LTLA.RDS" => shp_fls("raw-data/gis/Local_Authority_Districts__December_2019__Boundaries_UK_BFC") do cln_uk_popdens() end
+
+
+desc "Combine cleaned environmental data with USA R0/Rt estimates"
 task :join_R_climate => ["clean-data/climate_and_R0_USA.csv","clean-data/climate_and_lockdown_Rt_USA.csv", "clean-data/daily_climate_and_Rt_USA.csv"]
 def join_R_climate()
   `Rscript src/combine-R0-and-environment-USA.R`
@@ -119,3 +150,15 @@ end
 file "clean-data/climate_and_R0_USA.csv" => ["clean-data/temp-dailymean-states.RDS", "clean-data/humid-dailymean-states.RDS", "clean-data/population-density-states.RDS", "raw-data/cases/imperial-usa-pred-2020-05-25.csv", "raw-data/google-mobility.csv", "raw-data/USstatesCov19distancingpolicy.csv"]+shp_fls("clean-data/gadm-states",true) do join_R_climate() end
 file "clean-data/climate_and_lockdown_Rt_USA.csv" do join_R_climate() end
 file "clean-data/daily_climate_and_Rt_USA.csv" do join_R_climate() end
+
+
+desc "Combine cleaned environmental data with UK death data"
+task :join_uk_deaths_climate => ["clean-data/climate-and-deaths-UK-NUTS.csv", "clean-data/climate-and-deaths-UK-LTLA.csv"]
+def join_uk_deaths_climate()
+  `Rscript src/join-climate-deaths-UK.R`
+  date_metadata "clean-data/climate-and-deaths-UK-NUTS.csv"
+  date_metadata "clean-data/climate-and-deaths-UK-LTLA.csv"
+end
+file "clean-data/climate-and-deaths-UK-NUTS.csv" => ["raw-data/cases/uk-regional.csv", "raw-data/uk-regional-mobility.csv", "clean-data/population-density-UK-NUTS.RDS", "clean-data/temp-UK-NUTS.RDS"] do join_uk_deaths_climate() end
+file "clean-data/climate-and-deaths-UK-LTLA.csv" => ["raw-data/cases/uk-ltla.csv", "raw-data/uk-ltla-mobility.csv", "clean-data/population-density-UK-LTLA.RDS", "clean-data/temp-UK-LTLA.RDS"] do join_uk_deaths_climate() end
+
