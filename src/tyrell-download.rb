@@ -288,6 +288,12 @@ file "raw-data/USstatesCov19distancingpolicy.csv" => ["imptf-models/covid19model
   date_metadata("raw-data/USstatesCov19distancingpolicy.csv")
 end
 
+desc "Copy USA population data from imp model 6"
+file "raw-data/usa-regions.csv" => ["imptf-models/covid19model-6.0"] do
+  FileUtils.cp "imptf-models/covid19model-6.0/usa/data/usa-regions.csv", "raw-data/"
+  date_metadata("raw-data/usa-regions.csv")
+end
+
 
 ################################
 # Miscellaneous ################
@@ -317,4 +323,24 @@ desc "Get mobility data for UK NUTS regions"
 task :uk_regional_mobility => ["raw-data/uk-regional-mobility.csv"] do
   `Rscript src/get-uk-regional-mobility.R`
   date_metadata "raw-data/uk-regional-mobility.csv"
+
+  
+desc "Download urban population data"
+file "raw-data/pop-urban-pct-historical.xls" do
+  Dir.chdir("raw-data") do
+    stream_file("https://www.icip.iastate.edu/sites/default/files/uploads/tables/population/pop-urban-pct-historical.xls", "pop-urban-pct-historical.xls")
+  end
+end
+
+desc "Get ASPM 77 airport data"
+file "ext-data/APM-Report.xls" do
+  puts "To get a missing external data dependency:"
+  puts "(1) Go to https://aspm.faa.gov/apm/sys/AnalysisAP.asp and perform the following commands in the tabs listed"
+  puts "(2) Output: analysis: - all flights; ms excel, no sub-totals"
+  puts "(3) Dates: range: 01 Feb --> 01 May"
+  puts "(4) Airports: click 'ASPM 77' to fill all"
+  puts "(5) Grouping: select airport, date"
+  puts "(6) Select filters: use schedule"
+  puts "(7) click 'Run'"
+  puts "(8) download the resulting .xls file and save it into 'ext-data' as 'APM-Report.xls'"
 end
