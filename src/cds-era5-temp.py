@@ -6,13 +6,16 @@ c.retrieve(
     'reanalysis-era5-pressure-levels',
     {
         'product_type': 'reanalysis',
-        'variable': 'temperature',
+        'variable': [
+            'relative_humidity', 'temperature',
+        ],
         'pressure_level': '1000',
         'year': '2020',
         'month': [
             '01', '02', '03',
             '04', '05', '06',
-            '07', '08',
+            '07', '08', '09',
+            '10', '11', '12',
         ],
         'day': [
             '01', '02', '03',
@@ -39,4 +42,4 @@ c.retrieve(
         ],
         'format': 'grib',
     },
-    'cds-era5-temp-hourly.grib')
+    'download.grib')
