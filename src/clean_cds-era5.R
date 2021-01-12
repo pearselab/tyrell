@@ -7,9 +7,8 @@ source("src/packages.R")
 countries <- shapefile("clean-data/gadm-countries.shp")
 states <- shapefile("clean-data/gadm-states.shp")
 
-# Load temperature data and subset into rasters for each day of the year
-# - NOTE: assumes Tom's humidity script applies here too
-days <- as.character(as.Date("2020-01-01") + 0:151)
+# Load climate data and subset into rasters for each day of the year
+days <- as.character(as.Date("2020-01-01") + 0:243)
 temp <- rgdal::readGDAL("raw-data/gis/cds-era5-temp-dailymean.grib")
 humid <- rgdal::readGDAL("raw-data/gis/cds-era5-humid-dailymean.grib")
 uv <- rgdal::readGDAL("raw-data/gis/cds-era5-uv-dailymean.grib")

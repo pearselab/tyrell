@@ -49,6 +49,11 @@ file "raw-data/cases/imperial-usa-pred.csv" do dwn_file("raw-data/cases", "https
 desc "Download Imperial COVID-19 USA predictions specific to Imperial Report 23 release"
 file "raw-data/cases/imperial-usa-pred-2020-05-25.csv" do dwn_file("raw-data/cases", "https://mrc-ide.github.io/covid19usa/downloads/archive/2020-05-25/data-model-estimates.csv", "imperial-usa-pred-2020-05-25.csv") end
 
+
+desc "Download Imperial COVID-19 UK LTLA predictions"
+file "raw-data/cases/imperial-uk-pred.csv" do dwn_file("raw-data/cases", "https://imperialcollegelondon.github.io/covid19local/downloads/UK_hotspot_Rt_estimates.csv", "imperial-uk-pred.csv") end
+
+
 desc "Download Imperial COVID-19 LMIC predictions"
 file "raw-data/cases/imperial-lmic-pred.csv" do
   Dir.chdir "raw-data/cases" do
@@ -81,6 +86,16 @@ file "raw-data/cases/oxford-interventions.csv" do
     stream_file("https://github.com/OxCGRT/covid-policy-tracker/raw/master/data/OxCGRT_latest.csv", "oxford-interventions.csv")
   end
 end
+
+
+desc "Download UK death/cases data"
+task :dwn_uk_deaths => ["raw-data/cases/uk-regional.csv", "raw-data/cases/uk-utla.csv", "raw-data/cases/uk-ltla.csv"] do
+  `Rscript src/get-uk-case-data.R`
+  date_metadata "raw-data/cases/uk-regional.csv"
+  date_metadata "raw-data/cases/uk-utla.csv"
+  date_metadata "raw-data/cases/uk-ltla.csv"
+end
+
 
 ################################
 # GIS ##########################
@@ -121,6 +136,13 @@ file "raw-data/gis/cds-era5-uv-hourly.grib" do
   date_metadata "raw-data/gis/cds-era5-uv-hourly.grib"
 end
 
+# This doesn't work yet (!)
+#~ desc "Get hourly CDS-CAMS PM 2.5 data"
+#~ file "raw-data/gis/cds-cams-pm2pt5-hourly.grib" do
+  #~ Dir.chdir("raw-data/gis") do `python3 ../../src/cds-cams-pm2pt5.py` end
+  #~ date_metadata "raw-data/gis/cds-cams-pm2pt5-hourly.grib"
+#~ end
+
 desc "Get NASA GPW 30s population density data - large file, 300mb"
 file "ext-data/gpw_v4_population_density_rev11_2020_2pt5_min.tif" do
   puts "To get a missing external data dependency:"
@@ -150,6 +172,23 @@ end
 desc "Get google mobility data"
 file "raw-data/google-mobility.csv" do dwn_file("raw-data", "https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv", "google-mobility.csv") end
 
+# UK NUTs regions shapefile
+desc "Download UK NUTs regions shapefile"
+file "raw-data/gis/NUTS_Level_1__January_2018__Boundaries" do
+  Dir.chdir "raw-data/gis" do
+    unzip(stream_file("https://opendata.arcgis.com/datasets/01fd6b2d7600446d8af768005992f76a_0.zip?outSR=27700", "UK-NUTS.zip"))
+    FileUtils.rm "UK-NUTS.zip"
+  end
+end
+
+# UK local authorities shapefile
+desc "Download UK local authorities shapefile"
+file "raw-data/gis/Local_Authority_Districts__December_2019__Boundaries_UK_BFC" do
+  Dir.chdir "raw-data/gis" do
+    unzip(stream_file("https://opendata.arcgis.com/datasets/1d78d47c87df4212b79fe2323aae8e08_0.zip?outSR=%7B%22latestWkid%22%3A27700%2C%22wkid%22%3A27700%7D", "UK-LTLA.zip"))
+    FileUtils.rm "UK-LTLA.zip"
+  end
+end
 
 ################################
 # Genetic ######################
@@ -269,6 +308,23 @@ directory "raw-data/rambaut-nomenclature" do
   date_metadata("raw-data/rambaut-nomenclature")
 end
 
+desc "Get UK population data"
+file "raw-data/UK-population.xls" do dwn_file("raw-data", "https://www.ons.gov.uk/file?uri=%2fpeoplepopulationandcommunity%2fpopulationandmigration%2fpopulationestimates%2fdatasets%2fpopulationestimatesforukenglandandwalesscotlandandnorthernireland%2fmid2019april2020localauthoritydistrictcodes/ukmidyearestimates20192020ladcodes.xls", "UK-population.xls") end
+
+desc "Get mobility data for UK LTLA regions"
+task :uk_ltla_mobility => ["raw-data/uk-ltla-mobility.csv"]
+def uk_ltla_mobility()
+  `Rscript src/get-uk-ltla-mobility.R`
+  date_metadata "raw-data/uk-ltla-mobility.csv"
+end
+file "raw-data/uk-ltla-mobility.csv" => "raw-data/google-mobility.csv" do uk_ltla_mobility() end
+
+desc "Get mobility data for UK NUTS regions"
+task :uk_regional_mobility => ["raw-data/uk-regional-mobility.csv"] do
+  `Rscript src/get-uk-regional-mobility.R`
+  date_metadata "raw-data/uk-regional-mobility.csv"
+
+  
 desc "Download urban population data"
 file "raw-data/pop-urban-pct-historical.xls" do
   Dir.chdir("raw-data") do

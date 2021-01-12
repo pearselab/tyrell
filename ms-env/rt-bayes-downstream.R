@@ -219,7 +219,7 @@ make_plot <-  function(state, legend = FALSE){
     state_idx <- which(states == state)
     region_idx <- stan_data$Region[state_idx]
     
-    state_name <- read.csv("/imptf-models/covid19model-6.0/usa/data/states.csv")
+    state_name <- read.csv("imptf-models/covid19model-6.0/usa/data/states.csv")
     
     full_name <- state_name$State[which(state_name$Abbreviation == state)]
     
