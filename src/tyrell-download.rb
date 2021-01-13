@@ -323,7 +323,7 @@ desc "Get mobility data for UK NUTS regions"
 task :uk_regional_mobility => ["raw-data/uk-regional-mobility.csv"] do
   `Rscript src/get-uk-regional-mobility.R`
   date_metadata "raw-data/uk-regional-mobility.csv"
-
+end
   
 desc "Download urban population data"
 file "raw-data/pop-urban-pct-historical.xls" do
