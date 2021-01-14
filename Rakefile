@@ -19,7 +19,7 @@ task :default => :help
 desc "Tyrell command overview"
 task :help do
   puts "Tyrell - COVID-19 data/analysis management software"
-  puts "\t\t\t\t\t\t\thttps://github.com/pearselab/tyrell"  
+  puts "\t\t\t\t\thttps://github.com/pearselab/tyrell"  
   puts "Useful commands:"
   puts "  rake install         - Setup Tyrell dependencies"
   puts "  rake ms1_env_us      - Repeat Smith et al. 2020 (DOI)"
@@ -83,7 +83,8 @@ task :dwn_data => [:before_dwn_data,
                    "raw-data/gis/NUTS_Level_1__January_2018__Boundaries", "raw-data/gis/Local_Authority_Districts__December_2019__Boundaries_UK_BFC",
                    "raw-data/UK-population.xls",
                    "ext-data/", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif",
-                   "raw-data/google-mobility.csv", "raw-data/USstatesCov19distancingpolicy.csv",
+                   "raw-data/google-mobility.csv", "raw-data/USstatesCov19distancingpolicy.csv", "raw-data/usa-regions.csv", 
+                   "raw-data/pop-urban-pct-historical.xls", "ext-data/APM-Report.xls",
                    "raw-data/genetic", :raw_nxtstr, :raw_imptfmods, "raw-data/rambaut-nomenclature"]
                    
 task :before_dwn_data do
@@ -92,7 +93,7 @@ end
 
 # Clean data
 desc "Clean (process) all raw data"
-task :cln_data => [:before_cln_data, :cln_gadm, :cln_denvfoi_rasters, :cln_worldclim, :cln_cdsear5_hourly, :cln_cdsear5_daily, :cln_cdsear5_daily_weighted, :cln_gpw_popdens, :join_R_climate]
+task :cln_data => [:before_cln_data, :cln_gadm, :cln_denvfoi_rasters, :cln_worldclim, :cln_cdsear5_hourly, :cln_cdsear5_daily, :cln_gpw_popdens, :cln_airport_data, :join_R_climate]
 task :before_cln_data do
   puts "\t ... Processing raw data"
 end
