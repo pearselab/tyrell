@@ -20,7 +20,7 @@ uk_mobil$sub_region_1 <- gsub(" County Borough", "", uk_mobil$sub_region_1)
 uk_mobil$sub_region_1 <- gsub("Borough of ", "", uk_mobil$sub_region_1)
 
 # now the more specific things that need fixing individually
-uk_mobil[uk_mobil$sub_region_1 == "Bristol" & !is.na(uk_mobil$sub_region_1),]$sub_region_1 <- "Bristol, City of"
+uk_mobil[uk_mobil$sub_region_1 == "Bristol City" & !is.na(uk_mobil$sub_region_1),]$sub_region_1 <- "Bristol, City of"
 uk_mobil[uk_mobil$sub_region_1 == "Edinburgh" & !is.na(uk_mobil$sub_region_1),]$sub_region_1 <- "City of Edinburgh"
 uk_mobil[uk_mobil$sub_region_1 == "Derry and Strabane" & !is.na(uk_mobil$sub_region_1),]$sub_region_1 <- "Derry City and Strabane"
 uk_mobil[uk_mobil$sub_region_1 == "Herefordshire" & !is.na(uk_mobil$sub_region_1),]$sub_region_1 <- "Herefordshire, County of"
@@ -33,7 +33,6 @@ uk_mobil[uk_mobil$sub_region_2 == "City of Canterbury" & !is.na(uk_mobil$sub_reg
 uk_mobil[uk_mobil$sub_region_2 == "City of Carlisle" & !is.na(uk_mobil$sub_region_2),]$sub_region_2 <- "Carlisle"
 uk_mobil[uk_mobil$sub_region_2 == "City of Preston" & !is.na(uk_mobil$sub_region_2),]$sub_region_2 <- "Preston"
 uk_mobil[uk_mobil$sub_region_2 == "Saint Albans" & !is.na(uk_mobil$sub_region_2),]$sub_region_2 <- "St Albans"
-uk_mobil[uk_mobil$sub_region_2 == "Saint Helens" & !is.na(uk_mobil$sub_region_2),]$sub_region_2 <- "St. Helens"
 uk_mobil[uk_mobil$sub_region_2 == "City of Westminster" & !is.na(uk_mobil$sub_region_2),]$sub_region_2 <- "Westminster"
 uk_mobil[uk_mobil$sub_region_2 == "City of Winchester" & !is.na(uk_mobil$sub_region_2),]$sub_region_2 <- "Winchester"
 uk_mobil[uk_mobil$sub_region_2 == "City of Wolverhampton" & !is.na(uk_mobil$sub_region_2),]$sub_region_2 <- "Wolverhampton"

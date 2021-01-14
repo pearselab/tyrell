@@ -314,7 +314,8 @@ end
 file "raw-data/uk-ltla-mobility.csv" => "raw-data/google-mobility.csv" do uk_ltla_mobility() end
 
 desc "Get mobility data for UK NUTS regions"
-task :uk_regional_mobility => ["raw-data/uk-regional-mobility.csv"] do
+task :uk_regional_mobility => "raw-data/uk-regional-mobility.csv"
+file "raw-data/uk-regional-mobility.csv" do
   `Rscript src/get-uk-regional-mobility.R`
   date_metadata "raw-data/uk-regional-mobility.csv"
 end
