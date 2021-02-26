@@ -90,7 +90,6 @@ dimnames(UK_LTLA.uv) <- list(
 #   days
 # )
 
-
 saveRDS(UK_NUTS.temp, "clean-data/temp-UK-NUTS.RDS")
 saveRDS(UK_NUTS.humid, "clean-data/humid-UK-NUTS.RDS")
 saveRDS(UK_NUTS.uv, "clean-data/uv-UK-NUTS.RDS")

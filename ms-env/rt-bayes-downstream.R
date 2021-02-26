@@ -90,7 +90,7 @@ xtable(summary(fit, pars=c("alpha","alpha_state","alpha_region","mu","env_time_s
 ## Figure 3
 # just make 1 new col, then take the distribution, save the quantiles... and overwrite this each new temp/pop
 
-temp_seq <- seq(0.1, 5, 0.1)
+temp_seq <- seq(0.1, 10, 0.1)
 
 # make an empty dataframe to populate with new results
 temp_results <- data.frame(temperature = rep(NA, length(temp_seq)))
@@ -151,13 +151,13 @@ fig3 <- ggplot(temp_results) +
     geom_line(aes(x = temperature, y = mob_87.5), alpha = 0.8, col = "#CC6600", linetype = "dashed", lwd = 1.5) +
     geom_line(aes(x = temperature, y = mob_95), alpha = 0.8, col = "#CC6600", linetype = "dotted", lwd = 1) +
     geom_line(aes(x = temperature, y = mob_5), alpha = 0.8, col = "#CC6600", linetype = "dotted", lwd = 1) +
-    geom_line(data = pop_results, aes(x = pop_density/2, y = mob_50), col = "#6666FF", lwd = 2) +
-    geom_line(data = pop_results, aes(x = pop_density/2, y = mob_12.5), alpha = 0.8, col = "#6666FF", linetype = "dashed", lwd = 1.5) +
-    geom_line(data = pop_results, aes(x = pop_density/2, y = mob_87.5), alpha = 0.8, col = "#6666FF", linetype = "dashed", lwd = 1.5) +
-    geom_line(data = pop_results, aes(x = pop_density/2, y = mob_95), alpha = 0.8, col = "#6666FF", linetype = "dotted", lwd = 1) +
-    geom_line(data = pop_results, aes(x = pop_density/2, y = mob_5), alpha = 0.8, col = "#6666FF", linetype = "dotted", lwd = 1) +
+    geom_line(data = pop_results, aes(x = pop_density, y = mob_50), col = "#6666FF", lwd = 2) +
+    geom_line(data = pop_results, aes(x = pop_density, y = mob_12.5), alpha = 0.8, col = "#6666FF", linetype = "dashed", lwd = 1.5) +
+    geom_line(data = pop_results, aes(x = pop_density, y = mob_87.5), alpha = 0.8, col = "#6666FF", linetype = "dashed", lwd = 1.5) +
+    geom_line(data = pop_results, aes(x = pop_density, y = mob_95), alpha = 0.8, col = "#6666FF", linetype = "dotted", lwd = 1) +
+    geom_line(data = pop_results, aes(x = pop_density, y = mob_5), alpha = 0.8, col = "#6666FF", linetype = "dotted", lwd = 1) +
     labs(x = "Temperature Decrease (°C)", y = "% Reduction in Mobility to Mitigate") +
-    scale_x_continuous(sec.axis = sec_axis(~. *2, name = "X Greater Population Density")) +
+    scale_x_continuous(sec.axis = sec_axis(~., name = "X Greater Population Density")) +
     theme_bw() +
     theme(axis.title.x.bottom = element_text(colour = "#CC6600", size = 18, face = "bold"),
           axis.text.x.bottom = element_text(colour = "#CC6600", size = 16, face = "bold"),
@@ -171,6 +171,37 @@ fig3
 
 ggsave("ms-env/US_bayes_plot.pdf", fig3)
 
+# alternative two-panel figure
+
+fig3a <- ggplot(temp_results, aes(x = temperature, y = mob_50)) +
+    geom_ribbon(aes(ymin = mob_5, ymax = mob_95), col = "grey", alpha = 0.5) +
+    geom_ribbon(aes(ymin = mob_12.5, ymax = mob_87.5), col = "grey", alpha = 0.5) +
+    geom_line(col = "black", lwd = 2) +
+    labs(x = "Temperature Decrease (°C)", y = "% Reduction in Mobility to Mitigate") +
+    ylim(0, 100) +
+    theme_bw() +
+    theme(axis.text = element_text(size = 16, face = "bold"),
+          axis.title = element_text(size = 18, face = "bold"),
+          panel.grid.major.x = element_blank(),
+          panel.grid.minor.x = element_blank(),
+          aspect.ratio = 1)
+
+
+fig3b <- ggplot(pop_results, aes(x = pop_density, y = mob_50)) +
+    geom_ribbon(aes(ymin = mob_5, ymax = mob_95), col = "grey", alpha = 0.5) +
+    geom_ribbon(aes(ymin = mob_12.5, ymax = mob_87.5), col = "grey", alpha = 0.5) +
+    geom_line(col = "black", lwd = 2) +
+    labs(x = "X Greater Population Density", y = "% Reduction in Mobility to Mitigate") +
+    ylim(0, 100) +
+    theme_bw() +
+    theme(axis.text = element_text(size = 16, face = "bold"),
+          axis.title = element_text(size = 18, face = "bold"),
+          panel.grid.major.x = element_blank(),
+          panel.grid.minor.x = element_blank(),
+          aspect.ratio = 1)
+
+ggsave("ms-env/US_bayes_plot_a.pdf", fig3a, width = 5, height = 5)
+ggsave("ms-env/US_bayes_plot_b.pdf", fig3b, width = 5, height = 5)
 
 #####################################################
 # Supplementary figure showing the distributions of #

@@ -12,6 +12,7 @@ ms-env/*.pdf
 nohup.out
 phylo-env/*.txt
 phylo-env/*.RData
+phylo-env/*.pdf
 raw-data/*
 timestamp.yml
 ms-env/*.pdf
