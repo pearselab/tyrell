@@ -264,6 +264,70 @@ figure_2_supp <- function(){ # heatmap plot
 # --- Supplementary analyses --- #
 ##################################
 
+# ---- What about pure 2D representations of the effects seperately? ---- #
+
+figure_S_extra_a <- function(){
+  temps <- seq(-7, 21, by = 0.1)
+  populations <- rep(median(USA_R0_data$Pop_density), length(temps))
+  temperature_df <- data.frame(Temperature = temps, Pop_density = populations)
+  temp_preds <- predict(USA_regression_model, newdata = temperature_df)
+  
+  temps_ld <- seq(4, 24, by = 0.1)
+  populations_ld <- rep(median(USA_R0_data$Pop_density), length(temps_ld))
+  temperature_df_ld <- data.frame(Temperature = temps_ld, Pop_density = populations_ld)
+  temp_preds_ld <- predict(USA_regression_model_lockdown, newdata = temperature_df_ld)
+  
+  predicted_R0 <- data.frame(temperature_df, temp_preds)
+  names(predicted_R0) <- c("Temperature", "Pop_density", "R0")
+  
+  predicted_Rt <- data.frame(temperature_df_ld, temp_preds_ld)
+  names(predicted_Rt) <- c("Temperature", "Pop_density", "R0")
+  
+  temperature_plot <- ggplot(interaction_df, aes(x = Temperature, y = Rt)) + 
+    geom_point(shape = 21, size = 3, aes(fill = Lockdown)) +
+    geom_line(data = predicted_R0, aes(x = Temperature, y = R0), lwd = 1) +
+    geom_line(data = predicted_Rt, aes(x = Temperature, y = R0), lwd = 1) +
+    labs(x = "Temperature (°C)",
+         y = "R") +
+    scale_fill_discrete(labels = c("No Restrictions", "Lockdown")) +
+    main_theme +
+    theme(aspect.ratio = 1,
+          legend.position = c(0.75, 0.9),
+          legend.title = element_blank())
+  ggsave("ms-env/temperature_2d.svg", temperature_plot, width = 5, height = 5)
+}
+
+
+figure_S_extra_b <- function(){
+  populations <- 10^(seq(0.7, 3.5, by = 0.1))
+  temps <- rep(median(USA_R0_data$Temperature), length(populations))
+  population_df <- data.frame(Temperature = temps, Pop_density = populations)
+  pop_preds <- predict(USA_regression_model, newdata = population_df)
+  
+  populations_ld <- 10^(seq(0.7, 3.5, by = 0.1))
+  temps_ld <- rep(median(USA_Rt_data$Temperature), length(populations_ld))
+  population_df_ld <- data.frame(Temperature = temps_ld, Pop_density = populations_ld)
+  pop_preds_ld <- predict(USA_regression_model_lockdown, newdata = population_df_ld)
+  
+  predicted_R0 <- data.frame(population_df, pop_preds)
+  names(predicted_R0) <- c("Temperature", "Pop_density", "R0")
+  
+  predicted_Rt <- data.frame(population_df_ld, temp_preds_ld)
+  names(predicted_Rt) <- c("Temperature", "Pop_density", "R0")
+  
+  population_plot <- ggplot(interaction_df, aes(x = Pop_density, y = Rt)) + 
+    geom_point(shape = 21, size = 3, aes(fill = Lockdown)) +
+    geom_line(data = predicted_R0, aes(x = Pop_density, y = R0), lwd = 1) +
+    geom_line(data = predicted_Rt, aes(x = Pop_density, y = R0), lwd = 1) +
+    labs(x = expression(paste("Population density (people ", km^-2, ")")),
+         y = "R") +
+    scale_x_log10() +
+    main_theme +
+    theme(aspect.ratio = 1,
+          legend.position = "none")
+  ggsave("ms-env/population_2d.svg", population_plot, width = 5, height = 5)
+}
+
 # ---- Does the date R0 was estimated on have an effect? i.e. did states ---- #
 # ---- where the pandemic emerged later learn from the earlier states?   ---- #
 
@@ -358,6 +422,8 @@ figure_S1()
 figure_S2()
 figure_S3()
 
+figure_S_extra_a()
+figure_S_extra_b()
 
 
 # -- Old depreciated stuff -- #
