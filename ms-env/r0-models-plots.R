@@ -140,6 +140,16 @@ grid <- with(USA_R0_data, expand.grid(temps, pops))
 d <- setNames(data.frame(grid), c("Temperature", "Pop_density"))
 vals <- predict(USA_regression_model, newdata = d)
 
+# repeat for during lockdown
+USA_regression_model_lockdown <- lm(Rt ~ Temperature + log10(Pop_density), data = USA_Rt_data)
+# predict model over sensible grid of values (ld for lockdown)
+temps_ld <- seq(4, 24, by = 0.1)
+pops_ld <- 10^(seq(0.8, 3.5, by = 0.1))
+grid_ld <- with(USA_Rt_data[USA_Rt_data$Location %in% USA_R0_data$Location,], expand.grid(temps_ld, pops_ld))
+d_ld <- setNames(data.frame(grid_ld), c("Temperature", "Pop_density"))
+vals_ld <- predict(USA_regression_model_lockdown, newdata = d_ld)
+
+
 figure_1a <- function(){
   # form matrix and give to plotly
   R0 <- matrix(vals, nrow = length(unique(d$Temperature)), ncol = length(unique(d$Pop_density)))
@@ -165,14 +175,6 @@ figure_1a <- function(){
 
 
 figure_1b <- function(){
-  USA_regression_model_lockdown <- lm(Rt ~ Temperature + log10(Pop_density), data = USA_Rt_data)
-  # predict model over sensible grid of values (ld for lockdown)
-  temps_ld <- seq(4, 24, by = 0.1)
-  pops_ld <- 10^(seq(0.8, 3.5, by = 0.1))
-  grid_ld <- with(USA_Rt_data[USA_Rt_data$Location %in% USA_R0_data$Location,], expand.grid(temps_ld, pops_ld))
-  d_ld <- setNames(data.frame(grid_ld), c("Temperature", "Pop_density"))
-  vals_ld <- predict(USA_regression_model_lockdown, newdata = d_ld)
-  
   Rt <- matrix(vals_ld, nrow = length(unique(d_ld$Temperature)), ncol = length(unique(d_ld$Pop_density)))
   
   Rt_3d <- plot_ly() %>% 
@@ -218,7 +220,6 @@ figure_2a <- function(){ # heatmap plot
 }
 
 
-
 figure_2b <- function(){
   d <- USA_R0_data[,c("Temperature", "Absolute_Humidity", "Pop_density", "R0", "State")]
   
@@ -237,6 +238,27 @@ figure_2b <- function(){
 }
 
 
+# as figure 2a, but for lockdown Rt - maybe suitable for supplement
+figure_2_supp <- function(){ # heatmap plot
+  predicted_R0 <- data.frame(grid_ld, vals_ld)
+  names(predicted_R0) <- c("Temperature", "Pop_density", "Rt")
+  
+  heatmap_plot <- ggplot(predicted_R0, aes(x = Temperature, y = Pop_density)) + 
+    geom_tile(aes(fill = Rt)) +
+    geom_point(data = USA_Rt_data, aes(x = Temperature, y = Pop_density, fill = Rt), size = 4, shape = 21) +
+    geom_text(data = USA_Rt_data, aes(x = Temperature, y = Pop_density, label = State), hjust = 0, vjust = 0, 
+              position = position_nudge(y = 0.05), col = "white") +
+    scale_fill_viridis_c(limits = c(0, 4)) +
+    #scale_fill_gradient(low = "blue", high = "yellow") +
+    scale_x_continuous(expand = c(0, 0)) +
+    scale_y_log10(expand = c(0, 0)) +
+    labs(x = "Temperature (°C)",
+         y = expression(paste("Population density (people ", km^-2, ")")),
+         fill = expression(R[0])) +
+    main_theme +
+    theme(aspect.ratio = 1)
+  ggsave("ms-env/heatmap_Rt.png", heatmap_plot)
+}
 
 ##################################
 # --- Supplementary analyses --- #
