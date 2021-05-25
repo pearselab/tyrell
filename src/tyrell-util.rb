@@ -7,7 +7,7 @@ require 'open-uri'
 require 'selenium-webdriver'
 
 def stream_file(url, save_name)
-  download = open(url)
+  download = URI.open(url)
   IO.copy_stream(download, save_name)
   return save_name
 end
