@@ -425,35 +425,3 @@ figure_S3()
 figure_S_extra_a()
 figure_S_extra_b()
 
-
-# -- Old depreciated stuff -- #
-
-
-# can we plot the USA model residuals onto the US states map?
-# i.e. which states have higher R0 than our model predicts, which have lower?
-if(FALSE){
-library("usmap")
-
-# list of all US states
-us_state_list <- data.frame(unique(usmap::us_map()$abbr))
-names(us_state_list) <- c("state")
-
-# get residuals from the temp + pop density US model
-
-d$all_residuals <- residuals(lm(R0 ~ Temperature + log10(Pop_density), data = d))
-# d$all_residuals <- residuals(lm(R0 ~ log(Pop_density), data = d))
-# d$all_residuals <- residuals(lm(R0 ~ Temperature, data = d))
-
-
-us_residuals_data <- d[,c("State", "all_residuals")]
-names(us_residuals_data) <- c("state", "value")
-us_state_data <- merge(x = us_state_list, y = us_residuals_data, by.x = "state", by.y = "state", all.x = TRUE)
-
-png("ms-env/USA_residuals_map.png", width = 800, height = 600)
-plot_usmap(data = us_state_data, values = "value") +
-  scale_fill_gradient2(low = "blue", mid = "white", high = "red", name = "Model Residuals") +
-  theme(legend.text = element_text(size = 12),
-        legend.title = element_text(size = 14),
-        legend.position = c(0, 0.15))
-dev.off()
-}

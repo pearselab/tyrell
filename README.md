@@ -13,13 +13,15 @@ _If you are interested in reproducing the analysis within one of our manuscripts
 ### Smith et al. (2020) DOI: 10.1101/2020.09.12.20193250
 To work with the data and outputs in our manuscript:
 
-1. Download this zip-file (https://www.dropbox.com/s/pc41n0k3nps86ff/tyrell-ms1envus-Smith2020etal-20200916.zip?dl=0).
+1. Download the quickstart zip-file, doi: [10.5281/zenodo.4884696](https://doi.org/10.5281/zenodo.4884696).
 2. Unzip it on your computer.
 3. The folder `ms-env` contains everything you need: 
    1. Data are in the folder `clean-data`.
-   2. Independent regression scripts are in files starting with `r0-`.
-   3. Semi-mechanistic model scripts and posterior distributions are in files starting with `rt-`.
-4. (Optional) This file (https://www.dropbox.com/s/8kakwt67zi0s2cg/rt-bayes-27082020-0358.Rdata?dl=0) contains the workspace from the Bayesian run used in the manuscript. It is 4.1Gb in size, but is available for download if you wish.
+   2. To run independent regressions and generate results run: `Rscript ms-env/r0-models-plots.R`
+   3. The code to run semi-mechanistic model scripts directly are also provided: `rt-bayes-model`.
+4. Running the downstream analyses from our Bayesian model run:
+   1. Download the workspace from figshare, doi: [10.6084/m9.figshare.14696841](https://doi.org/10.6084/m9.figshare.14696841) and place in the ms-env folder. Files are large and this also contains the workspaces from null models (approx 9.5Gb total).
+   2. Run the downstream analyses on the provided workspace with `Rscript ms-env/rt-downstream.R 27082020-0358`
 
 If you want to re-build everything (data and analyses) from scratch, follow the installation instructions below and then run `rake ms1_env_US`. Note that this will take several days even on a computer with 12 processor cores, and you are responsible for checking your Bayesian model outputs for validity. To run everything from scratch, you will need to carry out installation steps 1-6 and 8-10 below.
 
