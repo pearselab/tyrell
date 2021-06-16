@@ -67,25 +67,26 @@ end
 
 # Install
 desc "Install all software and setup tyrell folders"
-task :install => [:before_install, "timestamp.yml", :folders, :r_packages, :setup_cds_api,:setup_nasa_api]
+task :install => [:before_install, "timestamp.yml", :folders, :r_packages]
 task :before_install do
   puts "\t ... Installing software and setting up tyrell folders"
 end
 
 # Download data
 desc "Download raw case data"
-task :dwn_data_cases => ["raw-data/cases", :raw_jhu, "raw-data/cases/ecdc-cases.csv", "raw-data/cases/ecjrcdc-regions.csv", "raw-data/cases/ecjrcdc-countries.csv", "raw-data/cases/cvodidh-admin1.csv", "raw-data/cases/cvodidh-admin2.csv", "raw-data/cases/cvodidh-admin3.csv", "raw-data/cases/imperial-europe-pred.csv", "raw-data/cases/imperial-usa-pred.csv", "raw-data/cases/imperial-usa-pred-2020-05-25.csv", "raw-data/cases/imperial-uk-pred.csv", "raw-data/cases/imperial-lmic-pred.csv", "raw-data/cases/ihme-summary.csv", "raw-data/cases/who-interventions.xlsx", "raw-data/cases/imperial-interventions.csv", "raw-data/cases/oxford-interventions.csv", :dwn_uk_deaths]
+task :dwn_data_cases => ["raw-data/cases", :raw_jhu, "raw-data/cases/ecdc-cases.csv", "raw-data/cases/ecjrcdc-regions.csv", "raw-data/cases/ecjrcdc-countries.csv", "raw-data/cases/cvodidh-admin1.csv", "raw-data/cases/cvodidh-admin2.csv", "raw-data/cases/cvodidh-admin3.csv", "raw-data/cases/imperial-uk-pred.csv", "raw-data/cases/imperial-lmic-pred.csv", "raw-data/cases/ihme-summary.csv", "raw-data/cases/who-interventions.xlsx", "raw-data/cases/imperial-interventions.csv", "raw-data/cases/oxford-interventions.csv", :dwn_uk_deaths]
 
 desc "Download all raw data"
 task :dwn_data => [:before_dwn_data,
+                   "raw-data/UK-population.xls", # need to do this first otherwise uk case script won't run
                    :dwn_data_cases,
-                   "raw-data/gis", "raw-data/gis/denvfoimap-raster.RDS", :raw_gadm, "raw-data/gis/cds-era5-temp-hourly.grib", "raw-data/gis/cds-era5-humid-hourly.grib", "raw-data/gis/cds-era5-uv-hourly.grib", #"raw-data/gis/cds-cams-pm2pt5-hourly.grib",
+                   "raw-data/gis", "raw-data/gis/denvfoimap-raster.RDS", :raw_gadm,
                    "raw-data/gis/NUTS_Level_1__January_2018__Boundaries", "raw-data/gis/Local_Authority_Districts__December_2019__Boundaries_UK_BFC",
-                   "raw-data/UK-population.xls",
-                   "ext-data/", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif", "ext-data/gpw_v4_population_density_rev11_2020_15_min.tif",
+                   "ext-data/",
                    "raw-data/google-mobility.csv", "raw-data/USstatesCov19distancingpolicy.csv", "raw-data/usa-regions.csv", 
                    "raw-data/pop-urban-pct-historical.xls", "ext-data/APM-Report.xls",
-                   "raw-data/genetic", :raw_nxtstr, :raw_imptfmods, "raw-data/rambaut-nomenclature"]
+                   "raw-data/genetic", :raw_nxtstr, :raw_imptfmods, "raw-data/rambaut-nomenclature",
+                   :clim_av, :pop_av] # new tasks here that download climate and pop data from new repo
                    
 task :before_dwn_data do
   puts "\t ... Downloading raw data (can take a long time)"
@@ -93,7 +94,7 @@ end
 
 # Clean data
 desc "Clean (process) all raw data"
-task :cln_data => [:before_cln_data, :cln_gadm, :cln_denvfoi_rasters, :cln_worldclim, :cln_cdsear5_hourly, :cln_cdsear5_daily, :cln_gpw_popdens, :cln_airport_data, :join_R_climate]
+task :cln_data => [:before_cln_data, :cln_gadm, :cln_denvfoi_rasters, :cln_worldclim, :cln_airport_data, :join_R_climate]
 task :before_cln_data do
   puts "\t ... Processing raw data"
 end

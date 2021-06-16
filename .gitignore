@@ -17,3 +17,4 @@ raw-data/*
 timestamp.yml
 ms-env/*.pdf
 ms-env/*.RDS
+wc10/*
