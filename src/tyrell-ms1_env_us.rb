@@ -1,10 +1,12 @@
 desc "Fit R0 environmental models"
-task :ms1_r0_models => [:cln_cdsear5_daily, "clean-data/climate_and_R0_USA.csv","clean-data/climate_and_lockdown_Rt_USA.csv"] do
+task :ms1_r0_models => ["clean-data/climate_and_R0_USA.csv","clean-data/climate_and_lockdown_Rt_USA.csv"] do
+  puts "\t ... Repeating independent regression analyses"
   `Rscript ms-env/r0-models-plots.R > ms-env/STDOUT-r0-regression-models.txt`
 end
 
 desc "Fit Rt epidemiological models"
-task :ms1_rt_models => ["temp-dailymean-states","population-density-states"].map!{|x| "clean-data/#{x}.RDS"} + [:cln_cdsear5_daily, "imptf-models/covid19model-6.0"] do
+task :ms1_rt_models => ["temp-dailymean-states","population-density-states"].map!{|x| "clean-data/#{x}.RDS"} + ["imptf-models/covid19model-6.0"] do
+  puts "\t ... Repeating hierarchical Bayesian modelling - this will take a LONG time"
   datestamp = Time.now.strftime("%d%m%Y-%H%M")
   FileUtils.cp ["ms-env/rt-bayes-model.R","ms-env/rt-bayes-model.stan"], "imptf-models/covid19model-6.0/"
   Dir.chdir "imptf-models/covid19model-6.0/" do

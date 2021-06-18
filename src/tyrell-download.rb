@@ -16,7 +16,7 @@ file "raw-data/cases/ihme-summary.csv" do
     Dir.chdir("tmp-ihme") do 
       unzip(stream_file("https://ihmecovid19storage.blob.core.windows.net/latest/ihme-covid19.zip", "ihme.zip"))
       FileUtils.rm "ihme.zip"
-      FileUtils.mv Dir["*/Summary_stats_all_locs.csv"][0], "../ihme-summary.csv"
+      FileUtils.cp "Summary_stats_all_locs.csv", "../ihme-summary.csv"
     end
     FileUtils.rm_r "tmp-ihme"
   end
@@ -40,14 +40,15 @@ file "raw-data/cases/cvodidh-admin2.csv" do dwn_file("raw-data/cases", "https://
 desc "Download COVID-19 Data Hub admin3 case data"
 file "raw-data/cases/cvodidh-admin3.csv" do dwn_file("raw-data/cases", "https://storage.covid19datahub.io/data-3.csv", "cvodidh-admin3.csv") end
 
-desc "Download Imperial COVID-19 Europe predictions"
-file "raw-data/cases/imperial-europe-pred.csv" do dwn_file("raw-data/cases", "https://mrc-ide.github.io/covid19estimates/data/results.csv", "imperial-europe-pred.csv") end
+# TS: these links don't exist anymore
+#~ desc "Download Imperial COVID-19 Europe predictions"
+#~ file "raw-data/cases/imperial-europe-pred.csv" do dwn_file("raw-data/cases", "https://mrc-ide.github.io/covid19estimates/data/results.csv", "imperial-europe-pred.csv") end
 
-desc "Download Imperial COVID-19 USA predictions"
-file "raw-data/cases/imperial-usa-pred.csv" do dwn_file("raw-data/cases", "https://mrc-ide.github.io/covid19usa/downloads/data-model-estimates.csv", "imperial-usa-pred.csv") end
+#~ desc "Download Imperial COVID-19 USA predictions"
+#~ file "raw-data/cases/imperial-usa-pred.csv" do dwn_file("raw-data/cases", "https://mrc-ide.github.io/covid19usa/downloads/data-model-estimates.csv", "imperial-usa-pred.csv") end
 
-desc "Download Imperial COVID-19 USA predictions specific to Imperial Report 23 release"
-file "raw-data/cases/imperial-usa-pred-2020-05-25.csv" do dwn_file("raw-data/cases", "https://mrc-ide.github.io/covid19usa/downloads/archive/2020-05-25/data-model-estimates.csv", "imperial-usa-pred-2020-05-25.csv") end
+#~ desc "Download Imperial COVID-19 USA predictions specific to Imperial Report 23 release"
+#~ file "raw-data/cases/imperial-usa-pred-2020-05-25.csv" do dwn_file("raw-data/cases", "https://mrc-ide.github.io/covid19usa/downloads/archive/2020-05-25/data-model-estimates.csv", "imperial-usa-pred-2020-05-25.csv") end
 
 
 desc "Download Imperial COVID-19 UK LTLA predictions"
@@ -89,13 +90,25 @@ end
 
 
 desc "Download UK death/cases data"
-task :dwn_uk_deaths => ["raw-data/cases/uk-regional.csv", "raw-data/cases/uk-utla.csv", "raw-data/cases/uk-ltla.csv"] do
+task :dwn_uk_deaths => ["raw-data/cases/uk-regional.csv", "raw-data/cases/uk-utla.csv", "raw-data/cases/uk-ltla.csv"]
+def dwn_uk_deaths()
   `Rscript src/get-uk-case-data.R`
   date_metadata "raw-data/cases/uk-regional.csv"
   date_metadata "raw-data/cases/uk-utla.csv"
   date_metadata "raw-data/cases/uk-ltla.csv"
 end
+file "raw-data/cases/uk-regional.csv" do dwn_uk_deaths() end
+file "raw-data/cases/uk-utla.csv" do dwn_uk_deaths() end
+file "raw-data/cases/uk-ltla.csv" do dwn_uk_deaths() end
 
+
+desc "Download vaccination data"
+file "raw-data/cases/vaccinations.csv" do
+  Dir.chdir("raw-data/cases") do
+    stream_file("https://github.com/owid/covid-19-data/raw/master/public/data/vaccinations/vaccinations.csv", "vaccinations.csv")
+  end
+  date_metadata "raw-data/cases/vaccinations.csv"
+end
 
 ################################
 # GIS ##########################
@@ -120,28 +133,47 @@ file "raw-data/gis/denvfoimap-raster.RDS" do
   stream_file("https://mrcdata.dide.ic.ac.uk/resources/DENVfoiMap/all_squares_env_var_0_1667_deg.rds", "raw-data/gis/denvfoimap-raster.RDS")
 end
 
-desc "Get hourly CDS-ERA5 temperature data"
-file "raw-data/gis/cds-era5-temp-hourly.grib" do
-  Dir.chdir("raw-data/gis") do `python3 ../../src/cds-era5-temp.py` end
-  date_metadata "raw-data/gis/cds-era5-temp-hourly.grib"
-end
-desc "Get hourly CDS-ERA5 humidity data"
-file "raw-data/gis/cds-era5-humid-hourly.grib" do
-  Dir.chdir("raw-data/gis") do `python3 ../../src/cds-era5-humid.py` end
-  date_metadata "raw-data/gis/cds-era5-humid-hourly.grib"
-end
-desc "Get hourly CDS-ERA5 UV data"
-file "raw-data/gis/cds-era5-uv-hourly.grib" do
-  Dir.chdir("raw-data/gis") do `python3 ../../src/cds-era5-uv.py` end
-  date_metadata "raw-data/gis/cds-era5-uv-hourly.grib"
-end
+# Don't need to call these tasks anymore
+#~ desc "Get hourly CDS-ERA5 temperature data"
+#~ file "raw-data/gis/cds-era5-temp-hourly.grib" do
+  #~ Dir.chdir("raw-data/gis") do `python3 ../../src/cds-era5-temp.py` end
+  #~ date_metadata "raw-data/gis/cds-era5-temp-hourly.grib"
+#~ end
+#~ desc "Get hourly CDS-ERA5 humidity data"
+#~ file "raw-data/gis/cds-era5-humid-hourly.grib" do
+  #~ Dir.chdir("raw-data/gis") do `python3 ../../src/cds-era5-humid.py` end
+  #~ date_metadata "raw-data/gis/cds-era5-humid-hourly.grib"
+#~ end
+#~ desc "Get hourly CDS-ERA5 UV data"
+#~ file "raw-data/gis/cds-era5-uv-hourly.grib" do
+  #~ Dir.chdir("raw-data/gis") do `python3 ../../src/cds-era5-uv.py` end
+  #~ date_metadata "raw-data/gis/cds-era5-uv-hourly.grib"
+#~ end
 
-# This doesn't work yet (!)
 #~ desc "Get hourly CDS-CAMS PM 2.5 data"
 #~ file "raw-data/gis/cds-cams-pm2pt5-hourly.grib" do
   #~ Dir.chdir("raw-data/gis") do `python3 ../../src/cds-cams-pm2pt5.py` end
   #~ date_metadata "raw-data/gis/cds-cams-pm2pt5-hourly.grib"
 #~ end
+
+# now we get climate data already cleaned and ready to go:
+desc "Download climate data"
+task :clim_av => ["clean-data/temp-dailymean-countries.RDS", "clean-data/temp-dailymean-states.RDS", "clean-data/humid-dailymean-countries.RDS", "clean-data/humid-dailymean-states.RDS", "clean-data/precip-dailymean-countries.RDS", "clean-data/precip-dailymean-states.RDS", "clean-data/uv-dailymean-countries.RDS", "clean-data/uv-dailymean-states.RDS"]
+file "clean-data/temp-dailymean-countries.RDS" do dwn_file("clean-data", "https://raw.githubusercontent.com/smithtp/climate-averaging/main/output/temp-dailymean-countries-cleaned.RDS", "temp-dailymean-countries.RDS") end
+file "clean-data/temp-dailymean-states.RDS" do dwn_file("clean-data", "https://raw.githubusercontent.com/smithtp/climate-averaging/main/output/temp-dailymean-states-cleaned.RDS", "temp-dailymean-states.RDS") end
+file "clean-data/humid-dailymean-countries.RDS" do dwn_file("clean-data", "https://raw.githubusercontent.com/smithtp/climate-averaging/main/output/humid-dailymean-countries-cleaned.RDS", "humid-dailymean-countries.RDS") end
+file "clean-data/humid-dailymean-states.RDS" do dwn_file("clean-data", "https://raw.githubusercontent.com/smithtp/climate-averaging/main/output/humid-dailymean-states-cleaned.RDS", "humid-dailymean-states.RDS") end
+file "clean-data/precip-dailymean-countries.RDS" do dwn_file("clean-data", "https://raw.githubusercontent.com/smithtp/climate-averaging/main/output/precip-dailymean-countries-cleaned.RDS", "precip-dailymean-countries.RDS") end
+file "clean-data/precip-dailymean-states.RDS" do dwn_file("clean-data", "https://raw.githubusercontent.com/smithtp/climate-averaging/main/output/precip-dailymean-states-cleaned.RDS", "precip-dailymean-states.RDS") end
+file "clean-data/uv-dailymean-countries.RDS" do dwn_file("clean-data", "https://raw.githubusercontent.com/smithtp/climate-averaging/main/output/uv-dailymean-countries-cleaned.RDS", "uv-dailymean-countries.RDS") end
+file "clean-data/uv-dailymean-states.RDS" do dwn_file("clean-data", "https://raw.githubusercontent.com/smithtp/climate-averaging/main/output/uv-dailymean-states-cleaned.RDS", "uv-dailymean-states.RDS") end
+
+# get population density data already cleaned and ready to go
+desc "Download pop density data"
+task :pop_av => ["clean-data/population-density-countries.RDS","clean-data/population-density-states.RDS"]
+file "clean-data/population-density-countries.RDS" do dwn_file("clean-data", "https://raw.githubusercontent.com/smithtp/climate-averaging/main/output/population-density-countries.RDS", "population-density-countries.RDS") end
+file "clean-data/population-density-states.RDS" do dwn_file("clean-data", "https://raw.githubusercontent.com/smithtp/climate-averaging/main/output/population-density-states.RDS", "population-density-states.RDS") end
+
 
 desc "Get NASA GPW 30s population density data - large file, 300mb"
 file "ext-data/gpw_v4_population_density_rev11_2020_2pt5_min.tif" do
@@ -172,23 +204,51 @@ end
 desc "Get google mobility data"
 file "raw-data/google-mobility.csv" do dwn_file("raw-data", "https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv", "google-mobility.csv") end
 
+
 # UK NUTs regions shapefile
-desc "Download UK NUTs regions shapefile"
-file "raw-data/gis/NUTS_Level_1__January_2018__Boundaries" do
+desc "Download UK NUTS regions shapefile"
+task :raw_NUTS => ["raw-data/gis/NUTS_Level_1_(January_2018)_Boundaries.cpg", "raw-data/gis/NUTS_Level_1_(January_2018)_Boundaries.dbf", "raw-data/gis/NUTS_Level_1_(January_2018)_Boundaries.prj", "raw-data/gis/NUTS_Level_1_(January_2018)_Boundaries.shp", "raw-data/gis/NUTS_Level_1_(January_2018)_Boundaries.shx"]
+def raw_NUTS()
   Dir.chdir "raw-data/gis" do
-    unzip(stream_file("https://opendata.arcgis.com/datasets/01fd6b2d7600446d8af768005992f76a_0.zip?outSR=27700", "UK-NUTS.zip"))
-    FileUtils.rm "UK-NUTS.zip"
+    Dir.mkdir "tmp-NUTS"
+    Dir.chdir("tmp-NUTS") do
+      unzip(stream_file("https://opendata.arcgis.com/datasets/01fd6b2d7600446d8af768005992f76a_0.zip?outSR=27700", "UK-NUTS.zip"))
+      FileUtils.rm "UK-NUTS.zip"
+      FileUtils.rm Dir["*.xml"]
+      FileUtils.cp Dir["*"], "../"
+    end
+    FileUtils.rm_r "tmp-NUTS"
   end
 end
+file "raw-data/gis/NUTS_Level_1_(January_2018)_Boundaries.cpg" do raw_NUTS() end
+file "raw-data/gis/NUTS_Level_1_(January_2018)_Boundaries.dbf" do raw_NUTS() end
+file "raw-data/gis/NUTS_Level_1_(January_2018)_Boundaries.prj" do raw_NUTS() end
+file "raw-data/gis/NUTS_Level_1_(January_2018)_Boundaries.shp" do raw_NUTS() end
+file "raw-data/gis/NUTS_Level_1_(January_2018)_Boundaries.shx" do raw_NUTS() end
+
 
 # UK local authorities shapefile
 desc "Download UK local authorities shapefile"
-file "raw-data/gis/Local_Authority_Districts__December_2019__Boundaries_UK_BFC" do
+task :raw_LTLAs => ["raw-data/gis/Local_Authority_Districts_(December_2019)_Boundaries_UK_BFC.cpg", "raw-data/gis/Local_Authority_Districts_(December_2019)_Boundaries_UK_BFC.dbf", "raw-data/gis/Local_Authority_Districts_(December_2019)_Boundaries_UK_BFC.prj", "raw-data/gis/Local_Authority_Districts_(December_2019)_Boundaries_UK_BFC.shp", "raw-data/gis/Local_Authority_Districts_(December_2019)_Boundaries_UK_BFC.shx"]
+def raw_LTLAs()
   Dir.chdir "raw-data/gis" do
-    unzip(stream_file("https://opendata.arcgis.com/datasets/1d78d47c87df4212b79fe2323aae8e08_0.zip?outSR=%7B%22latestWkid%22%3A27700%2C%22wkid%22%3A27700%7D", "UK-LTLA.zip"))
-    FileUtils.rm "UK-LTLA.zip"
+    Dir.mkdir "tmp-LTLAs"
+    Dir.chdir("tmp-LTLAs") do
+      unzip(stream_file("https://opendata.arcgis.com/datasets/1d78d47c87df4212b79fe2323aae8e08_0.zip?outSR=%7B%22latestWkid%22%3A27700%2C%22wkid%22%3A27700%7D", "UK-LTLA.zip"))
+      FileUtils.rm "UK-LTLA.zip"
+      FileUtils.rm Dir["*.xml"]
+      FileUtils.cp Dir["*"], "../"
+    end
+    FileUtils.rm_r "tmp-LTLAs"
   end
 end
+file "raw-data/gis/Local_Authority_Districts_(December_2019)_Boundaries_UK_BFC.cpg" do raw_LTLAs() end
+file "raw-data/gis/Local_Authority_Districts_(December_2019)_Boundaries_UK_BFC.dbf" do raw_LTLAs() end
+file "raw-data/gis/Local_Authority_Districts_(December_2019)_Boundaries_UK_BFC.prj" do raw_LTLAs() end
+file "raw-data/gis/Local_Authority_Districts_(December_2019)_Boundaries_UK_BFC.shp" do raw_LTLAs() end
+file "raw-data/gis/Local_Authority_Districts_(December_2019)_Boundaries_UK_BFC.shx" do raw_LTLAs() end
+
+
 
 ################################
 # Genetic ######################
@@ -332,6 +392,23 @@ file "raw-data/pop-urban-pct-historical.xls" do
     stream_file("https://www.icip.iastate.edu/sites/default/files/uploads/tables/population/pop-urban-pct-historical.xls", "pop-urban-pct-historical.xls")
   end
 end
+
+desc "Download Rt data relating to ms1-env analysis from zenodo"
+task :ms1_zenodo => ["clean-data/climate_and_R0_USA.csv", "clean-data/climate_and_lockdown_Rt_USA.csv"]
+def ms1_zenodo()
+  Dir.chdir "raw-data" do
+    Dir.mkdir "tmp-ms1"
+    Dir.chdir("tmp-ms1") do 
+      unzip(stream_file("https://zenodo.org/record/4884696/files/tyrell-ms1envus-20210531.zip", "ms1-env.zip"))
+      FileUtils.rm "ms1-env.zip"
+      FileUtils.cp "tyrell-ms1envus-20210531/clean-data/climate_and_R0_USA.csv", "../../clean-data"
+      FileUtils.cp "tyrell-ms1envus-20210531/clean-data/climate_and_lockdown_Rt_USA.csv", "../../clean-data"
+    end
+    FileUtils.rm_r "tmp-ms1"
+  end
+end
+
+
 
 desc "Get ASPM 77 airport data"
 file "ext-data/APM-Report.xls" do

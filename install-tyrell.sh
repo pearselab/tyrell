@@ -13,8 +13,8 @@ apt install ruby r-base-dev chromium-chromedriver gdal-bin
 gem install rake open-uri rubyzip yaml selenium-webdriver
 
 # Install Python libraries
-pip install cdsapi
+# pip install cdsapi ## no longer necessary
 
 # install climate data operators
 # NOTE: Only for Linux; for alternatives see https://code.mpimet.mpg.de/projects/cdo/wiki
-apt install cdo
+# apt install cdo ## no longer necessary

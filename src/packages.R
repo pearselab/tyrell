@@ -30,11 +30,12 @@ if(!silent.require("DENVfoiMap")){
     if(!silent.require("DENVfoiMap"))
         stop("Cannot install DENVfoiMap")
 }
-if(!silent.require("velox")){ # src/clean-gadm.R and src/worldclim.R
-    install_github("hunzikp/velox", upgrade=FALSE)
-    if(!silent.require("velox"))
-        stop("Cannot install velox")
-}
+# Velox isn't being maintained anymore
+# if(!silent.require("velox")){ # src/clean-gadm.R and src/worldclim.R
+#     install_github("hunzikp/velox", upgrade=FALSE)
+#     if(!silent.require("velox"))
+#         stop("Cannot install velox")
+# }
 if(!silent.require("ggbiplot")){ # ms-env PCAs
     install_github("vqv/ggbiplot", upgrade=FALSE)
     if(!silent.require("ggbiplot"))

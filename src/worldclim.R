@@ -7,21 +7,21 @@ states <- shapefile("clean-data/gadm-states.shp")
 
 # Get WORLDCLIM data
 clim_variables <- c("t_min", "t_mean", "t_max")
-tmean <- velox(getData("worldclim",var="tmean",res=10) / 10)
-tmin <- velox(getData("worldclim",var="tmin",res=10)   / 10)
-tmax <- velox(getData("worldclim",var="tmax",res=10)   / 10)
+tmean <- getData("worldclim",var="tmean",res=10) / 10
+tmin <- getData("worldclim",var="tmin",res=10)   / 10
+tmax <- getData("worldclim",var="tmax",res=10)   / 10
 
 # Average across countries and states
 c.clim <- abind(
-    tmean$extract(countries, fun=function(x) median(x, na.rm=TRUE)),
-    tmin$extract(countries, fun=function(x) median(x, na.rm=TRUE)),
-    tmax$extract(countries, fun=function(x) median(x, na.rm=TRUE)),
+    raster::extract(x = tmean, y = countries, fun=function(x, na.rm = TRUE)median(x, na.rm = TRUE), small = TRUE),
+    raster::extract(x = tmin, y = countries, fun=function(x, na.rm = TRUE)median(x, na.rm = TRUE), small = TRUE),
+    raster::extract(x = tmax, y = countries, fun=function(x, na.rm = TRUE)median(x, na.rm = TRUE), small = TRUE),
     along=3
 )
 s.clim <- abind(
-    tmean$extract(states, fun=function(x) median(x, na.rm=TRUE)),
-    tmin$extract(states, fun=function(x) median(x, na.rm=TRUE)),
-    tmax$extract(states, fun=function(x) median(x, na.rm=TRUE)),
+    raster::extract(x = tmean, y = states, fun=function(x, na.rm = TRUE)median(x, na.rm = TRUE), small = TRUE),
+    raster::extract(x = tmin, y = states, fun=function(x, na.rm = TRUE)median(x, na.rm = TRUE), small = TRUE),
+    raster::extract(x = tmax, y = states, fun=function(x, na.rm = TRUE)median(x, na.rm = TRUE), small = TRUE),
     along=3
 )
 dimnames(c.clim) <- list(

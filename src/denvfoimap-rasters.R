@@ -15,8 +15,7 @@ avg.poly.clim <- function(shapefile, data, var, shp.metadata, FUNC=median){
     if(!var %in% colnames(data))
         stop("Invalid climatic variable")
     data <- rasterFromXYZ(data.frame(data[,c("longitude", "latitude",var)]))
-    data <- velox(data)
-    return(data$extract(shapefile, fun=function(x) FUNC(x, na.rm=TRUE)))
+    return(raster::extract(data, shapefile, fun=function(x, na.rm = TRUE) FUNC(x, na.rm=TRUE)))
     
     #return(setNames(
     #    sapply(
