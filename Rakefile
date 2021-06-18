@@ -81,13 +81,14 @@ task :dwn_data => [:before_dwn_data,
                    "raw-data/UK-population.xls", # need to do this first otherwise uk case script won't run
                    :dwn_data_cases,
                    "raw-data/gis", "raw-data/gis/denvfoimap-raster.RDS", :raw_gadm,
-                   "raw-data/gis/NUTS_Level_1__January_2018__Boundaries", "raw-data/gis/Local_Authority_Districts__December_2019__Boundaries_UK_BFC",
+                   :raw_NUTS, :raw_LTLAs, # these tasks grab shapegiles for local UK areas
                    "ext-data/",
                    "raw-data/google-mobility.csv", "raw-data/USstatesCov19distancingpolicy.csv", "raw-data/usa-regions.csv", 
                    "raw-data/pop-urban-pct-historical.xls", "ext-data/APM-Report.xls",
                    "raw-data/genetic", :raw_nxtstr, :raw_imptfmods, "raw-data/rambaut-nomenclature",
                    :clim_av, :pop_av, # new tasks here that download climate and pop data from new repo
-                   :ms1_zenodo] # this task to pull the Rt data for our analysis from the zenodo version
+                   :ms1_zenodo # this task to pull the Rt data for our analysis from the zenodo version
+                   ]
                    
 task :before_dwn_data do
   puts "\t ... Downloading raw data (can take a long time)"

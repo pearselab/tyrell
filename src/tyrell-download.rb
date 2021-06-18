@@ -204,23 +204,51 @@ end
 desc "Get google mobility data"
 file "raw-data/google-mobility.csv" do dwn_file("raw-data", "https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv", "google-mobility.csv") end
 
+
 # UK NUTs regions shapefile
-desc "Download UK NUTs regions shapefile"
-file "raw-data/gis/NUTS_Level_1__January_2018__Boundaries" do
+desc "Download UK NUTS regions shapefile"
+task :raw_NUTS => ["raw-data/gis/NUTS_Level_1_(January_2018)_Boundaries.cpg", "raw-data/gis/NUTS_Level_1_(January_2018)_Boundaries.dbf", "raw-data/gis/NUTS_Level_1_(January_2018)_Boundaries.prj", "raw-data/gis/NUTS_Level_1_(January_2018)_Boundaries.shp", "raw-data/gis/NUTS_Level_1_(January_2018)_Boundaries.shx"]
+def raw_NUTS()
   Dir.chdir "raw-data/gis" do
-    unzip(stream_file("https://opendata.arcgis.com/datasets/01fd6b2d7600446d8af768005992f76a_0.zip?outSR=27700", "UK-NUTS.zip"))
-    FileUtils.rm "UK-NUTS.zip"
+    Dir.mkdir "tmp-NUTS"
+    Dir.chdir("tmp-NUTS") do
+      unzip(stream_file("https://opendata.arcgis.com/datasets/01fd6b2d7600446d8af768005992f76a_0.zip?outSR=27700", "UK-NUTS.zip"))
+      FileUtils.rm "UK-NUTS.zip"
+      FileUtils.rm Dir["*.xml"]
+      FileUtils.cp Dir["*"], "../"
+    end
+    FileUtils.rm_r "tmp-NUTS"
   end
 end
+file "raw-data/gis/NUTS_Level_1_(January_2018)_Boundaries.cpg" do raw_NUTS() end
+file "raw-data/gis/NUTS_Level_1_(January_2018)_Boundaries.dbf" do raw_NUTS() end
+file "raw-data/gis/NUTS_Level_1_(January_2018)_Boundaries.prj" do raw_NUTS() end
+file "raw-data/gis/NUTS_Level_1_(January_2018)_Boundaries.shp" do raw_NUTS() end
+file "raw-data/gis/NUTS_Level_1_(January_2018)_Boundaries.shx" do raw_NUTS() end
+
 
 # UK local authorities shapefile
 desc "Download UK local authorities shapefile"
-file "raw-data/gis/Local_Authority_Districts__December_2019__Boundaries_UK_BFC" do
+task :raw_LTLAs => ["raw-data/gis/Local_Authority_Districts_(December_2019)_Boundaries_UK_BFC.cpg", "raw-data/gis/Local_Authority_Districts_(December_2019)_Boundaries_UK_BFC.dbf", "raw-data/gis/Local_Authority_Districts_(December_2019)_Boundaries_UK_BFC.prj", "raw-data/gis/Local_Authority_Districts_(December_2019)_Boundaries_UK_BFC.shp", "raw-data/gis/Local_Authority_Districts_(December_2019)_Boundaries_UK_BFC.shx"]
+def raw_LTLAs()
   Dir.chdir "raw-data/gis" do
-    unzip(stream_file("https://opendata.arcgis.com/datasets/1d78d47c87df4212b79fe2323aae8e08_0.zip?outSR=%7B%22latestWkid%22%3A27700%2C%22wkid%22%3A27700%7D", "UK-LTLA.zip"))
-    FileUtils.rm "UK-LTLA.zip"
+    Dir.mkdir "tmp-LTLAs"
+    Dir.chdir("tmp-LTLAs") do
+      unzip(stream_file("https://opendata.arcgis.com/datasets/1d78d47c87df4212b79fe2323aae8e08_0.zip?outSR=%7B%22latestWkid%22%3A27700%2C%22wkid%22%3A27700%7D", "UK-LTLA.zip"))
+      FileUtils.rm "UK-LTLA.zip"
+      FileUtils.rm Dir["*.xml"]
+      FileUtils.cp Dir["*"], "../"
+    end
+    FileUtils.rm_r "tmp-LTLAs"
   end
 end
+file "raw-data/gis/Local_Authority_Districts_(December_2019)_Boundaries_UK_BFC.cpg" do raw_LTLAs() end
+file "raw-data/gis/Local_Authority_Districts_(December_2019)_Boundaries_UK_BFC.dbf" do raw_LTLAs() end
+file "raw-data/gis/Local_Authority_Districts_(December_2019)_Boundaries_UK_BFC.prj" do raw_LTLAs() end
+file "raw-data/gis/Local_Authority_Districts_(December_2019)_Boundaries_UK_BFC.shp" do raw_LTLAs() end
+file "raw-data/gis/Local_Authority_Districts_(December_2019)_Boundaries_UK_BFC.shx" do raw_LTLAs() end
+
+
 
 ################################
 # Genetic ######################
@@ -366,7 +394,8 @@ file "raw-data/pop-urban-pct-historical.xls" do
 end
 
 desc "Download Rt data relating to ms1-env analysis from zenodo"
-task :ms1_zenodo do
+task :ms1_zenodo => ["clean-data/climate_and_R0_USA.csv", "clean-data/climate_and_lockdown_Rt_USA.csv"]
+def ms1_zenodo()
   Dir.chdir "raw-data" do
     Dir.mkdir "tmp-ms1"
     Dir.chdir("tmp-ms1") do 
