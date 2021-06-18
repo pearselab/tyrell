@@ -78,15 +78,15 @@ task :dwn_data_cases => ["raw-data/cases", :raw_jhu, "raw-data/cases/ecdc-cases.
 
 desc "Download all raw data"
 task :dwn_data => [:before_dwn_data,
-                   "raw-data/UK-population.xls", # need to do this first otherwise uk case script won't run
+                   "raw-data", "raw-data/UK-population.xls", # need to do this first otherwise uk case script won't run
                    :dwn_data_cases,
                    "raw-data/gis", "raw-data/gis/denvfoimap-raster.RDS", :raw_gadm,
                    :raw_NUTS, :raw_LTLAs, # these tasks grab shapegiles for local UK areas
-                   "ext-data/",
+                   "ext-data",
                    "raw-data/google-mobility.csv", "raw-data/USstatesCov19distancingpolicy.csv", "raw-data/usa-regions.csv", 
                    "raw-data/pop-urban-pct-historical.xls", "ext-data/APM-Report.xls",
                    "raw-data/genetic", :raw_nxtstr, :raw_imptfmods, "raw-data/rambaut-nomenclature",
-                   :clim_av, :pop_av, # new tasks here that download climate and pop data from new repo
+                   "clean-data", :clim_av, :pop_av, # new tasks here that download climate and pop data from new repo
                    :ms1_zenodo # this task to pull the Rt data for our analysis from the zenodo version
                    ]
                    

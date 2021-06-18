@@ -407,7 +407,8 @@ def ms1_zenodo()
     FileUtils.rm_r "tmp-ms1"
   end
 end
-
+file "clean-data/climate_and_R0_USA.csv" do ms1_zenodo() end
+file "clean-data/climate_and_lockdown_Rt_USA.csv" do ms1_zenodo() end
 
 
 desc "Get ASPM 77 airport data"
