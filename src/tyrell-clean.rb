@@ -147,17 +147,17 @@ end
 file "clean-data/airport_data.csv" => "ext-data/APM-Report.xls" do cln_airport_data() end
 
 
-desc "Combine cleaned environmental data with R0/Rt estimates"
-task :join_R_climate => ["clean-data/climate_and_R0_USA.csv","clean-data/climate_and_lockdown_Rt_USA.csv", "clean-data/daily_climate_and_Rt_USA.csv"]
-def join_R_climate()
-  `Rscript src/combine-R0-and-environment-USA.R`
-  date_metadata "clean-data/climate_and_R0_USA.csv"
-  date_metadata "clean-data/climate_and_lockdown_Rt_USA.csv"
-  date_metadata "clean-data/daily_climate_and_Rt_USA.csv"
-end
-file "clean-data/climate_and_R0_USA.csv" => ["clean-data/temp-dailymean-states.RDS", "clean-data/humid-dailymean-states.RDS", "clean-data/population-density-states.RDS", "raw-data/cases/imperial-usa-pred-2020-05-25.csv", "raw-data/google-mobility.csv", "raw-data/USstatesCov19distancingpolicy.csv", "raw-data/pop-urban-pct-historical.xls", "clean-data/airport_data.csv"]+shp_fls("clean-data/gadm-states",true) do join_R_climate() end
-file "clean-data/climate_and_lockdown_Rt_USA.csv" do join_R_climate() end
-file "clean-data/daily_climate_and_Rt_USA.csv" do join_R_climate() end
+#~ desc "Combine cleaned environmental data with R0/Rt estimates"
+#~ task :join_R_climate => ["clean-data/climate_and_R0_USA.csv","clean-data/climate_and_lockdown_Rt_USA.csv", "clean-data/daily_climate_and_Rt_USA.csv"]
+#~ def join_R_climate()
+  #~ `Rscript src/combine-R0-and-environment-USA.R`
+  #~ date_metadata "clean-data/climate_and_R0_USA.csv"
+  #~ date_metadata "clean-data/climate_and_lockdown_Rt_USA.csv"
+  #~ date_metadata "clean-data/daily_climate_and_Rt_USA.csv"
+#~ end
+#~ file "clean-data/climate_and_R0_USA.csv" => ["clean-data/temp-dailymean-states.RDS", "clean-data/humid-dailymean-states.RDS", "clean-data/population-density-states.RDS", "raw-data/cases/imperial-usa-pred-2020-05-25.csv", "raw-data/google-mobility.csv", "raw-data/USstatesCov19distancingpolicy.csv", "raw-data/pop-urban-pct-historical.xls", "clean-data/airport_data.csv"]+shp_fls("clean-data/gadm-states",true) do join_R_climate() end
+#~ file "clean-data/climate_and_lockdown_Rt_USA.csv" do join_R_climate() end
+#~ file "clean-data/daily_climate_and_Rt_USA.csv" do join_R_climate() end
 
 
 desc "Combine cleaned environmental data with UK death data"

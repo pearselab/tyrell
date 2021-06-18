@@ -102,6 +102,14 @@ file "raw-data/cases/uk-utla.csv" do dwn_uk_deaths() end
 file "raw-data/cases/uk-ltla.csv" do dwn_uk_deaths() end
 
 
+desc "Download vaccination data"
+file "raw-data/cases/vaccinations.csv" do
+  Dir.chdir("raw-data/cases") do
+    stream_file("https://github.com/owid/covid-19-data/raw/master/public/data/vaccinations/vaccinations.csv", "vaccinations.csv")
+  end
+  date_metadata "raw-data/cases/vaccinations.csv"
+end
+
 ################################
 # GIS ##########################
 ################################
@@ -356,6 +364,22 @@ file "raw-data/pop-urban-pct-historical.xls" do
     stream_file("https://www.icip.iastate.edu/sites/default/files/uploads/tables/population/pop-urban-pct-historical.xls", "pop-urban-pct-historical.xls")
   end
 end
+
+desc "Download Rt data relating to ms1-env analysis from zenodo"
+task :ms1_zenodo do
+  Dir.chdir "raw-data" do
+    Dir.mkdir "tmp-ms1"
+    Dir.chdir("tmp-ms1") do 
+      unzip(stream_file("https://zenodo.org/record/4884696/files/tyrell-ms1envus-20210531.zip", "ms1-env.zip"))
+      FileUtils.rm "ms1-env.zip"
+      FileUtils.cp "tyrell-ms1envus-20210531/clean-data/climate_and_R0_USA.csv", "../../clean-data"
+      FileUtils.cp "tyrell-ms1envus-20210531/clean-data/climate_and_lockdown_Rt_USA.csv", "../../clean-data"
+    end
+    FileUtils.rm_r "tmp-ms1"
+  end
+end
+
+
 
 desc "Get ASPM 77 airport data"
 file "ext-data/APM-Report.xls" do

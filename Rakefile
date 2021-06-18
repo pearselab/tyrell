@@ -74,7 +74,7 @@ end
 
 # Download data
 desc "Download raw case data"
-task :dwn_data_cases => ["raw-data/cases", :raw_jhu, "raw-data/cases/ecdc-cases.csv", "raw-data/cases/ecjrcdc-regions.csv", "raw-data/cases/ecjrcdc-countries.csv", "raw-data/cases/cvodidh-admin1.csv", "raw-data/cases/cvodidh-admin2.csv", "raw-data/cases/cvodidh-admin3.csv", "raw-data/cases/imperial-uk-pred.csv", "raw-data/cases/imperial-lmic-pred.csv", "raw-data/cases/ihme-summary.csv", "raw-data/cases/who-interventions.xlsx", "raw-data/cases/imperial-interventions.csv", "raw-data/cases/oxford-interventions.csv", :dwn_uk_deaths]
+task :dwn_data_cases => ["raw-data/cases", :raw_jhu, "raw-data/cases/ecdc-cases.csv", "raw-data/cases/ecjrcdc-regions.csv", "raw-data/cases/ecjrcdc-countries.csv", "raw-data/cases/cvodidh-admin1.csv", "raw-data/cases/cvodidh-admin2.csv", "raw-data/cases/cvodidh-admin3.csv", "raw-data/cases/imperial-uk-pred.csv", "raw-data/cases/imperial-lmic-pred.csv", "raw-data/cases/ihme-summary.csv", "raw-data/cases/who-interventions.xlsx", "raw-data/cases/imperial-interventions.csv", "raw-data/cases/oxford-interventions.csv", "raw-data/cases/vaccinations.csv", :dwn_uk_deaths]
 
 desc "Download all raw data"
 task :dwn_data => [:before_dwn_data,
@@ -86,7 +86,8 @@ task :dwn_data => [:before_dwn_data,
                    "raw-data/google-mobility.csv", "raw-data/USstatesCov19distancingpolicy.csv", "raw-data/usa-regions.csv", 
                    "raw-data/pop-urban-pct-historical.xls", "ext-data/APM-Report.xls",
                    "raw-data/genetic", :raw_nxtstr, :raw_imptfmods, "raw-data/rambaut-nomenclature",
-                   :clim_av, :pop_av] # new tasks here that download climate and pop data from new repo
+                   :clim_av, :pop_av, # new tasks here that download climate and pop data from new repo
+                   :ms1_zenodo] # this task to pull the Rt data for our analysis from the zenodo version
                    
 task :before_dwn_data do
   puts "\t ... Downloading raw data (can take a long time)"
@@ -94,7 +95,7 @@ end
 
 # Clean data
 desc "Clean (process) all raw data"
-task :cln_data => [:before_cln_data, :cln_gadm, :cln_denvfoi_rasters, :cln_worldclim, :cln_airport_data, :join_R_climate]
+task :cln_data => [:before_cln_data, :cln_gadm, :cln_denvfoi_rasters, :cln_worldclim, :cln_airport_data]
 task :before_cln_data do
   puts "\t ... Processing raw data"
 end
@@ -115,13 +116,13 @@ end
 
 # Update data
 desc "Update case/mortality raw-data"
-task :update_cases => [:before_update_cases, :update_cases, :purge_clean_cases]
-task :before_update_data do
+task :update_cases => [:before_update_cases, :update_case_data, :purge_clean_cases]
+task :before_update_cases do
   puts "\t ... Updating changable raw data; purging relevant clean data"
 end
 
 desc "Update raw data"
-task :update_cases do
+task :update_case_data do
   FileUtils.rm_r "raw-data/cases"
   Rake.application[:dwn_data_cases].invoke
 end
