@@ -158,21 +158,23 @@ end
 
 # now we get climate data already cleaned and ready to go:
 desc "Download climate data"
-task :clim_av => ["clean-data/temp-dailymean-countries.RDS", "clean-data/temp-dailymean-states.RDS", "clean-data/humid-dailymean-countries.RDS", "clean-data/humid-dailymean-states.RDS", "clean-data/precip-dailymean-countries.RDS", "clean-data/precip-dailymean-states.RDS", "clean-data/uv-dailymean-countries.RDS", "clean-data/uv-dailymean-states.RDS"]
-file "clean-data/temp-dailymean-countries.RDS" do dwn_file("clean-data", "https://raw.githubusercontent.com/smithtp/climate-averaging/main/output/temp-dailymean-countries-cleaned.RDS", "temp-dailymean-countries.RDS") end
-file "clean-data/temp-dailymean-states.RDS" do dwn_file("clean-data", "https://raw.githubusercontent.com/smithtp/climate-averaging/main/output/temp-dailymean-states-cleaned.RDS", "temp-dailymean-states.RDS") end
-file "clean-data/humid-dailymean-countries.RDS" do dwn_file("clean-data", "https://raw.githubusercontent.com/smithtp/climate-averaging/main/output/humid-dailymean-countries-cleaned.RDS", "humid-dailymean-countries.RDS") end
-file "clean-data/humid-dailymean-states.RDS" do dwn_file("clean-data", "https://raw.githubusercontent.com/smithtp/climate-averaging/main/output/humid-dailymean-states-cleaned.RDS", "humid-dailymean-states.RDS") end
-file "clean-data/precip-dailymean-countries.RDS" do dwn_file("clean-data", "https://raw.githubusercontent.com/smithtp/climate-averaging/main/output/precip-dailymean-countries-cleaned.RDS", "precip-dailymean-countries.RDS") end
-file "clean-data/precip-dailymean-states.RDS" do dwn_file("clean-data", "https://raw.githubusercontent.com/smithtp/climate-averaging/main/output/precip-dailymean-states-cleaned.RDS", "precip-dailymean-states.RDS") end
-file "clean-data/uv-dailymean-countries.RDS" do dwn_file("clean-data", "https://raw.githubusercontent.com/smithtp/climate-averaging/main/output/uv-dailymean-countries-cleaned.RDS", "uv-dailymean-countries.RDS") end
-file "clean-data/uv-dailymean-states.RDS" do dwn_file("clean-data", "https://raw.githubusercontent.com/smithtp/climate-averaging/main/output/uv-dailymean-states-cleaned.RDS", "uv-dailymean-states.RDS") end
+task :clim_av => ["clean-data/temp-dailymean-countries.RDS", "clean-data/temp-dailymean-states.RDS", "clean-data/spechumid-dailymean-countries.RDS", "clean-data/spechumid-dailymean-states.RDS", "clean-data/relhumid-dailymean-countries.RDS", "clean-data/relhumid-dailymean-states.RDS", "clean-data/precip-dailymean-countries.RDS", "clean-data/precip-dailymean-states.RDS", "clean-data/uv-dailymean-countries.RDS", "clean-data/uv-dailymean-states.RDS"]
+file "clean-data/temp-dailymean-countries.RDS" do dwn_file("clean-data", "https://raw.githubusercontent.com/pearselab/areadata/main/output/temp-dailymean-countries-cleaned.RDS", "temp-dailymean-countries.RDS") end
+file "clean-data/temp-dailymean-states.RDS" do dwn_file("clean-data", "https://raw.githubusercontent.com/pearselab/areadata/main/output/temp-dailymean-GID1-cleaned.RDS", "temp-dailymean-states.RDS") end
+file "clean-data/spechumid-dailymean-countries.RDS" do dwn_file("clean-data", "https://raw.githubusercontent.com/pearselab/areadata/main/output/spechumid-dailymean-countries-cleaned.RDS", "spechumid-dailymean-countries.RDS") end
+file "clean-data/spechumid-dailymean-states.RDS" do dwn_file("clean-data", "https://raw.githubusercontent.com/pearselab/areadata/main/output/spechumid-dailymean-GID1-cleaned.RDS", "spechumid-dailymean-states.RDS") end
+file "clean-data/relhumid-dailymean-countries.RDS" do dwn_file("clean-data", "https://raw.githubusercontent.com/pearselab/areadata/main/output/relhumid-dailymean-countries-cleaned.RDS", "relhumid-dailymean-countries.RDS") end
+file "clean-data/relhumid-dailymean-states.RDS" do dwn_file("clean-data", "https://raw.githubusercontent.com/pearselab/areadata/main/output/relhumid-dailymean-GID1-cleaned.RDS", "relhumid-dailymean-states.RDS") end
+file "clean-data/precip-dailymean-countries.RDS" do dwn_file("clean-data", "https://raw.githubusercontent.com/pearselab/areadata/main/output/precip-dailymean-countries-cleaned.RDS", "precip-dailymean-countries.RDS") end
+file "clean-data/precip-dailymean-states.RDS" do dwn_file("clean-data", "https://raw.githubusercontent.com/pearselab/areadata/main/output/precip-dailymean-GID1-cleaned.RDS", "precip-dailymean-states.RDS") end
+file "clean-data/uv-dailymean-countries.RDS" do dwn_file("clean-data", "https://raw.githubusercontent.com/pearselab/areadata/main/output/uv-dailymean-countries-cleaned.RDS", "uv-dailymean-countries.RDS") end
+file "clean-data/uv-dailymean-states.RDS" do dwn_file("clean-data", "https://raw.githubusercontent.com/pearselab/areadata/main/output/uv-dailymean-GID1-cleaned.RDS", "uv-dailymean-states.RDS") end
 
 # get population density data already cleaned and ready to go
 desc "Download pop density data"
 task :pop_av => ["clean-data/population-density-countries.RDS","clean-data/population-density-states.RDS"]
-file "clean-data/population-density-countries.RDS" do dwn_file("clean-data", "https://raw.githubusercontent.com/smithtp/climate-averaging/main/output/population-density-countries.RDS", "population-density-countries.RDS") end
-file "clean-data/population-density-states.RDS" do dwn_file("clean-data", "https://raw.githubusercontent.com/smithtp/climate-averaging/main/output/population-density-states.RDS", "population-density-states.RDS") end
+file "clean-data/population-density-countries.RDS" do dwn_file("clean-data", "https://raw.githubusercontent.com/pearselab/areadata/main/output/population-density-countries.RDS", "population-density-countries.RDS") end
+file "clean-data/population-density-states.RDS" do dwn_file("clean-data", "https://raw.githubusercontent.com/pearselab/areadata/main/output/population-density-GID1.RDS", "population-density-states.RDS") end
 
 
 desc "Get NASA GPW 30s population density data - large file, 300mb"
