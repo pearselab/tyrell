@@ -74,7 +74,7 @@ end
 
 # Download data
 desc "Download raw case data"
-task :dwn_data_cases => ["raw-data/cases", :raw_jhu, "raw-data/cases/ecdc-cases.csv", "raw-data/cases/ecjrcdc-regions.csv", "raw-data/cases/ecjrcdc-countries.csv", "raw-data/cases/cvodidh-admin1.csv", "raw-data/cases/cvodidh-admin2.csv", "raw-data/cases/cvodidh-admin3.csv", "raw-data/cases/imperial-uk-pred.csv", "raw-data/cases/imperial-lmic-pred.csv", "raw-data/cases/ihme-summary.csv", "raw-data/cases/who-interventions.xlsx", "raw-data/cases/imperial-interventions.csv", "raw-data/cases/oxford-interventions.csv", "raw-data/cases/vaccinations.csv", :dwn_uk_deaths]
+task :dwn_data_cases => ["raw-data/cases", :raw_jhu, "raw-data/cases/ecdc-cases.csv", "raw-data/cases/ecjrcdc-regions.csv", "raw-data/cases/ecjrcdc-countries.csv", "raw-data/cases/cvodidh-admin1.csv", "raw-data/cases/cvodidh-admin2.csv", "raw-data/cases/cvodidh-admin3.csv", "raw-data/cases/imperial-uk-pred.csv", "raw-data/cases/who-interventions.xlsx", "raw-data/cases/imperial-interventions.csv", "raw-data/cases/oxford-interventions.csv", "raw-data/cases/oxford-vaccines.csv", "raw-data/cases/vaccinations.csv", :dwn_uk_deaths]
 
 desc "Download all raw data"
 task :dwn_data => [:before_dwn_data,

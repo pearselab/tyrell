@@ -88,6 +88,12 @@ file "raw-data/cases/oxford-interventions.csv" do
   end
 end
 
+desc "Download Oxford vaccinations data"
+file "raw-data/cases/oxford-vaccines.csv" do
+  Dir.chdir("raw-data/cases") do
+    stream_file("https://github.com/OxCGRT/covid-policy-tracker/raw/master/data/OxCGRT_vaccines_full.csv", "oxford-vaccines.csv")
+  end
+end
 
 desc "Download UK death/cases data"
 task :dwn_uk_deaths => ["raw-data/cases/uk-regional.csv", "raw-data/cases/uk-utla.csv", "raw-data/cases/uk-ltla.csv"]

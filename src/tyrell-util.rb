@@ -5,6 +5,7 @@ require 'yaml'
 require 'zip'
 require 'open-uri'
 require 'selenium-webdriver'
+require 'resolv-replace'
 
 def stream_file(url, save_name)
   download = URI.open(url)
